@@ -1,5 +1,5 @@
-from message import Message, Subpacket
-from reconstruction import render, reconstruct
+from sempalab.types import Message, Subpacket
+from sempalab.packetize import render, reconstruct
 
 
 message = Message(

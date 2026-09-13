@@ -1,4 +1,4 @@
-from partition import generate_partitions, validate_partition
+from sempalab.partition import generate_partitions, validate_partition
 
 
 def test_k4_m2():

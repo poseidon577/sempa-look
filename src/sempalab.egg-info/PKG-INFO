@@ -1,0 +1,12 @@
+Metadata-Version: 2.4
+Name: sempalab
+Version: 0.1.0
+Summary: Implementation and research reproduction of SemPA-Look
+Requires-Python: <3.13,>=3.12
+Requires-Dist: numpy
+Requires-Dist: scipy
+Requires-Dist: pyyaml
+Requires-Dist: tqdm
+Requires-Dist: torch
+Requires-Dist: sentence-transformers
+Requires-Dist: scikit-learn

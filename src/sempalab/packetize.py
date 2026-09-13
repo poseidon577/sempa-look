@@ -1,4 +1,4 @@
-from message import Message, Subpacket
+from sempalab.types import Message, Subpacket
 
 def render(
     indices: tuple[int, ...],
