@@ -51,6 +51,7 @@ def random_pa(
     initial_logical_calls = encoder.logical_calls
     initial_miss_calls = encoder.miss_calls
     initial_cache_hits = encoder.cache_hits
+    initial_encoder_batches = encoder.encoder_batches
 
     partitions = list(
         generate_partitions(K, M)
@@ -77,21 +78,16 @@ def random_pa(
     )
 
     return SearchResult(
-        best_partition=selected_partition,
-        best_score=score,
-        objective=objective,
-        partitions_evaluated=1,
-        logical_calls=(
-            encoder.logical_calls
-            - initial_logical_calls
-        ),
-        miss_calls=(
-            encoder.miss_calls
-            - initial_miss_calls
-        ),
-        cache_hits=(
-            encoder.cache_hits
-            - initial_cache_hits
-        ),
-        runtime_seconds=runtime_seconds,
+    best_partition=selected_partition,
+    best_score=score,
+    objective=objective,
+    partitions_evaluated=1,
+    logical_calls=encoder.logical_calls - initial_logical_calls,
+    miss_calls=encoder.miss_calls - initial_miss_calls,
+    cache_hits=encoder.cache_hits - initial_cache_hits,
+    encoder_batches=(
+        encoder.encoder_batches
+        - initial_encoder_batches
+    ),
+    runtime_seconds=runtime_seconds,
     )

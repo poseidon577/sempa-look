@@ -45,6 +45,7 @@ def greedy_tss(
     initial_logical_calls = encoder.logical_calls
     initial_miss_calls = encoder.miss_calls
     initial_cache_hits = encoder.cache_hits
+    initial_encoder_batches = encoder.encoder_batches
 
     remaining = tuple(range(K))
     selected_groups = []
@@ -107,4 +108,8 @@ def greedy_tss(
             - initial_cache_hits
         ),
         runtime_seconds=runtime_seconds,
+        encoder_batches=(
+        encoder.encoder_batches
+        - initial_encoder_batches
+        ),
     )

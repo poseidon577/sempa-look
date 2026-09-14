@@ -9,32 +9,16 @@ from sentence_transformers import SentenceTransformer
 
 
 class InstrumentedEncoder:
-    """
-    Sentence-transformer wrapper with:
-
-    - batched encoding
-    - L2-normalized embeddings
-    - embedding cache
-    - logical-call accounting
-    - actual model-forward accounting
-    - cache-hit accounting
-    - wall-clock accounting
-    """
-
     def __init__(
         self,
-        model_name: str = "sentence-transformers/all-MiniLM-L6-v2",
-        device: str | None = None,
-        batch_size: int = 64,
-        cache_size: int = 200_000,
+        model_name="sentence-transformers/all-MiniLM-L6-v2",
+        device=None,
+        batch_size=64,
+        cache_size=200_000,
     ):
         self.model_name = model_name
         self.batch_size = batch_size
         self.cache_size = cache_size
-
-        # --------------------------------------------------
-        # Choose device
-        # --------------------------------------------------
 
         if device is None:
             device = (
@@ -45,10 +29,6 @@ class InstrumentedEncoder:
 
         self.device = device
 
-        # --------------------------------------------------
-        # Load encoder
-        # --------------------------------------------------
-
         print(f"Loading encoder: {model_name}")
         print(f"Device: {self.device}")
 
@@ -57,126 +37,162 @@ class InstrumentedEncoder:
             device=self.device,
         )
 
-        # --------------------------------------------------
-        # Cache
-        # --------------------------------------------------
+        # Cache for arbitrary token-subset embeddings
+        self.cache = OrderedDict()
 
-        self.cache: OrderedDict[
-            tuple[int, tuple[int, ...]],
-            np.ndarray,
-        ] = OrderedDict()
+        # Dedicated cache for the complete original message
+        self.original_cache = {}
 
-        # --------------------------------------------------
-        # Counters
-        # --------------------------------------------------
-
+        # Instrumentation
         self.logical_calls = 0
         self.miss_calls = 0
         self.cache_hits = 0
+        self.encoder_batches = 0
         self.wall_seconds = 0.0
 
-    def _cache_get(
-        self,
-        key: tuple[int, tuple[int, ...]],
-    ) -> np.ndarray | None:
+    # ---------------------------------------------------------
+    # Generic embedding cache
+    # ---------------------------------------------------------
 
+    def _cache_get(self, key):
         if key not in self.cache:
             return None
 
-        # LRU behavior:
-        # recently accessed item moves to the end.
         value = self.cache.pop(key)
         self.cache[key] = value
 
         return value
 
-    def _cache_put(
-        self,
-        key: tuple[int, tuple[int, ...]],
-        value: np.ndarray,
-    ) -> None:
-
+    def _cache_put(self, key, value):
         if key in self.cache:
             self.cache.pop(key)
 
         self.cache[key] = value
 
-        # Remove oldest entries if cache is full.
         while len(self.cache) > self.cache_size:
             self.cache.popitem(last=False)
 
-    def embed_sets(
+    # ---------------------------------------------------------
+    # Original-message embedding
+    # ---------------------------------------------------------
+
+    def embed_original(
         self,
-        index_sets: list[tuple[int, ...]],
-        message_id: int,
-        tokens: tuple[str, ...],
-    ) -> np.ndarray:
+        message_id,
+        tokens,
+    ):
         """
-        Encode many token subsets from one message.
+        Return the embedding of the complete original message.
 
-        Parameters
-        ----------
-        index_sets:
-            Token-index subsets to encode.
-
-        message_id:
-            Unique identifier of the message.
-
-        tokens:
-            Original token sequence.
-
-        Returns
-        -------
-        np.ndarray
-            Shape: (len(index_sets), embedding_dimension)
+        This is cached separately because every semantic-similarity
+        evaluation compares a reconstruction against the same
+        original message.
         """
 
-        if not index_sets:
-            return np.empty((0, 0), dtype=np.float32)
+        key = message_id
 
-        # Every requested semantic evaluation counts
-        # as one logical call.
+        if key in self.original_cache:
+            self.cache_hits += 1
+            return self.original_cache[key]
+
+        text = " ".join(tokens)
 
         start = time.perf_counter()
 
-        results: list[np.ndarray | None] = []
-        missing_indices: list[int] = []
-        missing_texts: list[str] = []
+        self.encoder_batches += 1
 
-        # --------------------------------------------------
-        # Check cache
-        # --------------------------------------------------
+        embedding = self.model.encode(
+            [text],
+            batch_size=1,
+            convert_to_numpy=True,
+            normalize_embeddings=True,
+            show_progress_bar=False,
+        )[0]
 
-        for position, indices in enumerate(index_sets):
+        self.wall_seconds += (
+            time.perf_counter() - start
+        )
 
-            canonical_indices = tuple(sorted(indices))
+        embedding = np.asarray(
+            embedding,
+            dtype=np.float32,
+        )
 
-            key = (
-                message_id,
-                canonical_indices,
-            )
+        self.original_cache[key] = embedding
+
+        self.miss_calls += 1
+
+        return embedding
+
+    # ---------------------------------------------------------
+    # Arbitrary subset embeddings
+    # ---------------------------------------------------------
+
+    def embed_sets(self, index_sets, message_id, tokens):
+        if not index_sets:
+            return np.empty((0, 0), dtype=np.float32)
+
+        start = time.perf_counter()
+
+        # --------------------------------------------------------
+        # 1. Canonicalize all requested index sets
+        # --------------------------------------------------------
+
+        canonical_sets = [
+            tuple(sorted(indices))
+            for indices in index_sets
+        ]
+
+        # --------------------------------------------------------
+        # 2. Look up everything already in the cache
+        # --------------------------------------------------------
+
+        results = [None] * len(canonical_sets)
+
+        missing_keys = []
+        missing_texts = []
+        missing_key_to_positions = {}
+
+        for position, indices in enumerate(canonical_sets):
+
+            key = (message_id, indices)
 
             cached = self._cache_get(key)
 
             if cached is not None:
-                results.append(cached)
+                results[position] = cached
                 self.cache_hits += 1
-            else:
-                results.append(None)
-                missing_indices.append(position)
+                continue
+
+            # ----------------------------------------------------
+            # This subset is not cached.
+            #
+            # But it may already have appeared earlier in THIS
+            # batch. Avoid encoding it twice.
+            # ----------------------------------------------------
+
+            if key not in missing_key_to_positions:
+                missing_key_to_positions[key] = []
+                missing_keys.append(key)
 
                 text = " ".join(
                     tokens[i]
-                    for i in canonical_indices
+                    for i in indices
                 )
 
                 missing_texts.append(text)
 
-        # --------------------------------------------------
-        # Encode cache misses in batches
-        # --------------------------------------------------
+            missing_key_to_positions[key].append(position)
+
+        # --------------------------------------------------------
+        # 3. Encode each UNIQUE missing subset exactly once
+        # --------------------------------------------------------
 
         if missing_texts:
+
+            self.encoder_batches += int(
+                np.ceil(len(missing_texts) / self.batch_size)
+            )
 
             embeddings = self.model.encode(
                 missing_texts,
@@ -186,21 +202,17 @@ class InstrumentedEncoder:
                 show_progress_bar=False,
             )
 
+            # miss_calls = number of UNIQUE embeddings computed
             self.miss_calls += len(missing_texts)
 
-            for position, embedding, text in zip(
-                missing_indices,
-                embeddings,
-                missing_texts,
-            ):
-                indices = tuple(
-                    sorted(index_sets[position])
-                )
+            # ----------------------------------------------------
+            # 4. Put embeddings into cache and restore duplicates
+            # ----------------------------------------------------
 
-                key = (
-                    message_id,
-                    indices,
-                )
+            for key, embedding in zip(
+                missing_keys,
+                embeddings,
+            ):
 
                 embedding = np.asarray(
                     embedding,
@@ -212,7 +224,9 @@ class InstrumentedEncoder:
                     embedding,
                 )
 
-                results[position] = embedding
+                # Same subset may have appeared multiple times.
+                for position in missing_key_to_positions[key]:
+                    results[position] = embedding
 
         self.wall_seconds += (
             time.perf_counter() - start

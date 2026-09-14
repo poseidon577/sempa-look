@@ -44,5 +44,7 @@ class SearchResult:
     logical_calls: int
     miss_calls: int
     cache_hits: int
+    encoder_batches: int
+    runtime_seconds: float
 
     runtime_seconds: float

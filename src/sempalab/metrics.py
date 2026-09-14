@@ -18,19 +18,77 @@ def cosine_similarity(
     return float(np.dot(a, b))
 
 
-def semantic_similarity(encoder, message, surviving_indices):
+def semantic_similarity(
+    encoder,
+    message,
+    surviving_indices,
+):
     encoder.logical_calls += 1
 
-    original_indices = tuple(range(len(message.tokens)))
-
-    embeddings = encoder.embed_sets(
-        [original_indices, tuple(sorted(surviving_indices))],
+    original_embedding = encoder.embed_original(
         message_id=message.message_id,
         tokens=message.tokens,
     )
 
+    reconstructed_embedding = encoder.embed_sets(
+        [tuple(sorted(surviving_indices))],
+        message_id=message.message_id,
+        tokens=message.tokens,
+    )[0]
+
+    return cosine_similarity(
+        original_embedding,
+        reconstructed_embedding,
+    )
+
     return cosine_similarity(embeddings[0], embeddings[1])
 
+def batch_semantic_similarity(
+    encoder,
+    message,
+    surviving_index_sets,
+):
+    """
+    Compute multiple semantic similarities while reusing
+    the cached original-message embedding.
+    """
+
+    if not surviving_index_sets:
+        return np.empty(
+            0,
+            dtype=np.float32,
+        )
+
+    encoder.logical_calls += len(
+        surviving_index_sets
+    )
+
+    original_embedding = encoder.embed_original(
+        message_id=message.message_id,
+        tokens=message.tokens,
+    )
+
+    canonical_sets = [
+        tuple(sorted(indices))
+        for indices in surviving_index_sets
+    ]
+
+    reconstructed_embeddings = encoder.embed_sets(
+        canonical_sets,
+        message_id=message.message_id,
+        tokens=message.tokens,
+    )
+
+    return np.array(
+        [
+            cosine_similarity(
+                original_embedding,
+                embedding,
+            )
+            for embedding in reconstructed_embeddings
+        ],
+        dtype=np.float32,
+    )
 
 def exact_ats(
     partition: tuple[tuple[int, ...], ...],

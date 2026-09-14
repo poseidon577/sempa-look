@@ -1,0 +1,1 @@
+from sempalab.algorithms.genetic import genetic
