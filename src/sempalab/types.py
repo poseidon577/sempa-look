@@ -32,3 +32,17 @@ class Packet:
 
     packet_id: int
     subpacket: Subpacket
+
+@dataclass(frozen=True)
+class SearchResult:
+    best_partition: tuple[tuple[int, ...], ...]
+    best_score: float
+
+    objective: str
+
+    partitions_evaluated: int
+    logical_calls: int
+    miss_calls: int
+    cache_hits: int
+
+    runtime_seconds: float
