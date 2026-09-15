@@ -1,44 +1,27 @@
 # sempa-look
 
 ````markdown
-# SEMPA-LAB
+Semantic Packet Aggregation for Token Communication
 
-### Semantic Packet Aggregation for Token Communication
+Reproducing, analyzing, and extending SemPA-Look for semantic communication
 
-<p align="center">
+Overview
 
-**Reproducing, analyzing, and extending SemPA-Look for semantic communication**
-
-<br><br>
-
-[![Python](https://img.shields.io/badge/Python-3.11%2B-blue?logo=python&logoColor=white)](https://www.python.org/)
-[![PyTorch](https://img.shields.io/badge/PyTorch-2.x-ee4c2c?logo=pytorch&logoColor=white)](https://pytorch.org/)
-[![Apple Silicon](https://img.shields.io/badge/Apple%20Silicon-MPS-black?logo=apple)](https://developer.apple.com/metal/pytorch/)
-[![Tests](https://img.shields.io/badge/tests-passing-brightgreen)](#testing)
-[![Status](https://img.shields.io/badge/status-active%20research-orange)](#project-status)
-
-</p>
-
----
-
-## Overview
-
-**SEMPA-LAB** is a research implementation and experimental framework for studying **semantic packet aggregation (SemPA)** in token communication.
+SEMPA-LOOK is a research implementation and experimental framework for studying **semantic packet aggregation (SemPA)** in token communication.
 
 The project reproduces and analyzes the 2026 IEEE Transactions on Communications paper:
 
-> **Low-Complexity Semantic Packet Aggregation for Token Communication via Lookahead Search**  
+> Low-Complexity Semantic Packet Aggregation for Token Communication via Lookahead Search
 > S. Lee, J. Park, J. Choi, and H. Park, IEEE Transactions on Communications, 2026.
 
 The central problem is simple to state:
 
-> **How should the tokens of a message be grouped into packets so that the message retains as much semantic meaning as possible when packets are lost?**
+> How should the tokens of a message be grouped into packets so that the message retains as much semantic meaning as possible when packets are lost?**
 
 Unlike conventional bit communication, tokens are not independent. The semantic meaning of a token depends on its surrounding context. Consequently, packetizing tokens becomes a **combinatorial optimization problem**.
 
 SEMPA-LAB aims to go beyond simply reproducing the paper:
 
-```text
                     SEMPA-LAB
                         │
           ┌─────────────┼─────────────┐
@@ -49,11 +32,10 @@ SEMPA-LAB aims to go beyond simply reproducing the paper:
           └─────────────┼─────────────┘
                         │
                  Research System
-````
 
 The research workflow is deliberately ordered:
 
-```text
+
 WHAT THE PAPER CLAIMS
           ↓
 WHAT THE CODE IMPLEMENTS
@@ -61,7 +43,7 @@ WHAT THE CODE IMPLEMENTS
 WHAT THE EXPERIMENTS SHOW
           ↓
 WHAT CAN BE IMPROVED
-```
+
 
 Extensions are only introduced after the baseline has been verified.
 
