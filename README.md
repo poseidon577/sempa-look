@@ -1,7 +1,4 @@
 # sempa-look
-Absolutely. For GitHub, I’d make it **research-grade but visually polished**: a strong header, badges, architecture diagram, mathematical intuition, algorithm table, installation, usage, results, roadmap, and reproducibility notes.
-
-Here is the consolidated `README.md` I recommend using:
 
 ````markdown
 # SEMPA-LAB
