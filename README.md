@@ -1,6 +1,5 @@
 # sempa-look
 
-````markdown
 Semantic Packet Aggregation for Token Communication
 
 Reproducing, analyzing, and extending SemPA-Look for semantic communication
@@ -1181,6 +1180,4 @@ tqdm
 pytest
 ```
 
-One thing I would **not** put in the public README yet is a claim like *“we reproduced the paper”*. We're currently at the **algorithmic implementation milestone**; the 100-message Stage 2 acceptance experiment and the actual MS-COCO reproduction still need to be run. That distinction is important for the credibility of the GitHub repo. 
 
-The paper itself reports that SemPA-Look is intended to approach exhaustive-search semantic quality while reducing computational complexity, so the README frames the project around exactly that quality–complexity trade-off rather than presenting it as merely an implementation exercise. 
