@@ -98,7 +98,7 @@
 | Fig. 12a | Random PA ATS at K=40 | WikiHow, M=5, 7 dB, subword | 0.8630 | 0.8642 | +0.1% | read off plot |
 | Fig. 12b | SemPA-Look WTS (L=1) at K=10 | WikiHow, M=5, subword | 0.5400 | 0.5800 | +7.4% | read off plot |
 | Fig. 12b | Random PA WTS (L=1) at K=10 | WikiHow, M=5, subword | 0.4000 | 0.4455 | +11.4% | read off plot |
-| Fig. 12a | SemPA-Look ATS at K=60 | WikiHow, M=5, 7 dB, subword | 0.9070 | not run |  | read off plot |
+| Fig. 12a | SemPA-Look ATS at K=60 | WikiHow, M=5, 7 dB, subword | 0.9070 | 0.9025 | -0.5% | read off plot |
 | Fig. 13b | SemPA-Look ATS at K=28, N=2 | WikiHow, 7 dB, subword | 0.8620 | 0.8643 | +0.3% | read off plot |
 | Fig. 13b | SemPA-Look ATS at K=28, N=4 | WikiHow, 7 dB, subword | 0.8690 | 0.8708 | +0.2% | read off plot |
 | Fig. 13b | Random PA ATS at K=28, N=2 | WikiHow, 7 dB, subword | 0.8330 | 0.8372 | +0.5% | read off plot |
