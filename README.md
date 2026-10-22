@@ -753,7 +753,7 @@ The current algorithmic stage contains:
 
 [ ] SemPA-GBeam      optional
 [ ] MCTS-UCT         optional
-[ ] 100-message acceptance experiment
+[x] 100-message acceptance experiment
 ```
 
 ## Stage 2 Acceptance Criteria
@@ -798,6 +798,18 @@ k >= 0.2 * k_max
 ```
 
 These acceptance criteria are the gate before moving to the full communication-system reproduction.
+
+### Acceptance Results
+
+Run with `scripts/stage2_acceptance.py` on 100 de-duplicated 8-word MS-COCO val2017 captions (`results/stage2/messages.json`). All checks pass at every erasure probability. Gap is the mean relative ATS gap to Full Search; calls are logical objective calls per message.
+
+| p   | SemPA-Look k=1 | SemPA-Look k=0 | Greedy TSS/RSS | Random PA |
+| --- | -------------- | -------------- | -------------- | --------- |
+| 0.1 | 0.24%          | 1.49%          | 2.21%          | 1.41%     |
+| 0.3 | 0.65%          | 4.06%          | 6.02%          | 3.82%     |
+| 0.5 | 0.98%          | 6.12%          | 9.06%          | 5.75%     |
+
+SemPA-Look k=1 uses 20 calls per message against 140 for Full Search. The 3% gate is on the mean; the worst single-message gap is 1.95% / 5.27% / 8.00% at p = 0.1 / 0.3 / 0.5. At K=8, M=4 Greedy TSS and RSS coincide. Full outputs: `results/stage2/acceptance.csv` and `results/stage2/summary.json`.
 
 ---
 
@@ -1137,7 +1149,7 @@ Completed:
 
 Current next milestone:
 
-* [ ] 100-message Stage 2 acceptance experiment
+* [x] 100-message Stage 2 acceptance experiment
 
 Then:
 
