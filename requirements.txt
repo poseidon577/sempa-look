@@ -1,7 +1,8 @@
 numpy
 scipy
-pyyaml
-tqdm
 torch
 sentence-transformers
 scikit-learn
+PyYAML
+tqdm
+pytest

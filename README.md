@@ -409,7 +409,7 @@ SEMPA-LAB therefore measures encoder runtime rather than assuming that GPU/MPS i
 # Repository Structure
 
 ```text
-iot/
+sempa-look/
 │
 ├── README.md
 ├── requirements.txt
@@ -428,7 +428,8 @@ iot/
 │       ├── objectives.py
 │       │
 │       ├── channel/
-│       │   └── __init__.py
+│       │   ├── __init__.py
+│       │   └── bernoulli.py
 │       │
 │       └── algorithms/
 │           ├── __init__.py
@@ -444,14 +445,13 @@ iot/
 │
 ├── scripts/
 │
-├── configs/
-│
-├── data/
-│
-├── results/
-│
-└── notebooks/
+├── configs/      (planned, Stage 3)
+├── data/         (planned, git-ignored)
+├── results/      (planned, git-ignored)
+└── notebooks/    (planned)
 ```
+
+Directories marked *planned* do not exist yet. They are created as the corresponding stages land; `data/` and `results/` are git-ignored.
 
 ### Directory Guide
 
@@ -462,10 +462,10 @@ iot/
 | `channel/`      | Channel models                |
 | `tests/`        | Unit and regression tests     |
 | `scripts/`      | Reproducible experiments      |
-| `configs/`      | Experiment configurations     |
-| `data/`         | Datasets and evaluation sets  |
-| `results/`      | CSV/JSON experimental results |
-| `notebooks/`    | Exploratory analysis          |
+| `configs/`      | Experiment configurations (planned) |
+| `data/`         | Datasets and evaluation sets (planned) |
+| `results/`      | CSV/JSON experimental results (planned) |
+| `notebooks/`    | Exploratory analysis (planned) |
 
 ---
 
@@ -473,10 +473,10 @@ iot/
 
 ## Software
 
-Recommended:
+Required (pinned in `pyproject.toml`):
 
 ```text
-Python >= 3.11
+Python 3.12
 ```
 
 Core dependencies:
@@ -491,6 +491,8 @@ PyYAML
 tqdm
 ```
 
+`pytest` is also listed in `requirements.txt` for running the test suite.
+
 Install everything with:
 
 ```bash
@@ -504,8 +506,8 @@ pip install -r requirements.txt
 Clone the repository:
 
 ```bash
-git clone <repository-url>
-cd iot
+git clone https://github.com/poseidon577/sempa-look.git
+cd sempa-look
 ```
 
 Create a virtual environment:
@@ -1188,21 +1190,3 @@ The original paper, datasets, pretrained models, and third-party dependencies re
 *Semantic communication research through reproducible engineering.*
 
 </p>
-```
-
-### `requirements.txt`
-
-I'd pair that README with this clean requirements file:
-
-```txt
-numpy
-scipy
-torch
-sentence-transformers
-scikit-learn
-PyYAML
-tqdm
-pytest
-```
-
-
