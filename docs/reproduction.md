@@ -45,7 +45,8 @@ the reruns use the same sentences. Runtimes on 4 CPU cores: about 1 minute
 | SemPA-Look encoder calls, P=130, N=2 (Fig. 11b) | 260 | 260 | exact |
 | SemPA-Look encoder calls, K=24, M=4 (Table III) | 250 (closed form) | 190 (measured) | see gap 3 |
 | ATS and WTS vs K, M=5 (Fig. 12) | rising with K, SemPA-Look above Random PA | same shape, about 1 % lower | shape reproduced |
-| ATS vs K with N fixed (Fig. 13) | see table | see table | see reproduction_table.md |
+| ATS vs K with N fixed (Fig. 13): SemPA-Look above Random PA at every K | yes, gap 0.017–0.029 | yes, gap 0.020–0.034 | reproduced |
+| Fig. 13: N=2 beats N=4 and ATS saturates by K≈20 | yes | N=4 ≥ N=2 for K ≥ 20, still rising at K=28 | **not reproduced**, gap 4 |
 | SemPA-Look vs Random PA, 6 dB (Fig. 6a, Table II) | +14.3 %, +18.5 % | +5.8 %, +2.4 % | **not reproduced**, gap 1 |
 | WTS gain over Random PA (Fig. 6c) | +46.2 % | +10.9 % at L=3 | **not reproduced**, gap 1 |
 | TSS vs RSS separation (Fig. 3) | RSS > TSS > Random | all three overlap | **not reproduced**, gap 2 |
@@ -102,6 +103,16 @@ steps use fewer than k lookaheads. Counting the encoder calls Algorithm 1
 actually makes gives 190. The paper's own Fig. 11b (260 calls at P=130, N=2,
 i.e. k collapses to 1) agrees with the measured count, so we report 250 as
 the paper's closed form and 190 as measured.
+
+### 4. Fig. 13 (N fixed, K growing) at large K
+
+With N fixed, the paper's ATS flattens from K≈20 and N=2 stays above N=4. Our
+curves keep rising up to K=28, and for K ≥ 20 N=4 is slightly above N=2
+(SemPA-Look 0.8805 vs 0.8716 at K=28). SemPA-Look's lead over Random PA, the
+point of the figure, is reproduced for both N. Long WikiHow sentences with
+exactly K words are scarcer, so our K=24 and K=28 sets may come from a narrower
+slice of the 20,000 articles we read (A4 in assumptions.md); a different
+sentence pool is the most likely cause, but we have not verified it.
 
 ## Not reproduced
 

@@ -67,3 +67,8 @@ def test_reference_file_is_well_formed():
     for entry in entries:
         assert entry["source"] in {"text", "plot"}
         assert ("value" in entry["ours"]) != ("gain" in entry["ours"])
+
+        # An unquoted comma inside a YAML flow mapping silently splits a
+        # field into a stray null key and truncates the text.
+        assert set(entry) <= {"id", "figure", "quantity", "setting", "paper", "source", "ours", "note", "unit"}
+        assert all(value is not None for value in entry.values())

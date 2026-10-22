@@ -165,6 +165,7 @@ def main(argv=None):
             {
                 "rows": runs[f"wikihow_fixed_n{n}"], "x_key": "K", "y_key": "mean_ats", "xlabel": "Sentence length K",
                 "ylabel": "ATS", "paper": paper[f"fig13_n{n}"], "title": f"N = {n}",
+                "xticks": [8, 12, 16, 20, 24, 28],
             }
             for n in (2, 4)
         ],

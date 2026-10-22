@@ -21,7 +21,7 @@ fig7_sempa_M2,Fig. 7a,SemPA-Look ATS at M=2,"COCO, K=12, 7 dB",0.886,0.884849500
 fig7_sempa_M3,Fig. 7a,SemPA-Look ATS at M=3,"COCO, K=12, 7 dB",0.885,0.8847734021964254,,-0.02560427159034924,%,text
 fig7_sempa_M4,Fig. 7a,SemPA-Look ATS at M=4,"COCO, K=12, 7 dB",0.883,0.8809002283252002,,-0.23779973667041898,%,text
 fig7_sempa_M6,Fig. 7a,SemPA-Look ATS at M=6,"COCO, K=12, 7 dB",0.871,0.8713861750546673,,0.044336975277533275,%,text
-fig7_sempa_M12,Fig. 7a,ATS at M=12 (no packetization,"COCO, K=12, 7 dB",0.793,0.7930317779114219,,0.004007302827470051,%,text
+fig7_sempa_M12,Fig. 7a,"ATS at M=12 (no packetization, = 1 - p)","COCO, K=12, 7 dB",0.793,0.7930317779114219,,0.004007302827470051,%,text
 fig8_full_M3,Fig. 8a,Full Search ATS at M=3 (peak),"COCO, K=12, 7 dB",0.896,0.8962599988437384,,0.029017728095803122,%,plot
 fig8_full_M6,Fig. 8a,Full Search ATS at M=6,"COCO, K=12, 7 dB",0.883,0.883620173757053,,0.07023485357338992,%,plot
 fig8_random_M2,Fig. 8a,Random PA ATS at M=2,"COCO, K=12, 7 dB",0.874,0.8757940257775013,,0.20526610726559702,%,plot
@@ -61,6 +61,6 @@ fig12_random_K40,Fig. 12a,Random PA ATS at K=40,"WikiHow, M=5, 7 dB",0.88,0.8744
 fig12_wts_sempa_K10,Fig. 12b,SemPA-Look WTS (L=1) at K=10,"WikiHow, M=5",0.59,0.5664775858819485,,-3.9868498505171948,%,plot
 fig12_wts_random_K10,Fig. 12b,Random PA WTS (L=1) at K=10,"WikiHow, M=5",0.45,0.44920716017484663,,-0.17618662781186215,%,plot
 fig12_sempa_K60,Fig. 12a,SemPA-Look ATS at K=60,"WikiHow, M=5, 7 dB",0.913,0.896503556228941,,-1.806839405373393,%,plot
-fig13_n2_sempa_K28,Fig. 13a,SemPA-Look ATS at K=28,"WikiHow, 7 dB",0.88,0.11565189062620496,,-86.85773970156761,%,plot
-fig13_n4_sempa_K28,Fig. 13a,SemPA-Look ATS at K=28,"WikiHow, 7 dB",0.868,0.120409673226927,,-86.1279178309992,%,plot
-fig13_n4_random_K28,Fig. 13a,Random PA ATS at K=28,"WikiHow, 7 dB",0.842,0.10790818684766947,,-87.18430084944544,%,plot
+fig13_n2_sempa_K28,Fig. 13,"SemPA-Look ATS at K=28, N=2","WikiHow, 7 dB",0.88,0.8716279787007121,,-0.9513660567372654,%,plot
+fig13_n4_sempa_K28,Fig. 13,"SemPA-Look ATS at K=28, N=4","WikiHow, 7 dB",0.868,0.8804555696100312,,1.4349734573768718,%,plot
+fig13_n4_random_K28,Fig. 13,"Random PA ATS at K=28, N=4","WikiHow, 7 dB",0.842,0.8576421997170048,,1.8577434343236185,%,plot

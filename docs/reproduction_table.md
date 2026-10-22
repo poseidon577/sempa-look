@@ -22,7 +22,7 @@
 | Fig. 7a | SemPA-Look ATS at M=3 | COCO, K=12, 7 dB | 0.8850 | 0.8848 | -0.0% | text/table |
 | Fig. 7a | SemPA-Look ATS at M=4 | COCO, K=12, 7 dB | 0.8830 | 0.8809 | -0.2% | text/table |
 | Fig. 7a | SemPA-Look ATS at M=6 | COCO, K=12, 7 dB | 0.8710 | 0.8714 | +0.0% | text/table |
-| Fig. 7a | ATS at M=12 (no packetization | COCO, K=12, 7 dB | 0.7930 | 0.7930 | +0.0% | text/table |
+| Fig. 7a | ATS at M=12 (no packetization, = 1 - p) | COCO, K=12, 7 dB | 0.7930 | 0.7930 | +0.0% | text/table |
 | Fig. 8a | Full Search ATS at M=3 (peak) | COCO, K=12, 7 dB | 0.8960 | 0.8963 | +0.0% | read off plot |
 | Fig. 8a | Full Search ATS at M=6 | COCO, K=12, 7 dB | 0.8830 | 0.8836 | +0.1% | read off plot |
 | Fig. 8a | Random PA ATS at M=2 | COCO, K=12, 7 dB | 0.8740 | 0.8758 | +0.2% | read off plot |
@@ -62,6 +62,6 @@
 | Fig. 12b | SemPA-Look WTS (L=1) at K=10 | WikiHow, M=5 | 0.5900 | 0.5665 | -4.0% | read off plot |
 | Fig. 12b | Random PA WTS (L=1) at K=10 | WikiHow, M=5 | 0.4500 | 0.4492 | -0.2% | read off plot |
 | Fig. 12a | SemPA-Look ATS at K=60 | WikiHow, M=5, 7 dB | 0.9130 | 0.8965 | -1.8% | read off plot |
-| Fig. 13a | SemPA-Look ATS at K=28 | WikiHow, 7 dB | 0.8800 | 0.1157 | -86.9% | read off plot |
-| Fig. 13a | SemPA-Look ATS at K=28 | WikiHow, 7 dB | 0.8680 | 0.1204 | -86.1% | read off plot |
-| Fig. 13a | Random PA ATS at K=28 | WikiHow, 7 dB | 0.8420 | 0.1079 | -87.2% | read off plot |
+| Fig. 13 | SemPA-Look ATS at K=28, N=2 | WikiHow, 7 dB | 0.8800 | 0.8716 | -1.0% | read off plot |
+| Fig. 13 | SemPA-Look ATS at K=28, N=4 | WikiHow, 7 dB | 0.8680 | 0.8805 | +1.4% | read off plot |
+| Fig. 13 | Random PA ATS at K=28, N=4 | WikiHow, 7 dB | 0.8420 | 0.8576 | +1.9% | read off plot |

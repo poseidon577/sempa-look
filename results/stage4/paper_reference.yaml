@@ -124,7 +124,7 @@ entries:
      ours: {value: {experiment: coco_k12, algorithm: sempa_look, metric: ats, where: {M: 4, snr_db: 7}}}}
   - {id: fig7_sempa_M6, figure: Fig. 7a, quantity: SemPA-Look ATS at M=6, setting: "COCO, K=12, 7 dB", paper: 0.871, source: text,
      ours: {value: {experiment: coco_k12, algorithm: sempa_look, metric: ats, where: {M: 6, snr_db: 7}}}}
-  - {id: fig7_sempa_M12, figure: Fig. 7a, quantity: ATS at M=12 (no packetization, = 1 - p), setting: "COCO, K=12, 7 dB", paper: 0.793, source: text,
+  - {id: fig7_sempa_M12, figure: Fig. 7a, quantity: "ATS at M=12 (no packetization, = 1 - p)", setting: "COCO, K=12, 7 dB", paper: 0.793, source: text,
      ours: {value: {experiment: coco_k12, algorithm: sempa_look, metric: ats, where: {M: 12, snr_db: 7}}}}
   - {id: fig8_full_M3, figure: Fig. 8a, quantity: Full Search ATS at M=3 (peak), setting: "COCO, K=12, 7 dB", paper: 0.896, source: plot,
      ours: {value: {experiment: coco_k12, algorithm: full_search, metric: ats, where: {M: 3, snr_db: 7}}}}
@@ -228,9 +228,9 @@ entries:
      ours: {value: {experiment: wikihow_len, algorithm: random_pa, metric: wts_L1, where: {K: 10}}}}
   - {id: fig12_sempa_K60, figure: Fig. 12a, quantity: SemPA-Look ATS at K=60, setting: "WikiHow, M=5, 7 dB", paper: 0.913, source: plot,
      ours: {value: {experiment: wikihow_len_long, algorithm: sempa_look, metric: ats, where: {K: 60}}}}
-  - {id: fig13_n2_sempa_K28, figure: Fig. 13a, quantity: SemPA-Look ATS at K=28, N=2, setting: "WikiHow, 7 dB", paper: 0.880, source: plot,
+  - {id: fig13_n2_sempa_K28, figure: Fig. 13, quantity: "SemPA-Look ATS at K=28, N=2", setting: "WikiHow, 7 dB", paper: 0.880, source: plot,
      ours: {value: {experiment: wikihow_fixed_n2, algorithm: sempa_look, metric: ats, where: {K: 28}}}}
-  - {id: fig13_n4_sempa_K28, figure: Fig. 13a, quantity: SemPA-Look ATS at K=28, N=4, setting: "WikiHow, 7 dB", paper: 0.868, source: plot,
+  - {id: fig13_n4_sempa_K28, figure: Fig. 13, quantity: "SemPA-Look ATS at K=28, N=4", setting: "WikiHow, 7 dB", paper: 0.868, source: plot,
      ours: {value: {experiment: wikihow_fixed_n4, algorithm: sempa_look, metric: ats, where: {K: 28}}}}
-  - {id: fig13_n4_random_K28, figure: Fig. 13a, quantity: Random PA ATS at K=28, N=4, setting: "WikiHow, 7 dB", paper: 0.842, source: plot,
+  - {id: fig13_n4_random_K28, figure: Fig. 13, quantity: "Random PA ATS at K=28, N=4", setting: "WikiHow, 7 dB", paper: 0.842, source: plot,
      ours: {value: {experiment: wikihow_fixed_n4, algorithm: random_pa, metric: ats, where: {K: 28}}}}

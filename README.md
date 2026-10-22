@@ -891,8 +891,9 @@ Results are written to `results/<experiment>/` as `results.csv`, `summary.json`,
 | Table III: GA encoder calls, G·P·2^N | 3,200 | 3,200 |
 | Table III: SemPA-Look encoder calls | 250 (closed form) | 190 (measured, disjoint lookaheads) |
 | Fig. 6a / Table II: SemPA-Look gain over Random PA at 6 dB | +14.3 % / +18.5 % | +5.8 % / +2.4 % (not reproduced) |
+| Fig. 13: N=2 above N=4 at large K | yes | no, N=4 slightly above (not reproduced) |
 
-The one result we do not reproduce is the size of the gain over Random PA at 6 dB. Our Random PA matches the paper at 4, 7 and 8 dB but is stronger at 6 dB, while Full Search, GA and SemPA-Look match at 6 dB too. See [docs/reproduction.md](docs/reproduction.md#gaps-we-could-not-close).
+Two results are not reproduced: the size of the gain over Random PA at 6 dB, and the N=2 vs N=4 ordering of Fig. 13 at large K. Our Random PA matches the paper at 4, 7 and 8 dB but is stronger at 6 dB, while Full Search, GA and SemPA-Look match at 6 dB too. See [docs/reproduction.md](docs/reproduction.md#gaps-we-could-not-close).
 
 ### Figures
 
