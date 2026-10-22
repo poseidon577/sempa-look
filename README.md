@@ -803,21 +803,21 @@ These acceptance criteria are the gate before moving to the full communication-s
 
 After algorithmic validation, the project introduces the actual communication system.
 
-Planned components:
+Components:
 
 ```text
-[ ] BPSK modulation
-[ ] AWGN channel
-[ ] Hard demodulation
-[ ] Empirical packet-error validation
-[ ] Batch packet aggregation
-[ ] Packet deaggregation
-[ ] Dummy padding
-[ ] Packet-bit accounting
-[ ] YAML configuration system
+[x] BPSK modulation
+[x] AWGN channel
+[x] Hard demodulation
+[x] Empirical packet-error validation
+[x] Batch packet aggregation
+[x] Packet deaggregation
+[x] Dummy padding
+[x] Packet-bit accounting
+[x] YAML configuration system
 ```
 
-The analytical packet-error model will be validated against an independent Monte-Carlo BPSK/AWGN simulation.
+The analytical packet-error model is validated against an independent Monte-Carlo BPSK/AWGN simulation.
 
 This provides two independent correctness checks:
 
@@ -826,6 +826,31 @@ Analytical model
        ↕
 Physical simulation
 ```
+
+## Stage 3 modules
+
+| Module                     | Role                                                        |
+| -------------------------- | ----------------------------------------------------------- |
+| `channel/awgn_bpsk.py`     | Analytical PER and bit-level BPSK + AWGN + hard decisions   |
+| `aggregation.py`           | `aggregate_into_packets`, `deaggregate_packets`, `packet_bits` |
+| `system.py`                | Batch transmission and empirical ATS over the physical chain |
+| `config.py`                | YAML loading, `base:` inheritance, validation               |
+| `run.py`                   | Experiment entry point                                      |
+
+Run the demo experiment:
+
+```bash
+python -m sempalab.run --config configs/stage3_demo.yaml
+```
+
+Results are written to `results/<experiment>/` as `results.csv`, `summary.json`, and the resolved `config.yaml`.
+
+## Stage 3 assumptions
+
+* **Packet layout.** A physical packet has `N = K/M` slots, so it carries `K` tokens. A batch of `B` messages uses `max(B, N)` packets; subpacket `n` of message `b` goes to packet `(b + n) mod max(B, N)`. No packet carries two subpackets of the same message, so a message's subpackets are erased independently. When `B < N`, the unused slots are dummy padding.
+* **Bit budget.** 18 bits per token (`|D| = 200,000`), `ceil(log2 K)` bits per token position, and `ceil(log2(B+1))` bits per slot message id (the extra value marks a dummy slot). For `K=12, M=4, B=100` this is `216 + 48 + 21 = 285 ≤ 300` bits. The packet-error model uses the configured `packet_bits` (300), as the paper does.
+* **6 dB anchor.** The formula gives `p = 0.5120` at 6 dB (`p_b = 2.388e-3`), matching the paper's Table V (`δ = 51.2%`). The value 0.5137 that appears in the project plan does not follow from the formula and is treated as a typo.
+* **Datasets.** Stage 3 reads messages from inline YAML (`dataset: inline`) or a text file with one message per line (`dataset: text_file`). MS-COCO loading is part of Stage 4.
 
 ---
 

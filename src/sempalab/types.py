@@ -27,11 +27,14 @@ class Packet:
     """
     Physical packet carrying one or more subpackets.
 
-    For now, we assume one subpacket per packet.
+    Every subpacket in a packet belongs to a distinct message,
+    so the N subpackets of one message are erased independently.
+    `dummy_slots` counts padding slots that carry no tokens.
     """
 
     packet_id: int
-    subpacket: Subpacket
+    subpackets: tuple[Subpacket, ...]
+    dummy_slots: int = 0
 
 @dataclass(frozen=True)
 class SearchResult:

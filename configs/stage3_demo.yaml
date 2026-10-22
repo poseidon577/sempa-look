@@ -1,0 +1,32 @@
+# Small end-to-end Stage 3 run: K=8, M=4 messages sent in batches
+# of B=4 through BPSK/AWGN, comparing three packetization methods.
+#
+#   python -m sempalab.run --config configs/stage3_demo.yaml
+
+base: base.yaml
+
+experiment: stage3_demo
+dataset: inline
+messages:
+  - a man riding a bicycle near the beach
+  - two dogs play with a ball in grass
+  - a plate of food with rice and vegetables
+  - a red bus parked on a city street
+  - a woman holding an umbrella in the rain
+  - a cat sleeping on top of a laptop
+
+K: 8
+M: 4
+B: 4          # N = 2 <= B, so no dummy padding is needed
+P: 10
+k: 1          # k_max = N - 1 = 1
+
+snr_db: [4, 6, 7, 8]
+
+algorithms:
+  - full_search
+  - random_pa
+  - greedy_rss
+  - sempa_look
+
+trials: 500

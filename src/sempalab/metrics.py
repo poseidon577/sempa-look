@@ -2,10 +2,15 @@ from __future__ import annotations
 
 from itertools import combinations
 
+from typing import TYPE_CHECKING
+
 import numpy as np
 
-from sempalab.encoder import InstrumentedEncoder
 from sempalab.types import Message
+
+if TYPE_CHECKING:
+    # Type-only import: keeps metrics usable without torch.
+    from sempalab.encoder import InstrumentedEncoder
 
 
 def cosine_similarity(
