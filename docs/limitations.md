@@ -157,9 +157,9 @@ The ranking weighs three things: how much headroom the direction opens beyond th
 
 **7. Learned amortised packetiser (addresses L10).** A GNN or pointer-network policy trained on Full Search labels would replace per-message search with one forward pass ([NeuroCUT](https://arxiv.org/html/2310.11787v3)). It is ranked last because the gain it would amortise is only about 0.015 ATS at 7 dB for K = 24. *Effort:* high. *First experiment:* not recommended until directions 1–3 show that more headroom exists.
 
-## Decisions (Tejas, 2026-10-22)
+## Decisions (2026-10-22)
 
-The open questions from the first version of this review were settled as follows.
+The open questions from the first version of this review were settled by the repo owner as follows.
 - **Contacting the authors:** no. The 6 dB Random PA gap stays reported as unexplained, as in [reproduction.md](reproduction.md).
 - **Encoder:** MPNet stays the encoder that defines the objective and the headline numbers, for continuity with the paper. Every result for a new method is also re-scored under at least two other encoders (direction 4), so the circularity objection is answered from the start rather than as a separate study.
 - **Overlap with the authors' group:** lead with direction 2 (channel-aware aggregation), folding in direction 3's p-aware surrogate. Direction 1 is deferred because the authors' own group is active on MLM receivers; a recovery receiver can later be added as one more channel/receiver model in the same framework.
