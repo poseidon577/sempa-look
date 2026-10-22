@@ -157,16 +157,16 @@ The ranking weighs three things: how much headroom the direction opens beyond th
 
 **7. Learned amortised packetiser (addresses L10).** A GNN or pointer-network policy trained on Full Search labels would replace per-message search with one forward pass ([NeuroCUT](https://arxiv.org/html/2310.11787v3)). It is ranked last because the gain it would amortise is only about 0.015 ATS at 7 dB for K = 24. *Effort:* high. *First experiment:* not recommended until directions 1–3 show that more headroom exists.
 
-## Open questions for Tejas
+## Decisions (Tejas, 2026-10-22)
 
-These items need your decision before the next stage starts:
-- **Contacting the authors.** Should we write to them about the 6 dB Random PA values in Fig. 6a and Table II? Our N = 2 algebra points to an SNR shift or a different baseline definition at that one point, and only their per-message data can settle it.
-- **Encoder.** Should we stay with MPNet for continuity, or make direction 4's cross-encoder check a gate before investing in directions 1–3?
-- **Competition with the authors' group.** Is the overlap between direction 1 and the authors' MLM-detection line a reason to move fast or a reason to choose direction 2 or 3?
-- **Target regime.** What counts as the target operating point? Gains vanish at ≥ 8 dB uncoded, so any method claim needs either a coded link or a recovery receiver to stay relevant.
-- **Compute.** Do we have budget for new MPNet runs? Directions 1 and 3 need 2^K subset encodings at K = 12. The open Fig. 13 sentence-pool hypothesis and the Table II self-consistency check also need runs.
-- **Subword tokenization.** Subword was not reproduced. Does it matter for the target venue, given that the paper's 45.5% subword WTS claim is unchecked?
+The open questions from the first version of this review were settled as follows.
+- **Contacting the authors:** no. The 6 dB Random PA gap stays reported as unexplained, as in [reproduction.md](reproduction.md).
+- **Encoder:** MPNet stays the encoder that defines the objective and the headline numbers, for continuity with the paper. Every result for a new method is also re-scored under at least two other encoders (direction 4), so the circularity objection is answered from the start rather than as a separate study.
+- **Overlap with the authors' group:** lead with direction 2 (channel-aware aggregation), folding in direction 3's p-aware surrogate. Direction 1 is deferred because the authors' own group is active on MLM receivers; a recovery receiver can later be added as one more channel/receiver model in the same framework.
+- **Target regime:** new results are reported against the packet error rate p (about 0.05 to 0.6) rather than uncoded SNR. That range covers uncoded BPSK at 6–8 dB and coded links at lower SNR, and it is where aggregation matters at all. SNR axes are kept only for figures compared with the paper.
+- **Compute:** experiments run in the cloud container (4 CPUs, about 15 GB RAM), not on a local machine. The largest planned run, exhaustive subset encoding at K = 12 (4,096 subsets × 100 messages, about 410k short sentences, about 1.3 GB of float32 embeddings), fits without extra RAM.
+- **Subword tokenization:** reproduce the paper's subword results next (Figs. 6b/6d, 7b, 8b and the subword curves of Figs. 10–13), including the 45.5% subword WTS claim.
 
 ## Conclusion
 
-The reproduction changes what kind of contribution is worth making. SemPA-Look is a sound, cheap heuristic that does better than random grouping, but the margin is small, regime-specific and partly inflated by one baseline point. A paper that only searches the same objective faster or better would compete for at most a few hundredths of ATS, and GA already wins that contest at larger budgets. The weaknesses that matter are in the model: the receiver recovers nothing, the channel has no memory, and the objective ignores p and is scored by the encoder that defines it. Each of these has a mature fix in adjacent literature that has never been combined with packet aggregation. That gap, not the search, is where the next stage should aim. Directions 2 and 4 are cheap enough to run first and will decide whether the more ambitious direction 1 is worth its risk.
+The reproduction changes what kind of contribution is worth making. SemPA-Look is a sound, cheap heuristic that does better than random grouping, but the margin is small, regime-specific and partly inflated by one baseline point. A paper that only searches the same objective faster or better would compete for at most a few hundredths of ATS, and GA already wins that contest at larger budgets. The weaknesses that matter are in the model: the receiver recovers nothing, the channel has no memory, and the objective ignores p and is scored by the encoder that defines it. Each of these has a mature fix in adjacent literature that has never been combined with packet aggregation. That gap, not the search, is where the next stage should aim. Directions 2 and 4 are cheap enough to run first; see the decisions above for the chosen order.
