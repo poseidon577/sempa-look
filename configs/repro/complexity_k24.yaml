@@ -1,0 +1,15 @@
+# Table III: logical encoder calls at K=24, M=4 (N=6), G=5, P=10, k=4.
+# Call counts do not depend on the data; 10 messages are enough.
+experiment: complexity_k24
+description: Table III - encoder calls at K=24, M=4
+encoder: mpnet
+data:
+  num_messages: 10
+K: 24
+M: 4
+P: 10
+k: 4
+G: 5
+snr_db: [6]
+metrics: [ats]
+algorithms: [genetic, sempa_look, random_pa]

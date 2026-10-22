@@ -1,0 +1,19 @@
+# Fig. 11: ATS and encoder calls vs P (candidates / GA population)
+# at K=24, M=12 (N=2), G=5, k=4 (capped to k_max=1), 7 dB. 30 messages.
+experiment: wikihow_p
+description: P sweep for SemPA-Look and GA (Fig. 11)
+encoder: mpnet
+data:
+  source: wikihow
+  path: data/wikihow/wikihowAll.csv
+  max_articles: 20000
+  num_messages: 30
+K: 24
+M: 12
+k: 4
+G: 5
+snr_db: [7]
+sweep:
+  param: P
+  values: [10, 30, 50, 70, 90, 110, 130]
+algorithms: [sempa_look, genetic]

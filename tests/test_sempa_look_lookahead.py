@@ -66,3 +66,11 @@ def test_modes_agree_when_k_is_one_at_N_two(fake_encoder):
 def test_rejects_unknown_mode(fake_encoder):
     with pytest.raises(ValueError):
         sempa_look(message(8), fake_encoder(), 4, lookahead_mode="bogus")
+
+
+def test_single_subpacket_message(fake_encoder):
+    # M = K: one subpacket, nothing to decide, no encoder calls.
+    result = sempa_look(message(8), fake_encoder(), 8, P=10, k=4, seed=0)
+
+    assert result.best_partition == (tuple(range(8)),)
+    assert result.logical_calls == 0

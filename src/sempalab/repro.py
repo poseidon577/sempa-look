@@ -8,13 +8,15 @@ subpacket size M, SemPA-Look parameters (P, k), an SNR list, a list of
 algorithms, and optionally a sweep over one parameter (M, k, P or K).
 
 For every sweep point, message, algorithm and SNR the runner records
-exact ATS, WTS and the algorithm's own logical encoder calls.
+exact ATS (eq. 6), the paper's WTS for every L = 1..N-1 (Sec. V), and
+the algorithm's own logical encoder calls (the paper's complexity
+metric).
 
-Encoder cost accounting: before any algorithm runs on a message, the
-embeddings it can possibly need (every union of blocks, when that set
-is small) are computed in large batches and cached. Logical calls, the
-paper's complexity metric, are unaffected; miss counts and runtimes of
-individual algorithms are therefore not meaningful in these outputs.
+Encoder cost accounting: before any algorithm runs on a message, every
+subset that can survive under some partition (all unions of blocks,
+when that set is small) is encoded in large batches and cached. Logical
+calls are unaffected; cache misses and runtimes of individual
+algorithms are therefore not meaningful in these outputs.
 
 Outputs go to <results_dir>/<experiment>/:
     results.csv, summary.csv, config.yaml
@@ -36,8 +38,9 @@ import yaml
 
 from sempalab.channel.awgn_bpsk import packet_error_probability
 from sempalab.config import ENCODER_REGISTRY, merge
-from sempalab.datasets import coco_eval_set
-from sempalab.metrics import exact_ats, wts
+from sempalab.datasets import eval_set
+from sempalab import evaluation
+from sempalab.evaluation import SimilarityTable, to_mask
 from sempalab.partition import sample_random_partition
 
 
@@ -54,28 +57,36 @@ ALGORITHMS = (
 # Partition does not depend on the channel: computed once per message.
 P_INDEPENDENT = {"random_pa", "no_packetization", "greedy_tss", "greedy_rss", "sempa_look"}
 
-SWEEPABLE = {"M", "k", "P", "K"}
+SWEEPABLE = {"M", "k", "P", "K", "G"}
 
 DEFAULTS = {
     "experiment": None,
     "description": "",
     "encoder": "minilm",
     "device": None,
-    "coco": {
-        "annotations": "data/coco/annotations/captions_train2017.json",
+    "cache_size": 1_000_000,
+    "data": {
+        "source": "coco",
+        "path": "data/coco/annotations/captions_train2017.json",
+        "max_articles": None,
         "num_messages": 100,
         "seed": 42,
         "eval_set_dir": "results/stage4/eval_sets",
     },
     "K": 8,
     "M": 4,
+    # When set, M = K / fixed_N at every sweep point (Fig. 13).
+    "fixed_N": None,
     "P": 10,
     "k": 4,
     "lookahead_mode": "disjoint",
     "packet_bits": 300,
     "snr_db": [2, 4, 6, 8, 10],
     "algorithms": ["random_pa", "sempa_look"],
-    "genetic": {"P": 10, "G": 5},
+    # GA generations in the paper's sense: G evaluated populations,
+    # G * P * 2^N encoder calls (Table III, Fig. 10b).
+    "G": 5,
+    "genetic": {},
     "sweep": None,
     "metrics": ["ats", "wts"],
     "prefetch_max_sets": 5000,
@@ -122,6 +133,9 @@ def validate_repro_config(config: dict) -> None:
     if not algorithms or set(algorithms) - set(ALGORITHMS):
         raise ValueError(f"algorithms must be a non-empty subset of {ALGORITHMS}")
 
+    if config["data"]["source"] not in {"coco", "wikihow"}:
+        raise ValueError("data.source must be 'coco' or 'wikihow'")
+
     if config["lookahead_mode"] not in {"disjoint", "independent"}:
         raise ValueError("lookahead_mode must be 'disjoint' or 'independent'")
 
@@ -148,8 +162,8 @@ def validate_repro_config(config: dict) -> None:
         if K % M != 0:
             raise ValueError(f"M={M} must divide K={K}")
 
-        if point["P"] <= 0 or point["k"] < 0:
-            raise ValueError("P must be positive and k non-negative")
+        if point["P"] <= 0 or point["k"] < 0 or point["G"] < 1:
+            raise ValueError("P and G must be positive and k non-negative")
 
 
 def sweep_points(config: dict) -> list[dict]:
@@ -157,14 +171,19 @@ def sweep_points(config: dict) -> list[dict]:
     The (K, M, P, k) settings this config visits, in order.
     """
 
-    base = {name: config[name] for name in ("K", "M", "P", "k")}
+    base = {name: config[name] for name in ("K", "M", "P", "k", "G")}
 
     sweep = config["sweep"]
 
-    if sweep is None:
-        return [base]
+    points = [base] if sweep is None else [{**base, sweep["param"]: value} for value in sweep["values"]]
 
-    return [{**base, sweep["param"]: value} for value in sweep["values"]]
+    if config["fixed_N"]:
+        for point in points:
+            if point["K"] % config["fixed_N"] != 0:
+                raise ValueError(f"fixed_N={config['fixed_N']} must divide K={point['K']}")
+            point["M"] = point["K"] // config["fixed_N"]
+
+    return points
 
 
 # -------------------------------------------------------------
@@ -204,19 +223,6 @@ def count_block_unions(K: int, M: int) -> int:
 def block_unions(K: int, M: int):
     for size in range(0, K + 1, M):
         yield from combinations(range(K), size)
-
-
-def prefetch(encoder, message, index_sets, chunk: int = 4096) -> None:
-    """
-    Encode, in large batches, every set not already cached.
-    """
-
-    encoder.embed_original(message.message_id, message.tokens)
-
-    sets = list(dict.fromkeys(tuple(sorted(s)) for s in index_sets))
-
-    for start in range(0, len(sets), chunk):
-        encoder.embed_sets(sets[start:start + chunk], message.message_id, message.tokens)
 
 
 # -------------------------------------------------------------
@@ -271,12 +277,16 @@ def packetize(name, message, encoder, point, config, p, seed):
     elif name == "genetic":
         from sempalab.algorithms.genetic import genetic
 
+        # genetic() evaluates an initial population plus G' evolved ones,
+        # so the paper's G evaluated populations is G' = G - 1.
         result = genetic(
             message,
             encoder,
             M,
             objective="ats",
             p=p,
+            P=point["P"],
+            G=point["G"] - 1,
             seed=seed,
             **config["genetic"],
         )
@@ -303,23 +313,27 @@ def build_encoder(config: dict):
     return InstrumentedEncoder(
         model_name=ENCODER_REGISTRY[config["encoder"]],
         device=config["device"],
+        cache_size=config["cache_size"],
     )
 
 
 def load_messages(config: dict, K: int):
-    coco = config["coco"]
+    data = config["data"]
 
-    return coco_eval_set(
-        coco["annotations"],
+    return eval_set(
+        data["source"],
+        data["path"],
         K=K,
-        num_messages=coco["num_messages"],
-        seed=coco["seed"],
-        cache_dir=coco["eval_set_dir"],
+        num_messages=data["num_messages"],
+        seed=data["seed"],
+        cache_dir=data["eval_set_dir"],
+        max_articles=data["max_articles"],
     )
 
 
 def run_point(point, messages, encoder, config, sweep_value=None) -> list[dict]:
     K, M = point["K"], point["M"]
+    N = K // M
 
     snrs = list(config["snr_db"])
     ps = [packet_error_probability(snr, config["packet_bits"]) for snr in snrs]
@@ -332,8 +346,10 @@ def run_point(point, messages, encoder, config, sweep_value=None) -> list[dict]:
 
     for message in messages:
 
+        table = SimilarityTable(encoder, message)
+
         if do_prefetch:
-            prefetch(encoder, message, block_unions(K, M))
+            table.fill(to_mask(subset) for subset in block_unions(K, M))
 
         seed = config["seed"] * 1_000_003 + message.message_id
 
@@ -348,14 +364,17 @@ def run_point(point, messages, encoder, config, sweep_value=None) -> list[dict]:
 
                 if name in P_INDEPENDENT and cached is not None:
                     outcome = cached
+                elif name == "genetic" and M in (1, K):
+                    # Only one partition exists; GA would just re-evaluate it.
+                    outcome = (tuple((i,) for i in range(K)) if M == 1 else (tuple(range(K)),), 0, 1, 0.0)
+                elif name == "full_search":
+                    partition, _, evaluated, calls = evaluation.full_search(table, K, M, p)
+                    outcome = (partition, calls, evaluated, 0.0)
                 else:
                     outcome = packetize(name, message, encoder, point, config, p, seed)
                     cached = outcome
 
                 partition, logical_calls, evaluated, runtime = outcome
-
-                if not do_prefetch:
-                    prefetch(encoder, message, union_states(partition))
 
                 row = {
                     "experiment": config["experiment"],
@@ -364,9 +383,10 @@ def run_point(point, messages, encoder, config, sweep_value=None) -> list[dict]:
                     "sweep_value": sweep_value,
                     "K": K,
                     "M": M,
-                    "N": K // M,
+                    "N": N,
                     "P": point["P"],
                     "k": point["k"],
+                    "G": point["G"],
                     "algorithm": name,
                     "snr_db": snr,
                     "p": p,
@@ -379,10 +399,11 @@ def run_point(point, messages, encoder, config, sweep_value=None) -> list[dict]:
                 }
 
                 if "ats" in config["metrics"]:
-                    row["ats"] = exact_ats(partition, message, encoder, p)
+                    row["ats"] = evaluation.ats(table, partition, p)
 
                 if "wts" in config["metrics"]:
-                    row["wts"] = wts(partition, message, encoder, p)
+                    for L in range(1, len(partition)):
+                        row[f"wts_L{L}"] = evaluation.wts(table, partition, L)
 
                 rows.append(row)
 
@@ -393,12 +414,12 @@ def summarize(rows: list[dict]) -> list[dict]:
     groups: dict[tuple, list[dict]] = {}
 
     for row in rows:
-        key = (row["sweep_value"], row["K"], row["M"], row["P"], row["k"], row["algorithm"], row["snr_db"])
+        key = (row["sweep_value"], row["K"], row["M"], row["P"], row["k"], row["G"], row["algorithm"], row["snr_db"])
         groups.setdefault(key, []).append(row)
 
     table = []
 
-    for (sweep_value, K, M, P, k, name, snr), group in groups.items():
+    for (sweep_value, K, M, P, k, G, name, snr), group in groups.items():
 
         entry = {
             "experiment": group[0]["experiment"],
@@ -409,6 +430,7 @@ def summarize(rows: list[dict]) -> list[dict]:
             "M": M,
             "P": P,
             "k": k,
+            "G": G,
             "algorithm": name,
             "snr_db": snr,
             "p": group[0]["p"],
@@ -416,8 +438,10 @@ def summarize(rows: list[dict]) -> list[dict]:
             "mean_logical_calls": float(np.mean([r["logical_calls"] for r in group])),
         }
 
-        for metric in ("ats", "wts"):
-            if metric in group[0]:
+        metrics = [key for key in group[0] if key == "ats" or key.startswith("wts_L")]
+
+        for metric in metrics:
+            if True:
                 values = np.array([r[metric] for r in group])
                 entry[f"mean_{metric}"] = float(values.mean())
                 entry[f"sem_{metric}"] = float(values.std(ddof=1) / np.sqrt(len(values))) if len(values) > 1 else 0.0
@@ -429,7 +453,8 @@ def summarize(rows: list[dict]) -> list[dict]:
 
 def write_csv(path: Path, rows: list[dict]) -> None:
     with path.open("w", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+        fieldnames = list(dict.fromkeys(key for row in rows for key in row))
+        writer = csv.DictWriter(handle, fieldnames=fieldnames, restval="")
         writer.writeheader()
         writer.writerows(rows)
 
@@ -479,7 +504,7 @@ def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description="Run a Stage 4 reproduction experiment")
     parser.add_argument("--config", required=True)
     parser.add_argument("--encoder", help="override the encoder (minilm | mpnet)")
-    parser.add_argument("--num-messages", type=int, help="override coco.num_messages")
+    parser.add_argument("--num-messages", type=int, help="override data.num_messages")
     parser.add_argument("--results-dir", help="override results_dir")
     args = parser.parse_args(argv)
 
@@ -489,7 +514,7 @@ def main(argv: list[str] | None = None) -> None:
         overrides["encoder"] = args.encoder
 
     if args.num_messages:
-        overrides["coco"] = {"num_messages": args.num_messages}
+        overrides["data"] = {"num_messages": args.num_messages}
 
     if args.results_dir:
         overrides["results_dir"] = args.results_dir

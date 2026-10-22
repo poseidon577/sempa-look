@@ -1,0 +1,17 @@
+# Fig. 12 continued: K=50, 60 (N=10, 12) with 20 messages.
+experiment: wikihow_len_long
+description: Sentence length sweep, M=5 (Fig. 12, K=50, 60)
+encoder: mpnet
+data:
+  source: wikihow
+  path: data/wikihow/wikihowAll.csv
+  max_articles: 20000
+  num_messages: 20
+M: 5
+k: 4
+P: 10
+snr_db: [7]
+sweep:
+  param: K
+  values: [50, 60]
+algorithms: [sempa_look, random_pa]

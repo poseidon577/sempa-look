@@ -36,14 +36,15 @@ def workspace(tmp_path):
     )
 
     def make_config(**fields):
-        coco_override = fields.pop("coco", {})
+        data_override = fields.pop("data", {})
         raw = {
-            "coco": {
-                "annotations": str(annotations),
+            "data": {
+                "source": "coco",
+                "path": str(annotations),
                 "num_messages": 4,
                 "seed": 0,
                 "eval_set_dir": str(tmp_path / "eval_sets"),
-                **coco_override,
+                **data_override,
             },
             "results_dir": str(tmp_path / "results"),
             **fields,
@@ -140,10 +141,11 @@ def test_run_end_to_end(workspace, fake_encoder):
     ):
         assert r4["partition"] == r8["partition"]
 
-    # ATS and WTS rise with SNR, and WTS <= ATS.
+    # ATS rises with SNR.
     for name in ("random_pa", "sempa_look"):
         assert by[(name, 8)]["mean_ats"] > by[(name, 4)]["mean_ats"]
-        assert by[(name, 8)]["mean_wts"] <= by[(name, 8)]["mean_ats"] + 1e-9
+        # N = 2: only L = 1, and WTS does not depend on the SNR.
+        assert by[(name, 8)]["mean_wts_L1"] == by[(name, 4)]["mean_wts_L1"]
 
 
 def test_run_is_reproducible(workspace, fake_encoder):
@@ -177,7 +179,7 @@ def test_sweep_over_K_loads_new_messages(workspace, fake_encoder):
         snr_db=[8],
         algorithms=["random_pa", "sempa_look"],
         sweep={"param": "K", "values": [8, 10]},
-        coco={"num_messages": 1},
+        data={"num_messages": 1},
     )
 
     summary = run(config, encoder=fake_encoder())
@@ -188,3 +190,56 @@ def test_sweep_over_K_loads_new_messages(workspace, fake_encoder):
 
 def summary_rows(summary):
     return summary
+
+
+def test_genetic_calls_follow_paper_closed_form(workspace, fake_encoder):
+    make_config, _ = workspace
+
+    # Paper: G evaluated populations of P chromosomes, 2^N encodes each.
+    config = make_config(K=8, M=4, P=10, G=5, k=1, snr_db=[6], algorithms=["genetic"])
+
+    summary = run(config, encoder=fake_encoder())
+
+    assert summary[0]["mean_logical_calls"] == 5 * 10 * 2**2
+
+
+def test_wts_columns_cover_every_L(workspace, fake_encoder):
+    make_config, tmp_path = workspace
+
+    config = make_config(experiment="wts_cols", K=8, M=2, k=3, snr_db=[7], algorithms=["random_pa", "full_search"])
+
+    summary = run(config, encoder=fake_encoder())
+
+    for row in summary:
+        assert {f"mean_wts_L{L}" for L in (1, 2, 3)} <= set(row)
+
+    by = {row["algorithm"]: row for row in summary}
+    assert by["full_search"]["mean_ats"] >= by["random_pa"]["mean_ats"]
+
+
+def test_fixed_N_derives_M(workspace):
+    make_config, _ = workspace
+
+    config = make_config(K=8, fixed_N=2, sweep={"param": "K", "values": [8, 12, 16]})
+
+    assert [(pt["K"], pt["M"]) for pt in sweep_points(config)] == [(8, 4), (12, 6), (16, 8)]
+
+    with pytest.raises(ValueError):
+        make_config(K=8, fixed_N=3, sweep={"param": "K", "values": [8, 9]})
+
+
+def test_genetic_prefetch_keeps_results(fake_encoder):
+    # The batched prefetch must leave scores and logical calls untouched.
+    from sempalab.algorithms.genetic import genetic
+    from sempalab.metrics import exact_ats
+    from sempalab.types import Message
+
+    words = "a man riding a red bicycle near the sandy beach at sunset".split()
+    message = Message(message_id=1, text=" ".join(words), tokens=tuple(words))
+
+    encoder = fake_encoder()
+    result = genetic(message, encoder, 3, p=0.3, P=8, G=3, seed=5)
+
+    # initial population + G evolved ones, 2^N exact-ATS terms each
+    assert result.logical_calls == 8 * 4 * 2**4
+    assert result.best_score == pytest.approx(exact_ats(result.best_partition, message, fake_encoder(), 0.3))

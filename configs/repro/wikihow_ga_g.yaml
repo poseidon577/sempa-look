@@ -1,0 +1,19 @@
+# Fig. 10b: GA ATS vs number of generations G at K=24, M=4, 7 dB.
+# GA with G generations costs G*P*2^N encodes; 30 messages keep it tractable on CPU.
+experiment: wikihow_ga_g
+description: GA generations sweep (Fig. 10b)
+encoder: mpnet
+data:
+  source: wikihow
+  path: data/wikihow/wikihowAll.csv
+  max_articles: 20000
+  num_messages: 30
+K: 24
+M: 4
+P: 10
+k: 4
+snr_db: [7]
+sweep:
+  param: G
+  values: [1, 5, 10, 15, 20, 25, 30]
+algorithms: [genetic]

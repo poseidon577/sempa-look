@@ -1,5 +1,6 @@
 """
-MS-COCO caption loading for the Stage 4 reproduction.
+Message datasets for the Stage 4 reproduction: MS-COCO captions and
+WikiHow sentences.
 
 Only the caption annotations are needed (no images):
 
@@ -15,8 +16,10 @@ message of length K when it has exactly K words after normalization.
 
 from __future__ import annotations
 
+import csv
 import json
 import re
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -101,6 +104,37 @@ def select_captions(
     return [pool[i] for i in sorted(chosen)]
 
 
+WIKIHOW_CSV_URL = (
+    "https://huggingface.co/datasets/Lajvi/wikihowAll/resolve/main/wikihowAll.csv"
+)
+
+_SENTENCE_BREAK = re.compile(r"(?<=[.!?;])\s+|\n+")
+
+
+def load_wikihow_sentences(path: str | Path, max_articles: int | None = None) -> list[str]:
+    """
+    Sentences from the `text` column of wikihowAll.csv (Koupaee and
+    Wang, 2018), in file order. Assumption (docs/assumptions.md): a
+    WikiHow message is one sentence of an article body, split at
+    . ! ? ; or a line break.
+    """
+
+    csv.field_size_limit(sys.maxsize)
+
+    sentences = []
+
+    with Path(path).open(newline="", encoding="utf-8") as handle:
+        for count, row in enumerate(csv.DictReader(handle)):
+            if max_articles is not None and count >= max_articles:
+                break
+
+            sentences.extend(
+                part for part in _SENTENCE_BREAK.split(row.get("text") or "") if part.strip()
+            )
+
+    return sentences
+
+
 def to_messages(texts: list[str]) -> list[Message]:
     return [
         Message(message_id=i, text=text, tokens=tuple(text.split()))
@@ -108,44 +142,56 @@ def to_messages(texts: list[str]) -> list[Message]:
     ]
 
 
-def coco_eval_set(
-    annotations_path: str | Path,
+def eval_set(
+    source: str,
+    path: str | Path,
     K: int,
     num_messages: int,
     seed: int,
     cache_dir: str | Path | None = None,
+    max_articles: int | None = None,
 ) -> list[Message]:
     """
-    Build (or reload) a frozen evaluation set.
+    Build (or reload) a frozen evaluation set of K-word messages.
 
-    When `cache_dir` is given the selected captions are written to
-    <cache_dir>/coco_<split>_K<K>_n<num>_seed<seed>.txt and reused
-    afterwards, so every experiment sees the same messages.
+    source is "coco" (path = captions_*.json) or "wikihow"
+    (path = wikihowAll.csv, first `max_articles` articles).
+
+    When `cache_dir` is given the selected texts are written to
+    <cache_dir>/<name>_K<K>_n<num>_seed<seed>.txt and reused afterwards,
+    so every experiment sees the same messages.
     """
 
-    annotations_path = Path(annotations_path)
+    path = Path(path)
+
+    if source == "coco":
+        name = "coco_" + path.stem.replace("captions_", "")
+    elif source == "wikihow":
+        name = "wikihow" + (f"_a{max_articles}" if max_articles else "")
+    else:
+        raise ValueError(f"Unknown source: {source}")
 
     cache_file = None
 
     if cache_dir is not None:
-        split = annotations_path.stem.replace("captions_", "")
-        cache_file = (
-            Path(cache_dir)
-            / f"coco_{split}_K{K}_n{num_messages}_seed{seed}.txt"
-        )
+        cache_file = Path(cache_dir) / f"{name}_K{K}_n{num_messages}_seed{seed}.txt"
 
         if cache_file.exists():
             return to_messages(cache_file.read_text().splitlines())
 
-    texts = select_captions(
-        load_coco_captions(annotations_path),
-        K,
-        num_messages,
-        seed,
-    )
+    if source == "coco":
+        pool = load_coco_captions(path)
+    else:
+        pool = load_wikihow_sentences(path, max_articles)
+
+    texts = select_captions(pool, K, num_messages, seed)
 
     if cache_file is not None:
         cache_file.parent.mkdir(parents=True, exist_ok=True)
         cache_file.write_text("\n".join(texts) + "\n")
 
     return to_messages(texts)
+
+
+def coco_eval_set(annotations_path, K, num_messages, seed, cache_dir=None):
+    return eval_set("coco", annotations_path, K, num_messages, seed, cache_dir)

@@ -212,6 +212,9 @@ def sempa_look(
 
     selected_groups = []
 
+    # With N = 1 no decision is made and no score exists.
+    best_score = float("nan")
+
     # ---------------------------------------------------------
     # Main depth-wise lookahead search.
     #

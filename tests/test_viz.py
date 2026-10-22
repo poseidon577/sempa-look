@@ -12,7 +12,7 @@ def write_summary(path):
                     "algorithm": name,
                     "snr_db": snr,
                     "mean_ats": 0.1 * snr,
-                    "mean_wts": 0.09 * snr,
+                    "mean_wts_L1": 0.09 * snr,
                     "mean_logical_calls": 20,
                 }
             )
@@ -48,3 +48,28 @@ def test_every_algorithm_has_a_distinct_color():
     colors = [color for _, color, _ in STYLE.values()]
 
     assert len(set(colors)) == len(colors)
+
+
+def test_paper_overlay_and_wts_by_L(tmp_path):
+    from sempalab.viz import plot_panels, wts_by_L
+
+    summary = [
+        {"algorithm": "sempa_look", "mean_wts_L1": 0.8, "mean_wts_L2": 0.6, "mean_ats": 0.9},
+        {"algorithm": "random_pa", "mean_wts_L1": 0.7, "mean_wts_L2": 0.5, "mean_ats": 0.85},
+    ]
+
+    rows = wts_by_L(summary)
+    assert {(r["algorithm"], r["L"]) for r in rows} == {
+        ("sempa_look", 1), ("sempa_look", 2), ("random_pa", 1), ("random_pa", 2)
+    }
+
+    out = tmp_path / "wts.png"
+    fig = plot_panels(
+        [{"rows": rows, "x_key": "L", "y_key": "mean_wts", "xlabel": "L", "ylabel": "WTS",
+          "paper": {"x": [1, 2], "sempa_look": [0.82, 0.62], "random_pa": [0.73, 0.5]}}],
+        out_path=out,
+    )
+
+    assert out.exists()
+    # 2 ours + 2 paper lines
+    assert len(fig.axes[0].lines) == 4

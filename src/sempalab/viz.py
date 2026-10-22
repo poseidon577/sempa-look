@@ -30,7 +30,6 @@ STYLE = {
     "no_packetization": ("No packetization", "#6250d6", "P"),
 }
 
-METRIC_LABEL = {"ats": "ATS", "wts": "WTS"}
 
 TEXT = "#0b0b0b"
 MUTED = "#52514e"
@@ -67,7 +66,7 @@ def _style_axes(ax, xlabel, ylabel):
     ax.tick_params(colors=MUTED)
 
 
-def _plot_series(ax, rows, x_key, y_key, label_suffix=""):
+def _plot_series(ax, rows, x_key, y_key):
     algorithms = [name for name in STYLE if any(r["algorithm"] == name for r in rows)]
 
     for name in algorithms:
@@ -82,34 +81,67 @@ def _plot_series(ax, rows, x_key, y_key, label_suffix=""):
             marker=marker,
             markersize=6,
             linewidth=2,
-            label=label + label_suffix,
+            label=label,
         )
 
 
-def plot_vs_x(
-    summary: list[dict],
-    x_key: str,
-    xlabel: str,
-    metrics: tuple[str, ...] = ("ats", "wts"),
+def _plot_paper(ax, paper: dict):
+    """
+    Paper reference curves: dashed, hollow markers, same color per algorithm.
+    """
+
+    x = paper["x"]
+
+    for name in STYLE:
+        if name not in paper:
+            continue
+
+        label, color, marker = STYLE[name]
+
+        ax.plot(
+            x,
+            paper[name],
+            color=color,
+            marker=marker,
+            markersize=6,
+            markerfacecolor="none",
+            linewidth=1.2,
+            linestyle="--",
+            alpha=0.8,
+            label=f"{label} (paper)",
+        )
+
+
+def plot_panels(
+    panels: list[dict],
     title: str = "",
     out_path: str | Path | None = None,
-    algorithms: list[str] | None = None,
 ):
     """
-    One panel per metric, one line per algorithm, x = x_key.
+    Draw side-by-side panels. Each panel is a dict with
+        rows, x_key, y_key, xlabel, ylabel, and optional paper, xticks, log_y.
     """
 
-    rows = [r for r in summary if algorithms is None or r["algorithm"] in algorithms]
+    fig, axes = plt.subplots(1, len(panels), figsize=(5.2 * len(panels), 4.0), squeeze=False)
 
-    metrics = tuple(m for m in metrics if f"mean_{m}" in rows[0])
+    for ax, panel in zip(axes[0], panels):
+        _plot_series(ax, panel["rows"], panel["x_key"], panel["y_key"])
 
-    fig, axes = plt.subplots(1, len(metrics), figsize=(5.2 * len(metrics), 3.9), squeeze=False)
+        if panel.get("paper"):
+            _plot_paper(ax, panel["paper"])
 
-    for ax, metric in zip(axes[0], metrics):
-        _plot_series(ax, rows, x_key, f"mean_{metric}")
-        _style_axes(ax, xlabel, METRIC_LABEL[metric])
+        _style_axes(ax, panel["xlabel"], panel["ylabel"])
 
-    axes[0][0].legend(frameon=False, fontsize=8, labelcolor=TEXT)
+        if panel.get("xticks"):
+            ax.set_xticks(panel["xticks"])
+
+        if panel.get("log_y"):
+            ax.set_yscale("log")
+
+        if panel.get("title"):
+            ax.set_title(panel["title"], color=TEXT, fontsize=10)
+
+        ax.legend(frameon=False, fontsize=7, labelcolor=TEXT)
 
     if title:
         fig.suptitle(title, color=TEXT, fontsize=11)
@@ -122,3 +154,49 @@ def plot_vs_x(
         plt.close(fig)
 
     return fig
+
+
+def plot_vs_x(
+    summary: list[dict],
+    x_key: str,
+    xlabel: str,
+    metrics: tuple[str, ...] = ("ats", "wts_L1"),
+    title: str = "",
+    out_path: str | Path | None = None,
+    algorithms: list[str] | None = None,
+):
+    """
+    One panel per metric, one line per algorithm, x = x_key.
+    """
+
+    rows = [r for r in summary if algorithms is None or r["algorithm"] in algorithms]
+
+    metrics = tuple(m for m in metrics if f"mean_{m}" in rows[0])
+
+    panels = [
+        {
+            "rows": rows,
+            "x_key": x_key,
+            "y_key": f"mean_{metric}",
+            "xlabel": xlabel,
+            "ylabel": "ATS" if metric == "ats" else f"WTS (L={metric[5:]})",
+        }
+        for metric in metrics
+    ]
+
+    return plot_panels(panels, title=title, out_path=out_path)
+
+
+def wts_by_L(summary: list[dict]) -> list[dict]:
+    """
+    Reshape one-SNR summary rows into (algorithm, L, mean_wts) rows.
+    """
+
+    out = []
+
+    for row in summary:
+        for key, value in row.items():
+            if key.startswith("mean_wts_L") and value not in ("", None):
+                out.append({"algorithm": row["algorithm"], "L": int(key[10:]), "mean_wts": float(value)})
+
+    return out

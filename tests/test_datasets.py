@@ -82,3 +82,29 @@ def test_eval_set_is_frozen_on_disk(tmp_path):
     assert [m.text for m in again] == [m.text for m in messages]
     assert [m.message_id for m in again] == [0, 1]
     assert all(len(m.tokens) == 6 for m in again)
+
+
+def test_wikihow_sentences_and_eval_set(tmp_path):
+    from sempalab.datasets import eval_set, load_wikihow_sentences
+
+    path = tmp_path / "wikihowAll.csv"
+    path.write_text(
+        'headline,title,text\n'
+        '"h1","How to A","Wash the dog with warm water. Dry the dog carefully!\nBrush its fur every day."\n'
+        '"h2","How to B","Open the window wide; let the fresh air in now."\n'
+    )
+
+    sentences = load_wikihow_sentences(path)
+    assert sentences == [
+        "Wash the dog with warm water.",
+        "Dry the dog carefully!",
+        "Brush its fur every day.",
+        "Open the window wide;",
+        "let the fresh air in now.",
+    ]
+
+    assert load_wikihow_sentences(path, max_articles=1) == sentences[:3]
+
+    messages = eval_set("wikihow", path, K=6, num_messages=2, seed=0, cache_dir=tmp_path)
+    assert sorted(m.text for m in messages) == ["let the fresh air in now", "wash the dog with warm water"]
+    assert (tmp_path / "wikihow_K6_n2_seed0.txt").exists()

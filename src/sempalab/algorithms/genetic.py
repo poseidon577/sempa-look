@@ -305,7 +305,26 @@ def genetic(
     # Fitness evaluation
     # --------------------------------------------------------
 
+    def prefetch_population(population):
+        # Encode every surviving-token set of the whole population in one
+        # batched call, so exact_ats below only hits the cache. This does
+        # not change logical calls or fitness values, only wall-clock.
+        sets = {
+            tuple(sorted(
+                index
+                for n, group in enumerate(partition)
+                if mask >> n & 1
+                for index in group
+            ))
+            for partition in population
+            for mask in range(1, 1 << len(partition))
+        }
+
+        encoder.embed_sets(sorted(sets), message.message_id, message.tokens)
+
     def evaluate_population(population):
+        prefetch_population(population)
+
         fitnesses = []
 
         for partition in population:
