@@ -5,6 +5,7 @@ __pycache__/
 .DS_Store
 .env
 data/
-results/
+results/*
+!results/stage2/
 .ipynb_checkpoints/
 *.egg-info/
