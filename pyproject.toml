@@ -16,6 +16,7 @@ dependencies = [
     "torch",
     "sentence-transformers",
     "scikit-learn",
+    "matplotlib",
 ]
 
 [tool.setuptools.packages.find]

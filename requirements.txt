@@ -5,4 +5,5 @@ sentence-transformers
 scikit-learn
 PyYAML
 tqdm
+matplotlib
 pytest

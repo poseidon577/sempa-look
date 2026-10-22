@@ -34,33 +34,33 @@ fig9b_M1,Fig. 9b,ATS at M=1,"COCO, K=12, 8 dB",0.971,0.9703743317675378,,-0.0644
 fig9b_full_M3,Fig. 9b,Full Search ATS at M=3 (peak),"COCO, K=12, 8 dB",0.977,0.9752563631047511,,-0.17846846420152748,%,plot
 fig9b_sempa_M3,Fig. 9b,SemPA-Look ATS at M=3,"COCO, K=12, 8 dB",0.975,0.97241977848103,,-0.2646381045097407,%,plot
 fig9b_random_M3,Fig. 9b,Random PA ATS at M=3,"COCO, K=12, 8 dB",0.97,0.9668596726334131,,-0.3237450893388526,%,plot
-table3_sempa_calls,Table III,"SemPA-Look encoder calls, closed form (N-1)P(k+1)","K=24, M=4, N=6, P=10, k=4",250.0,,,,%,text
-table3_ga_calls,Table III,"GA encoder calls, G P 2^N","K=24, M=4, N=6, G=5, P=10",3200.0,,,,%,text
-table3_random_calls,Table III,Random PA encoder calls,"K=24, M=4",0.0,,,,abs,text
-fig11_sempa_calls_P130,Fig. 11b,SemPA-Look encoder calls at P=130,"K=24, M=12, k=4",260.0,,,,%,text
-fig11_ga_calls_P130,Fig. 11b,GA encoder calls at P=130,"K=24, M=12, G=5",2600.0,,,,%,text
-fig10b_ga_calls_G1,Fig. 10b,GA encoder calls at G=1,"K=24, M=4, P=10",640.0,,,,%,text
-table2_sempa,Table II,SemPA-Look ATS,"WikiHow, K=24, M=4, 6 dB",0.6421,,,,%,text
-table2_random,Table II,Random PA ATS,"WikiHow, K=24, M=4, 6 dB",0.5417,,,,%,text
-table5_6db,Table V,SemPA-Look ATS (no post-correction),"WikiHow, K=24, M=6, 6 dB",0.6206,,,,%,text
-table5_7db,Table V,SemPA-Look ATS (no post-correction),"WikiHow, K=24, M=6, 7 dB",0.8716,,,,%,text
-table5_8db,Table V,SemPA-Look ATS (no post-correction),"WikiHow, K=24, M=6, 8 dB",0.9696,,,,%,text
-fig16_sempa_k0,Fig. 16 / 10a,SemPA-Look ATS at k=0,"WikiHow, K=24, M=4, 7 dB",0.8649,,,,%,text
-fig16_sempa_kmax,Fig. 16 / 10a,SemPA-Look ATS at k=k_max=5,"WikiHow, K=24, M=4, 7 dB",0.8777,,,,%,text
-fig16_random,Fig. 16 / 10a,Random PA ATS,"WikiHow, K=24, M=4, 7 dB",0.86,,,,%,text
-fig10a_k1,Fig. 10a,SemPA-Look ATS at k=1,"WikiHow, K=24, M=4, 7 dB",0.875,,,,%,plot
-fig10b_ga_G1,Fig. 10b,GA ATS at G=1,"WikiHow, K=24, M=4, 7 dB",0.875,,,,%,plot
-fig10b_ga_G30,Fig. 10b,GA ATS at G=30,"WikiHow, K=24, M=4, 7 dB",0.8865,,,,%,plot
-fig11_sempa_P130,Fig. 11a,SemPA-Look ATS at P=130,"WikiHow, K=24, M=12, 7 dB",0.8814,,,,%,text
-fig11_ga_P130,Fig. 11a,GA ATS at P=130,"WikiHow, K=24, M=12, 7 dB",0.8863,,,,%,text
-fig11_sempa_P10,Fig. 11a,SemPA-Look ATS at P=10,"WikiHow, K=24, M=12, 7 dB",0.867,,,,%,plot
-fig12_sempa_K10,Fig. 12a,SemPA-Look ATS at K=10,"WikiHow, M=5, 7 dB",0.86,,,,%,plot
-fig12_sempa_K40,Fig. 12a,SemPA-Look ATS at K=40,"WikiHow, M=5, 7 dB",0.895,,,,%,plot
-fig12_random_K10,Fig. 12a,Random PA ATS at K=10,"WikiHow, M=5, 7 dB",0.833,,,,%,plot
-fig12_random_K40,Fig. 12a,Random PA ATS at K=40,"WikiHow, M=5, 7 dB",0.88,,,,%,plot
-fig12_wts_sempa_K10,Fig. 12b,SemPA-Look WTS (L=1) at K=10,"WikiHow, M=5",0.59,,,,%,plot
-fig12_wts_random_K10,Fig. 12b,Random PA WTS (L=1) at K=10,"WikiHow, M=5",0.45,,,,%,plot
-fig12_sempa_K60,Fig. 12a,SemPA-Look ATS at K=60,"WikiHow, M=5, 7 dB",0.913,,,,%,plot
-fig13_n2_sempa_K28,Fig. 13a,SemPA-Look ATS at K=28,"WikiHow, 7 dB",0.88,,,,%,plot
-fig13_n4_sempa_K28,Fig. 13a,SemPA-Look ATS at K=28,"WikiHow, 7 dB",0.868,,,,%,plot
-fig13_n4_random_K28,Fig. 13a,Random PA ATS at K=28,"WikiHow, 7 dB",0.842,,,,%,plot
+table3_sempa_calls,Table III,"SemPA-Look encoder calls, closed form (N-1)P(k+1)","K=24, M=4, N=6, P=10, k=4",250.0,190.0,,-24.0,%,text
+table3_ga_calls,Table III,"GA encoder calls, G P 2^N","K=24, M=4, N=6, G=5, P=10",3200.0,3200.0,,0.0,%,text
+table3_random_calls,Table III,Random PA encoder calls,"K=24, M=4",0.0,0.0,,0.0,abs,text
+fig11_sempa_calls_P130,Fig. 11b,SemPA-Look encoder calls at P=130,"K=24, M=12, k=4",260.0,260.0,,0.0,%,text
+fig11_ga_calls_P130,Fig. 11b,GA encoder calls at P=130,"K=24, M=12, G=5",2600.0,2600.0,,0.0,%,text
+fig10b_ga_calls_G1,Fig. 10b,GA encoder calls at G=1,"K=24, M=4, P=10",640.0,640.0,,0.0,%,text
+table2_sempa,Table II,SemPA-Look ATS,"WikiHow, K=24, M=4, 6 dB",0.6421,0.6341151859386192,,-1.2435468091233222,%,text
+table2_random,Table II,Random PA ATS,"WikiHow, K=24, M=4, 6 dB",0.5417,0.6191492365836292,,14.297440757546473,%,text
+table5_6db,Table V,SemPA-Look ATS (no post-correction),"WikiHow, K=24, M=6, 6 dB",0.6206,0.6316082571265692,,1.7738087538783702,%,text
+table5_7db,Table V,SemPA-Look ATS (no post-correction),"WikiHow, K=24, M=6, 7 dB",0.8716,0.8777539146340335,,0.7060480305224272,%,text
+table5_8db,Table V,SemPA-Look ATS (no post-correction),"WikiHow, K=24, M=6, 8 dB",0.9696,0.9704949258899229,,0.09229846224452393,%,text
+fig16_sempa_k0,Fig. 16 / 10a,SemPA-Look ATS at k=0,"WikiHow, K=24, M=4, 7 dB",0.8649,0.8658326226210776,,0.10783010996388344,%,text
+fig16_sempa_kmax,Fig. 16 / 10a,SemPA-Look ATS at k=k_max=5,"WikiHow, K=24, M=4, 7 dB",0.8777,0.876603991684747,,-0.12487277147693147,%,text
+fig16_random,Fig. 16 / 10a,Random PA ATS,"WikiHow, K=24, M=4, 7 dB",0.86,0.8611911029292341,,0.13850034060861371,%,text
+fig10a_k1,Fig. 10a,SemPA-Look ATS at k=1,"WikiHow, K=24, M=4, 7 dB",0.875,0.8725247441704229,,-0.2828863805230952,%,plot
+fig10b_ga_G1,Fig. 10b,GA ATS at G=1,"WikiHow, K=24, M=4, 7 dB",0.875,0.8741991386973287,,-0.09152700601957926,%,plot
+fig10b_ga_G30,Fig. 10b,GA ATS at G=30,"WikiHow, K=24, M=4, 7 dB",0.8865,0.8891274057687153,,0.296379669341832,%,plot
+fig11_sempa_P130,Fig. 11a,SemPA-Look ATS at P=130,"WikiHow, K=24, M=12, 7 dB",0.8814,0.8827981589468742,,0.1586293336594314,%,text
+fig11_ga_P130,Fig. 11a,GA ATS at P=130,"WikiHow, K=24, M=12, 7 dB",0.8863,0.8871381692364707,,0.09456947269217326,%,text
+fig11_sempa_P10,Fig. 11a,SemPA-Look ATS at P=10,"WikiHow, K=24, M=12, 7 dB",0.867,0.8698719165832673,,0.33124758745874894,%,plot
+fig12_sempa_K10,Fig. 12a,SemPA-Look ATS at K=10,"WikiHow, M=5, 7 dB",0.86,0.8481124331617729,,-1.3822752137473389,%,plot
+fig12_sempa_K40,Fig. 12a,SemPA-Look ATS at K=40,"WikiHow, M=5, 7 dB",0.895,0.8860169143269091,,-1.003696723250382,%,plot
+fig12_random_K10,Fig. 12a,Random PA ATS at K=10,"WikiHow, M=5, 7 dB",0.833,0.8200203822235409,,-1.5581774041367422,%,plot
+fig12_random_K40,Fig. 12a,Random PA ATS at K=40,"WikiHow, M=5, 7 dB",0.88,0.8744919286760175,,-0.6259171959070972,%,plot
+fig12_wts_sempa_K10,Fig. 12b,SemPA-Look WTS (L=1) at K=10,"WikiHow, M=5",0.59,0.5664775858819485,,-3.9868498505171948,%,plot
+fig12_wts_random_K10,Fig. 12b,Random PA WTS (L=1) at K=10,"WikiHow, M=5",0.45,0.44920716017484663,,-0.17618662781186215,%,plot
+fig12_sempa_K60,Fig. 12a,SemPA-Look ATS at K=60,"WikiHow, M=5, 7 dB",0.913,0.896503556228941,,-1.806839405373393,%,plot
+fig13_n2_sempa_K28,Fig. 13a,SemPA-Look ATS at K=28,"WikiHow, 7 dB",0.88,0.11565189062620496,,-86.85773970156761,%,plot
+fig13_n4_sempa_K28,Fig. 13a,SemPA-Look ATS at K=28,"WikiHow, 7 dB",0.868,0.120409673226927,,-86.1279178309992,%,plot
+fig13_n4_random_K28,Fig. 13a,Random PA ATS at K=28,"WikiHow, 7 dB",0.842,0.10790818684766947,,-87.18430084944544,%,plot
