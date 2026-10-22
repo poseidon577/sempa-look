@@ -1,0 +1,47 @@
+experiment: wikihow_k24_m4_subword
+description: K=24, M=4 lookahead sweep (Fig. 10a, Fig. 16, Table II), subword tokens
+encoder: mpnet
+device: null
+cache_size: 1000000
+tokenization: subword
+reconstruction: fragment
+data:
+  source: wikihow
+  path: data/wikihow/wikihowAll.csv
+  max_articles: 20000
+  num_messages: 100
+  seed: 42
+  eval_set_dir: results/stage4/eval_sets
+K: 24
+M: 4
+fixed_N: null
+P: 10
+k: 4
+lookahead_mode: disjoint
+packet_bits: 300
+snr_db:
+- 6
+- 7
+algorithms:
+- sempa_look
+- random_pa
+G: 5
+genetic: {}
+sweep:
+  param: k
+  values:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+metrics:
+- ats
+- wts
+prefetch_max_sets: 5000
+seed: 42
+results_dir: results/stage4
+run_at: '2026-10-22T17:25:23'
+wall_seconds: 1072.9
+model_name: sentence-transformers/all-mpnet-base-v2

@@ -234,3 +234,127 @@ entries:
      ours: {value: {experiment: wikihow_fixed_n4, algorithm: sempa_look, metric: ats, where: {K: 28}}}}
   - {id: fig13_n4_random_K28, figure: Fig. 13, quantity: "Random PA ATS at K=28, N=4", setting: "WikiHow, 7 dB", paper: 0.842, source: plot,
      ours: {value: {experiment: wikihow_fixed_n4, algorithm: random_pa, metric: ats, where: {K: 28}}}}
+
+  # ================ Subword tokenization ================
+  # Same settings as the word-based entries above, with messages of exactly
+  # K MPNet WordPiece tokens (docs/assumptions.md, A11-A12). Plot values were
+  # read off the subword panels of the TCOM PDF.
+
+  # Fig. 6b: the paper says subword ATS is "about 0.0002" below word ATS at 6 dB.
+  - id: fig6b_subword_vs_word_6db
+    figure: Fig. 6b
+    quantity: SemPA-Look ATS, subword relative to word, at 6 dB (0.0002 of 0.60)
+    setting: COCO, K=8, M=4
+    paper: -0.03
+    unit: "%"
+    source: text
+    ours:
+      gain:
+        a: {experiment: coco_k8_subword, algorithm: sempa_look, metric: ats, where: {snr_db: 6}}
+        b: {experiment: coco_k8, algorithm: sempa_look, metric: ats, where: {snr_db: 6}}
+  - {id: fig6b_sempa_6db, figure: Fig. 6b, quantity: SemPA-Look ATS at 6 dB, setting: "COCO, K=8, M=4, subword", paper: 0.605, source: plot,
+     ours: {value: {experiment: coco_k8_subword, algorithm: sempa_look, metric: ats, where: {snr_db: 6}}}}
+  - id: fig6b_gain_random
+    figure: Fig. 6b
+    quantity: SemPA-Look ATS gain over Random PA at 6 dB (plot, about 0.605 vs 0.53)
+    setting: COCO, K=8, M=4, subword
+    paper: 14
+    unit: "%"
+    source: plot
+    ours:
+      gain:
+        a: {experiment: coco_k8_subword, algorithm: sempa_look, metric: ats, where: {snr_db: 6}}
+        b: {experiment: coco_k8_subword, algorithm: random_pa, metric: ats, where: {snr_db: 6}}
+
+  # Fig. 6d: read at K=12, M=2 (N=6), 6 dB, as for Fig. 6c (A5, A6).
+  - id: fig6d_wts_gain_L3
+    figure: Fig. 6d
+    quantity: SemPA-Look WTS gain over Random PA (paper does not name L; L=3 shown)
+    setting: COCO, N=6 (ours K=12, M=2), 6 dB, subword
+    paper: 45.5
+    unit: "%"
+    source: text
+    ours:
+      gain:
+        a: {experiment: coco_k12_subword, algorithm: sempa_look, metric: wts_L3, where: {M: 2, snr_db: 6}}
+        b: {experiment: coco_k12_subword, algorithm: random_pa, metric: wts_L3, where: {M: 2, snr_db: 6}}
+  - {id: fig6d_sempa_L1, figure: Fig. 6d, quantity: SemPA-Look WTS at L=1, setting: "COCO, N=6, subword", paper: 0.82, source: plot,
+     ours: {value: {experiment: coco_k12_subword, algorithm: sempa_look, metric: wts_L1, where: {M: 2, snr_db: 6}}}}
+  - {id: fig6d_sempa_L3, figure: Fig. 6d, quantity: SemPA-Look WTS at L=3, setting: "COCO, N=6, subword", paper: 0.40, source: plot,
+     ours: {value: {experiment: coco_k12_subword, algorithm: sempa_look, metric: wts_L3, where: {M: 2, snr_db: 6}}}}
+  - {id: fig6d_sempa_L5, figure: Fig. 6d, quantity: SemPA-Look WTS at L=5, setting: "COCO, N=6, subword", paper: 0.10, source: plot,
+     ours: {value: {experiment: coco_k12_subword, algorithm: sempa_look, metric: wts_L5, where: {M: 2, snr_db: 6}}}}
+  - {id: fig6d_random_L1, figure: Fig. 6d, quantity: Random PA WTS at L=1, setting: "COCO, N=6, subword", paper: 0.74, source: plot,
+     ours: {value: {experiment: coco_k12_subword, algorithm: random_pa, metric: wts_L1, where: {M: 2, snr_db: 6}}}}
+  - {id: fig6d_random_L3, figure: Fig. 6d, quantity: Random PA WTS at L=3, setting: "COCO, N=6, subword", paper: 0.28, source: plot,
+     ours: {value: {experiment: coco_k12_subword, algorithm: random_pa, metric: wts_L3, where: {M: 2, snr_db: 6}}}}
+  - {id: fig6d_full_L3, figure: Fig. 6d, quantity: Full Search WTS at L=3, setting: "COCO, N=6, subword", paper: 0.49, source: plot,
+     ours: {value: {experiment: coco_k12_subword, algorithm: full_search, metric: wts_L3, where: {M: 2, snr_db: 6}}}}
+
+  # Fig. 7b (heatmap values printed in the figure) and Fig. 8b, K=12, 7 dB.
+  - {id: fig7b_sempa_M1, figure: Fig. 7b, quantity: SemPA-Look ATS at M=1, setting: "COCO, K=12, 7 dB, subword", paper: 0.874, source: text,
+     ours: {value: {experiment: coco_k12_subword, algorithm: sempa_look, metric: ats, where: {M: 1, snr_db: 7}}}}
+  - {id: fig7b_sempa_M2, figure: Fig. 7b, quantity: SemPA-Look ATS at M=2, setting: "COCO, K=12, 7 dB, subword", paper: 0.882, source: text,
+     ours: {value: {experiment: coco_k12_subword, algorithm: sempa_look, metric: ats, where: {M: 2, snr_db: 7}}}}
+  - {id: fig7b_sempa_M3, figure: Fig. 7b, quantity: SemPA-Look ATS at M=3, setting: "COCO, K=12, 7 dB, subword", paper: 0.883, source: text,
+     ours: {value: {experiment: coco_k12_subword, algorithm: sempa_look, metric: ats, where: {M: 3, snr_db: 7}}}}
+  - {id: fig7b_sempa_M4, figure: Fig. 7b, quantity: SemPA-Look ATS at M=4, setting: "COCO, K=12, 7 dB, subword", paper: 0.880, source: text,
+     ours: {value: {experiment: coco_k12_subword, algorithm: sempa_look, metric: ats, where: {M: 4, snr_db: 7}}}}
+  - {id: fig7b_sempa_M6, figure: Fig. 7b, quantity: SemPA-Look ATS at M=6, setting: "COCO, K=12, 7 dB, subword", paper: 0.869, source: text,
+     ours: {value: {experiment: coco_k12_subword, algorithm: sempa_look, metric: ats, where: {M: 6, snr_db: 7}}}}
+  - {id: fig7b_sempa_M12, figure: Fig. 7b, quantity: "ATS at M=12 (no packetization, = 1 - p)", setting: "COCO, K=12, 7 dB, subword", paper: 0.793, source: text,
+     ours: {value: {experiment: coco_k12_subword, algorithm: sempa_look, metric: ats, where: {M: 12, snr_db: 7}}}}
+  - {id: fig8b_full_M3, figure: Fig. 8b, quantity: Full Search ATS at M=3 (peak), setting: "COCO, K=12, 7 dB, subword", paper: 0.895, source: plot,
+     ours: {value: {experiment: coco_k12_subword, algorithm: full_search, metric: ats, where: {M: 3, snr_db: 7}}}}
+  - {id: fig8b_full_M6, figure: Fig. 8b, quantity: Full Search ATS at M=6, setting: "COCO, K=12, 7 dB, subword", paper: 0.884, source: plot,
+     ours: {value: {experiment: coco_k12_subword, algorithm: full_search, metric: ats, where: {M: 6, snr_db: 7}}}}
+  - {id: fig8b_random_M2, figure: Fig. 8b, quantity: Random PA ATS at M=2, setting: "COCO, K=12, 7 dB, subword", paper: 0.869, source: plot,
+     ours: {value: {experiment: coco_k12_subword, algorithm: random_pa, metric: ats, where: {M: 2, snr_db: 7}}}}
+  - {id: fig8b_random_M6, figure: Fig. 8b, quantity: Random PA ATS at M=6, setting: "COCO, K=12, 7 dB, subword", paper: 0.843, source: plot,
+     ours: {value: {experiment: coco_k12_subword, algorithm: random_pa, metric: ats, where: {M: 6, snr_db: 7}}}}
+
+  # Fig. 10a subword curves (WikiHow, K=24, M=4, 7 dB; k_max = 5).
+  - {id: fig10a_sub_k0, figure: Fig. 10a, quantity: SemPA-Look ATS at k=0, setting: "WikiHow, K=24, M=4, 7 dB, subword", paper: 0.8575, source: plot,
+     ours: {value: {experiment: wikihow_k24_m4_subword, algorithm: sempa_look, metric: ats, where: {k: 0, snr_db: 7}}}}
+  - {id: fig10a_sub_k1, figure: Fig. 10a, quantity: SemPA-Look ATS at k=1, setting: "WikiHow, K=24, M=4, 7 dB, subword", paper: 0.8695, source: plot,
+     ours: {value: {experiment: wikihow_k24_m4_subword, algorithm: sempa_look, metric: ats, where: {k: 1, snr_db: 7}}}}
+  - {id: fig10a_sub_k5, figure: Fig. 10a, quantity: SemPA-Look ATS at k=k_max=5, setting: "WikiHow, K=24, M=4, 7 dB, subword", paper: 0.873, source: plot,
+     ours: {value: {experiment: wikihow_k24_m4_subword, algorithm: sempa_look, metric: ats, where: {k: 5, snr_db: 7}}}}
+  - {id: fig10a_sub_random, figure: Fig. 10a, quantity: Random PA ATS, setting: "WikiHow, K=24, M=4, 7 dB, subword", paper: 0.849, source: plot,
+     ours: {value: {experiment: wikihow_k24_m4_subword, algorithm: random_pa, metric: ats, where: {k: 0, snr_db: 7}}}}
+
+  # Fig. 11a subword curves (WikiHow, K=24, M=12, 7 dB).
+  - {id: fig11_sub_sempa_P130, figure: Fig. 11a, quantity: SemPA-Look ATS at P=130, setting: "WikiHow, K=24, M=12, 7 dB, subword", paper: 0.8772, source: text,
+     ours: {value: {experiment: wikihow_p_subword, algorithm: sempa_look, metric: ats, where: {P: 130}}}}
+  - {id: fig11_sub_ga_P130, figure: Fig. 11a, quantity: GA ATS at P=130, setting: "WikiHow, K=24, M=12, 7 dB, subword", paper: 0.8830, source: text,
+     ours: {value: {experiment: wikihow_p_subword, algorithm: genetic, metric: ats, where: {P: 130}}}}
+  - {id: fig11_sub_sempa_P10, figure: Fig. 11a, quantity: SemPA-Look ATS at P=10, setting: "WikiHow, K=24, M=12, 7 dB, subword", paper: 0.860, source: plot,
+     ours: {value: {experiment: wikihow_p_subword, algorithm: sempa_look, metric: ats, where: {P: 10}}}}
+
+  # Fig. 12 subword curves (WikiHow, M=5, 7 dB).
+  - {id: fig12_sub_sempa_K10, figure: Fig. 12a, quantity: SemPA-Look ATS at K=10, setting: "WikiHow, M=5, 7 dB, subword", paper: 0.846, source: plot,
+     ours: {value: {experiment: wikihow_len_subword, algorithm: sempa_look, metric: ats, where: {K: 10}}}}
+  - {id: fig12_sub_sempa_K40, figure: Fig. 12a, quantity: SemPA-Look ATS at K=40, setting: "WikiHow, M=5, 7 dB, subword", paper: 0.886, source: plot,
+     ours: {value: {experiment: wikihow_len_subword, algorithm: sempa_look, metric: ats, where: {K: 40}}}}
+  - {id: fig12_sub_random_K10, figure: Fig. 12a, quantity: Random PA ATS at K=10, setting: "WikiHow, M=5, 7 dB, subword", paper: 0.812, source: plot,
+     ours: {value: {experiment: wikihow_len_subword, algorithm: random_pa, metric: ats, where: {K: 10}}}}
+  - {id: fig12_sub_random_K40, figure: Fig. 12a, quantity: Random PA ATS at K=40, setting: "WikiHow, M=5, 7 dB, subword", paper: 0.863, source: plot,
+     ours: {value: {experiment: wikihow_len_subword, algorithm: random_pa, metric: ats, where: {K: 40}}}}
+  - {id: fig12_sub_wts_sempa_K10, figure: Fig. 12b, quantity: SemPA-Look WTS (L=1) at K=10, setting: "WikiHow, M=5, subword", paper: 0.54, source: plot,
+     ours: {value: {experiment: wikihow_len_subword, algorithm: sempa_look, metric: wts_L1, where: {K: 10}}}}
+  - {id: fig12_sub_wts_random_K10, figure: Fig. 12b, quantity: Random PA WTS (L=1) at K=10, setting: "WikiHow, M=5, subword", paper: 0.40, source: plot,
+     ours: {value: {experiment: wikihow_len_subword, algorithm: random_pa, metric: wts_L1, where: {K: 10}}}}
+  - {id: fig12_sub_sempa_K60, figure: Fig. 12a, quantity: SemPA-Look ATS at K=60, setting: "WikiHow, M=5, 7 dB, subword", paper: 0.907, source: plot,
+     ours: {value: {experiment: wikihow_len_long_subword, algorithm: sempa_look, metric: ats, where: {K: 60}}}}
+
+  # Fig. 13b (WikiHow, 7 dB). Unlike Fig. 13a, the paper's subword panel has N=4 above N=2.
+  - {id: fig13b_n2_sempa_K28, figure: Fig. 13b, quantity: "SemPA-Look ATS at K=28, N=2", setting: "WikiHow, 7 dB, subword", paper: 0.862, source: plot,
+     ours: {value: {experiment: wikihow_fixed_n2_subword, algorithm: sempa_look, metric: ats, where: {K: 28}}}}
+  - {id: fig13b_n4_sempa_K28, figure: Fig. 13b, quantity: "SemPA-Look ATS at K=28, N=4", setting: "WikiHow, 7 dB, subword", paper: 0.869, source: plot,
+     ours: {value: {experiment: wikihow_fixed_n4_subword, algorithm: sempa_look, metric: ats, where: {K: 28}}}}
+  - {id: fig13b_n2_random_K28, figure: Fig. 13b, quantity: "Random PA ATS at K=28, N=2", setting: "WikiHow, 7 dB, subword", paper: 0.833, source: plot,
+     ours: {value: {experiment: wikihow_fixed_n2_subword, algorithm: random_pa, metric: ats, where: {K: 28}}}}
+  - {id: fig13b_n4_random_K28, figure: Fig. 13b, quantity: "Random PA ATS at K=28, N=4", setting: "WikiHow, 7 dB, subword", paper: 0.845, source: plot,
+     ours: {value: {experiment: wikihow_fixed_n4_subword, algorithm: random_pa, metric: ats, where: {K: 28}}}}
+  - {id: fig13b_n2_sempa_K8, figure: Fig. 13b, quantity: "SemPA-Look ATS at K=8, N=2", setting: "WikiHow, 7 dB, subword", paper: 0.839, source: plot,
+     ours: {value: {experiment: wikihow_fixed_n2_subword, algorithm: sempa_look, metric: ats, where: {K: 8}}}}

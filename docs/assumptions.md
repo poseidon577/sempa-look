@@ -22,7 +22,7 @@ published TCOM version.
 | # | Topic | Choice | Why |
 |---|---|---|---|
 | A1 | Reconstruction | Surviving tokens joined by single spaces in original order | Eq. (3) says "if we assume that the order of the tokens are given"; packets carry ordering bits (Sec. V) |
-| A2 | Tokenization | Word-based: lowercase, punctuation removed (letters, digits, `'` and `-` kept), whitespace split | Paper uses word tokens "split by space" for most figures; subword runs are not reproduced |
+| A2 | Tokenization | Word-based: lowercase, punctuation removed (letters, digits, `'` and `-` kept), whitespace split | Paper uses word tokens "split by space" for most figures; subword runs follow A11–A12 |
 | A3 | COCO messages | Unique normalised captions from `captions_train2017.json` with exactly K words; 100 drawn with seed 42; frozen in `results/stage4/eval_sets/` | Paper does not say which split, how captions were filtered, or which 100 |
 | A4 | WikiHow messages | Sentences of article bodies in `wikihowAll.csv` (first 20,000 articles), split at `. ! ? ;` or line breaks, normalised as in A2, exactly K words | Paper only says WikiHow "comprises longer sentences than MS-COCO" |
 | A5 | Fig. 6 setting | ATS panel (6a) at the captioned K = 8, M = 4. WTS panel (6c) at K = 12, M = 2 (N = 6), 6 dB | The caption says K = 8, M = 4, but N = 2 allows only L = 1 while the plot runs L = 1..5. N = 6 with full search feasible means K = 12, M = 2 (the setting of Figs. 5b and 7) |
@@ -31,10 +31,11 @@ published TCOM version.
 | A8 | Message counts | 100 messages per point, except GA-vs-G (Fig. 10b) and the P sweep (Fig. 11) with 30, and K = 50, 60 in Fig. 12 with 20 | CPU-only budget: these points need 10^4–10^6 MPNet forwards per message |
 | A9 | Random PA | One uniformly random partition per message, fixed across SNRs | Paper: "G is generated as a random partition" |
 | A10 | Seeds | SemPA-Look / GA / Random PA seed for message i: 42·1,000,003 + i | Reproducible per message, independent of algorithm order |
+| A11 | Subword tokenizer | WordPiece tokenizer of the encoder (`all-mpnet-base-v2`, 30,527-piece vocabulary) on the A2-normalized text; a message has exactly K pieces; `'` and `-` become their own pieces | Paper names BPE [30] and WordPiece [31] but not which one or which vocabulary (Sec. II-A); the encoder's own tokenizer needs no extra model |
+| A12 | Subword reconstruction | "fragment": received pieces in order, a continuation piece glued to the previous piece only if that piece was received too; a word that lost a piece survives as fragments. "strict" (word dropped unless all pieces arrive) run as a sensitivity check | Paper: "Losing even one subword prevents full recovery of the word" (Sec. V-B), without saying what RX does with the rest. "fragment" is closer to the paper's Fig. 7b values |
 
 ## Not reproduced
 
-- Subword tokenization (Figs. 6b/6d, 7b, 8b, subword curves of 10–13).
 - SemPA-GBeam, MCTS (Table II column), R-DeepSC / DeepSC / UTF-8 / Huffman (Table IV).
 - Fig. 4 sampling ablations (with/without replacement, RSS-only, lookahead-only variants).
 - AIGC / LPIPS (Figs. 14, 15), BLEURT / BERTScore (Fig. 16 lower panels), LLM post-correction (Tables V–VI with correction, Fig. 17), channel coding and CRC (Fig. 18).

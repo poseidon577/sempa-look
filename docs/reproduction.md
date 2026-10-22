@@ -64,6 +64,15 @@ Solid lines are ours, dashed lines with hollow markers are the paper's.
 ![Fig. 13](../results/stage4/figures/fig13_fixed_N.png)
 ![Fig. 3](../results/stage4/figures/fig3_tss_vs_rss.png)
 
+Subword tokenization (see [Subword tokenization](#subword-tokenization)):
+
+![Fig. 6b/6d](../results/stage4/figures/fig6_ats_wts_subword.png)
+![Fig. 7b/8b](../results/stage4/figures/fig8_ats_vs_M_subword.png)
+![Fig. 10a](../results/stage4/figures/fig10a_k_subword.png)
+![Fig. 11a](../results/stage4/figures/fig11_P_subword.png)
+![Fig. 12](../results/stage4/figures/fig12_length_subword.png)
+![Fig. 13b](../results/stage4/figures/fig13_fixed_N_subword.png)
+
 ## Gaps we could not close
 
 ### 1. Random PA is stronger at 6 dB than in the paper
@@ -112,11 +121,70 @@ curves keep rising up to K=28, and for K ≥ 20 N=4 is slightly above N=2
 point of the figure, is reproduced for both N. Long WikiHow sentences with
 exactly K words are scarcer, so our K=24 and K=28 sets may come from a narrower
 slice of the 20,000 articles we read (A4 in assumptions.md); a different
-sentence pool is the most likely cause, but we have not verified it.
+sentence pool is the most likely cause, but we have not verified it. The
+paper's own subword panel (Fig. 13b) has N=4 above N=2, as in our runs for both
+tokenizations; see [Subword tokenization](#subword-tokenization).
+
+## Subword tokenization
+
+The paper repeats most COCO and WikiHow experiments with subword tokens
+(Figs. 6b/6d, 7b, 8b and the subword curves of Figs. 10a, 11a, 12 and 13b)
+without naming the tokenizer. We use the WordPiece tokenizer of the encoder
+itself (A11) and select messages with exactly K pieces. Received pieces are
+turned back into text with the "fragment" rule (A12): contiguous pieces of a
+word are glued, a word that lost a piece survives only as fragments. Configs
+are `configs/repro/*_subword.yaml`; every compared number is in the
+"subword" rows of [reproduction_table.md](reproduction_table.md).
+
+The absolute numbers match as closely as the word-based ones:
+
+| Result (subword) | Paper | Ours |
+| --- | --- | --- |
+| Fig. 7b: SemPA-Look ATS vs M (K=12, 7 dB), M = 1, 2, 3, 4, 6, 12 | 0.874, 0.882, 0.883, 0.880, 0.869, 0.793 | 0.869, 0.877, 0.880, 0.876, 0.868, 0.793 |
+| Fig. 8b: Full Search ATS at M = 3 / 6 | 0.895 / 0.884 | 0.894 / 0.883 |
+| Fig. 10a: SemPA-Look ATS, k = 0 → 5 (K=24, M=4, 7 dB) | 0.8575 → 0.873 | 0.8582 → 0.8672 |
+| Fig. 11a: ATS at P=130, SemPA-Look / GA | 0.8772 / 0.8830 | 0.8772 / 0.8828 |
+| Fig. 6d: Full Search / SemPA-Look WTS at L=3 (N=6, 6 dB) | 0.49 / 0.40 | 0.491 / 0.400 |
+| Fig. 13b: SemPA-Look ATS at K=28, N = 2 / 4 | 0.862 / 0.869 | 0.864 / 0.871 |
+| Fig. 12a: SemPA-Look ATS at K = 10 / 40 (M=5) | 0.846 / 0.886 | 0.849 / 0.879 |
+
+What does not reproduce is, again, the size of the gain over Random PA:
+
+| Gain of SemPA-Look over Random PA (subword) | Paper | Ours |
+| --- | --- | --- |
+| Fig. 6b: ATS at 6 dB (K=8, M=4; paper read off the plot) | about +14 % | +6.0 % |
+| Fig. 6d: WTS (paper does not name L) | +45.5 % | +5.0 % to +24.0 % for L = 1..5 (+14.5 % at L=3) |
+| Fig. 6d: Random PA WTS at L=3 | 0.28 | 0.349 |
+
+This is gap 1 in subword form: the optimized methods land on the paper's
+values while our Random PA sits above the paper's curve.
+
+Three more observations:
+
+- **K=8 subword is word-based in disguise.** MS-COCO captions are rarely
+  shorter than 8 words, so the captions with exactly 8 WordPiece tokens are
+  almost all 8-word captions with no split word (61,215 of 62,071 unique
+  candidates; none of our 100). Subword and word ATS at K=8 therefore differ
+  only through which captions are drawn (ours: SemPA-Look 0.5926 vs 0.5965 at
+  6 dB), which fits the paper's "about 0.0002" difference in Fig. 6b. At K=12
+  51 of our 100 captions contain a split word, and subword ATS is 0.4–1.3 %
+  below word ATS (Fig. 7b vs 7a), as the paper also shows.
+- **Fig. 13b agrees with our Fig. 13.** In the paper's subword panel N=4 is
+  above N=2 (0.869 vs 0.862 at K=28), the opposite of its word panel. Our runs
+  give N=4 above N=2 for both tokenizations (subword 0.871 vs 0.864). So the
+  paper's own subword figure supports our ordering, and its word-based Fig. 13a
+  is the outlier (gap 4).
+- **The reconstruction rule matters little, and "fragment" fits better.** With
+  the "strict" rule (a word survives only if all its pieces arrive,
+  `configs/repro/coco_k12_subword_strict.yaml`), SemPA-Look ATS at K=12, 7 dB
+  drops to 0.870 / 0.875 / 0.871 / 0.866 for M = 2 / 3 / 4 / 6, further from
+  the paper's Fig. 7b than the "fragment" rule. Its gain over Random PA is a
+  little larger (+6.9 % vs +5.4 % at M=3, 6 dB) but still far from the
+  paper's headline gains.
 
 ## Not reproduced
 
-Subword tokenization, SemPA-GBeam, MCTS, the DeepSC / UTF-8 / Huffman
+SemPA-GBeam, MCTS, the DeepSC / UTF-8 / Huffman
 baselines of Table IV, the Fig. 4 sampling ablations, AIGC / LPIPS (Figs. 14,
 15), BLEURT / BERTScore, LLM post-correction and channel coding (Fig. 18).
 See [assumptions.md](assumptions.md#not-reproduced).

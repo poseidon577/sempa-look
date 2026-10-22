@@ -42,6 +42,7 @@ from sempalab.datasets import eval_set
 from sempalab import evaluation
 from sempalab.evaluation import SimilarityTable, to_mask
 from sempalab.partition import sample_random_partition
+from sempalab.tokenization import RECONSTRUCTIONS, TOKENIZATIONS
 
 
 ALGORITHMS = (
@@ -65,6 +66,10 @@ DEFAULTS = {
     "encoder": "minilm",
     "device": None,
     "cache_size": 1_000_000,
+    # Word or subword (MPNet WordPiece) tokens, and how received
+    # subword pieces become text; see sempalab/tokenization.py.
+    "tokenization": "word",
+    "reconstruction": "fragment",
     "data": {
         "source": "coco",
         "path": "data/coco/annotations/captions_train2017.json",
@@ -127,6 +132,12 @@ def validate_repro_config(config: dict) -> None:
 
     if config["encoder"] not in ENCODER_REGISTRY:
         raise ValueError(f"encoder must be one of {sorted(ENCODER_REGISTRY)}")
+
+    if config["tokenization"] not in TOKENIZATIONS:
+        raise ValueError(f"tokenization must be one of {list(TOKENIZATIONS)}")
+
+    if config["reconstruction"] not in RECONSTRUCTIONS:
+        raise ValueError(f"reconstruction must be one of {list(RECONSTRUCTIONS)}")
 
     algorithms = config["algorithms"]
 
@@ -314,6 +325,7 @@ def build_encoder(config: dict):
         model_name=ENCODER_REGISTRY[config["encoder"]],
         device=config["device"],
         cache_size=config["cache_size"],
+        reconstruction=config["reconstruction"],
     )
 
 
@@ -328,6 +340,7 @@ def load_messages(config: dict, K: int):
         seed=data["seed"],
         cache_dir=data["eval_set_dir"],
         max_articles=data["max_articles"],
+        tokenization=config["tokenization"],
     )
 
 

@@ -165,7 +165,7 @@ The open questions from the first version of this review were settled by the rep
 - **Overlap with the authors' group:** lead with direction 2 (channel-aware aggregation), folding in direction 3's p-aware surrogate. Direction 1 is deferred because the authors' own group is active on MLM receivers; a recovery receiver can later be added as one more channel/receiver model in the same framework.
 - **Target regime:** new results are reported against the packet error rate p (about 0.05 to 0.6) rather than uncoded SNR. That range covers uncoded BPSK at 6–8 dB and coded links at lower SNR, and it is where aggregation matters at all. SNR axes are kept only for figures compared with the paper.
 - **Compute:** experiments run in the cloud container (4 CPUs, about 15 GB RAM), not on a local machine. The largest planned run, exhaustive subset encoding at K = 12 (4,096 subsets × 100 messages, about 410k short sentences, about 1.3 GB of float32 embeddings), fits without extra RAM.
-- **Subword tokenization:** reproduce the paper's subword results next (Figs. 6b/6d, 7b, 8b and the subword curves of Figs. 10–13), including the 45.5% subword WTS claim.
+- **Subword tokenization:** reproduced; see [reproduction.md](reproduction.md#subword-tokenization). Absolute numbers match within about 1 %, but the 45.5 % subword WTS gain comes out at +14.5 % (L = 3), the same Random PA gap as with words. The paper's own subword Fig. 13b has N = 4 above N = 2, which supports our Fig. 13 ordering over its word-based panel.
 
 ## Conclusion
 

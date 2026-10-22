@@ -24,6 +24,7 @@ from pathlib import Path
 
 import numpy as np
 
+from sempalab.tokenization import tokenize
 from sempalab.types import Message
 
 
@@ -67,12 +68,15 @@ def select_captions(
     K: int,
     num_messages: int,
     seed: int,
+    tokenization: str = "word",
 ) -> list[str]:
     """
-    Normalize, keep unique captions with exactly K words, and draw
+    Normalize, keep unique captions with exactly K tokens (words, or
+    subword pieces when tokenization="subword"), and draw
     `num_messages` of them uniformly at random without replacement.
 
-    Selection depends only on (captions, K, num_messages, seed).
+    Selection depends only on (captions, K, num_messages, seed,
+    tokenization).
     """
 
     if K <= 0 or num_messages <= 0:
@@ -85,7 +89,15 @@ def select_captions(
 
         text = normalize_caption(caption)
 
-        if len(text.split()) != K or text in seen:
+        if text in seen:
+            continue
+
+        # Word count first: a caption has at least as many subword
+        # pieces as words, so longer ones never need the tokenizer.
+        if len(text.split()) > K:
+            continue
+
+        if len(tokenize(text, tokenization)) != K:
             continue
 
         seen.add(text)
@@ -93,7 +105,7 @@ def select_captions(
 
     if len(pool) < num_messages:
         raise ValueError(
-            f"Only {len(pool)} unique captions with K={K} words, "
+            f"Only {len(pool)} unique captions with K={K} {tokenization} tokens, "
             f"need {num_messages}"
         )
 
@@ -135,9 +147,9 @@ def load_wikihow_sentences(path: str | Path, max_articles: int | None = None) ->
     return sentences
 
 
-def to_messages(texts: list[str]) -> list[Message]:
+def to_messages(texts: list[str], tokenization: str = "word") -> list[Message]:
     return [
-        Message(message_id=i, text=text, tokens=tuple(text.split()))
+        Message(message_id=i, text=text, tokens=tokenize(text, tokenization))
         for i, text in enumerate(texts)
     ]
 
@@ -150,16 +162,18 @@ def eval_set(
     seed: int,
     cache_dir: str | Path | None = None,
     max_articles: int | None = None,
+    tokenization: str = "word",
 ) -> list[Message]:
     """
-    Build (or reload) a frozen evaluation set of K-word messages.
+    Build (or reload) a frozen evaluation set of K-token messages.
 
     source is "coco" (path = captions_*.json) or "wikihow"
     (path = wikihowAll.csv, first `max_articles` articles).
 
     When `cache_dir` is given the selected texts are written to
-    <cache_dir>/<name>_K<K>_n<num>_seed<seed>.txt and reused afterwards,
-    so every experiment sees the same messages.
+    <cache_dir>/<name>_K<K>_n<num>_seed<seed>.txt (with "_subword"
+    after <name> for subword sets) and reused afterwards, so every
+    experiment sees the same messages.
     """
 
     path = Path(path)
@@ -171,26 +185,29 @@ def eval_set(
     else:
         raise ValueError(f"Unknown source: {source}")
 
+    if tokenization != "word":
+        name += f"_{tokenization}"
+
     cache_file = None
 
     if cache_dir is not None:
         cache_file = Path(cache_dir) / f"{name}_K{K}_n{num_messages}_seed{seed}.txt"
 
         if cache_file.exists():
-            return to_messages(cache_file.read_text().splitlines())
+            return to_messages(cache_file.read_text().splitlines(), tokenization)
 
     if source == "coco":
         pool = load_coco_captions(path)
     else:
         pool = load_wikihow_sentences(path, max_articles)
 
-    texts = select_captions(pool, K, num_messages, seed)
+    texts = select_captions(pool, K, num_messages, seed, tokenization)
 
     if cache_file is not None:
         cache_file.parent.mkdir(parents=True, exist_ok=True)
         cache_file.write_text("\n".join(texts) + "\n")
 
-    return to_messages(texts)
+    return to_messages(texts, tokenization)
 
 
 def coco_eval_set(annotations_path, K, num_messages, seed, cache_dir=None):
