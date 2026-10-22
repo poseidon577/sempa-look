@@ -4,36 +4,36 @@ fig6a_gain_nopack,Fig. 6a,SemPA-Look ATS gain over no packetization at 6 dB,"COC
 fig6a_gap_full,Fig. 6a,SemPA-Look ATS relative to Full Search at 6 dB,"COCO, K=8, M=4",-1.79,-2.0271161400045035,%,-0.23711614000450343,pp,text
 fig6a_gap_ga,Fig. 6a,SemPA-Look ATS relative to GA at 6 dB,"COCO, K=8, M=4, G=5",-1.41,-0.6717160605799966,%,0.7382839394200034,pp,text
 fig6a_ats_sempa_6db,Fig. 6a,SemPA-Look ATS at 6 dB,"COCO, K=8, M=4",0.6,0.5964722070202846,,-0.5879654966192324,%,plot
-fig6c_wts_gain_L3,Fig. 6c,SemPA-Look WTS gain over Random PA (paper does not name L; L=3 shown),"COCO, N=6 (ours K=12, M=2), 6 dB",46.2,,%,,pp,text
-fig6c_sempa_L1,Fig. 6c,SemPA-Look WTS at L=1,"COCO, N=6",0.82,,,,%,plot
-fig6c_sempa_L3,Fig. 6c,SemPA-Look WTS at L=3,"COCO, N=6",0.43,,,,%,plot
-fig6c_sempa_L5,Fig. 6c,SemPA-Look WTS at L=5,"COCO, N=6",0.12,,,,%,plot
-fig6c_random_L1,Fig. 6c,Random PA WTS at L=1,"COCO, N=6",0.73,,,,%,plot
-fig6c_random_L3,Fig. 6c,Random PA WTS at L=3,"COCO, N=6",0.3,,,,%,plot
-fig6c_full_L3,Fig. 6c,Full Search WTS at L=3,"COCO, N=6",0.51,,,,%,plot
-fig3_rss_6db,Fig. 3,RSS-based PA ATS at 6 dB,"COCO, K, M unstated (ours K=12, M=3)",0.61,,,,%,plot
-fig3_tss_6db,Fig. 3,TSS-based PA ATS at 6 dB,"COCO (ours K=12, M=3)",0.555,,,,%,plot
-fig3_random_6db,Fig. 3,Random PA ATS at 6 dB,"COCO (ours K=12, M=3)",0.49,,,,%,plot
-fig3_rss_4db,Fig. 3,RSS-based PA ATS at 4 dB,"COCO (ours K=12, M=3)",0.05,,,,%,plot
-fig3_tss_4db,Fig. 3,TSS-based PA ATS at 4 dB,"COCO (ours K=12, M=3)",0.06,,,,%,plot
-fig7_sempa_M1,Fig. 7a,SemPA-Look ATS at M=1,"COCO, K=12, 7 dB",0.879,,,,%,text
-fig7_sempa_M2,Fig. 7a,SemPA-Look ATS at M=2,"COCO, K=12, 7 dB",0.886,,,,%,text
-fig7_sempa_M3,Fig. 7a,SemPA-Look ATS at M=3,"COCO, K=12, 7 dB",0.885,,,,%,text
-fig7_sempa_M4,Fig. 7a,SemPA-Look ATS at M=4,"COCO, K=12, 7 dB",0.883,,,,%,text
-fig7_sempa_M6,Fig. 7a,SemPA-Look ATS at M=6,"COCO, K=12, 7 dB",0.871,,,,%,text
-fig7_sempa_M12,Fig. 7a,ATS at M=12 (no packetization,"COCO, K=12, 7 dB",0.793,,,,%,text
-fig8_full_M3,Fig. 8a,Full Search ATS at M=3 (peak),"COCO, K=12, 7 dB",0.896,,,,%,plot
-fig8_full_M6,Fig. 8a,Full Search ATS at M=6,"COCO, K=12, 7 dB",0.883,,,,%,plot
-fig8_random_M2,Fig. 8a,Random PA ATS at M=2,"COCO, K=12, 7 dB",0.874,,,,%,plot
-fig8_random_M6,Fig. 8a,Random PA ATS at M=6,"COCO, K=12, 7 dB",0.849,,,,%,plot
-fig9a_M1,Fig. 9a,ATS at M=1 (best M at 4 dB),"COCO, K=12, 4 dB",0.052,,,,%,plot
-fig9a_full_M3,Fig. 9a,Full Search ATS at M=3,"COCO, K=12, 4 dB",0.048,,,,%,plot
-fig9a_sempa_M3,Fig. 9a,SemPA-Look ATS at M=3,"COCO, K=12, 4 dB",0.04,,,,%,plot
-fig9a_M12,Fig. 9a,ATS at M=12 (= 1 - p),"COCO, K=12, 4 dB",0.023,,,,%,plot
-fig9b_M1,Fig. 9b,ATS at M=1,"COCO, K=12, 8 dB",0.971,,,,%,plot
-fig9b_full_M3,Fig. 9b,Full Search ATS at M=3 (peak),"COCO, K=12, 8 dB",0.977,,,,%,plot
-fig9b_sempa_M3,Fig. 9b,SemPA-Look ATS at M=3,"COCO, K=12, 8 dB",0.975,,,,%,plot
-fig9b_random_M3,Fig. 9b,Random PA ATS at M=3,"COCO, K=12, 8 dB",0.97,,,,%,plot
+fig6c_wts_gain_L3,Fig. 6c,SemPA-Look WTS gain over Random PA (paper does not name L; L=3 shown),"COCO, N=6 (ours K=12, M=2), 6 dB",46.2,10.914293629530158,%,-35.285706370469846,pp,text
+fig6c_sempa_L1,Fig. 6c,SemPA-Look WTS at L=1,"COCO, N=6",0.82,0.8149366688728332,,-0.6174794057520399,%,plot
+fig6c_sempa_L3,Fig. 6c,SemPA-Look WTS at L=3,"COCO, N=6",0.43,0.3869070690870285,,-10.021611840225932,%,plot
+fig6c_sempa_L5,Fig. 6c,SemPA-Look WTS at L=5,"COCO, N=6",0.12,0.0933387959562242,,-22.21767003647983,%,plot
+fig6c_random_L1,Fig. 6c,Random PA WTS at L=1,"COCO, N=6",0.73,0.786937205195427,,7.799617150058494,%,plot
+fig6c_random_L3,Fig. 6c,Random PA WTS at L=3,"COCO, N=6",0.3,0.3488342723250389,,16.278090775012966,%,plot
+fig6c_full_L3,Fig. 6c,Full Search WTS at L=3,"COCO, N=6",0.51,0.5016342389583588,,-1.6403453022825916,%,plot
+fig3_rss_6db,Fig. 3,RSS-based PA ATS at 6 dB,"COCO, K, M unstated (ours K=12, M=3)",0.61,0.6180388796606993,,1.3178491247047988,%,plot
+fig3_tss_6db,Fig. 3,TSS-based PA ATS at 6 dB,"COCO (ours K=12, M=3)",0.555,0.622137708999545,,12.096884504422516,%,plot
+fig3_random_6db,Fig. 3,Random PA ATS at 6 dB,"COCO (ours K=12, M=3)",0.49,0.6201740955300129,,26.566141944900597,%,plot
+fig3_rss_4db,Fig. 3,RSS-based PA ATS at 4 dB,"COCO (ours K=12, M=3)",0.05,0.037221324676303416,,-25.55735064739317,%,plot
+fig3_tss_4db,Fig. 3,TSS-based PA ATS at 4 dB,"COCO (ours K=12, M=3)",0.06,0.039353387661187206,,-34.41102056468799,%,plot
+fig7_sempa_M1,Fig. 7a,SemPA-Look ATS at M=1,"COCO, K=12, 7 dB",0.879,0.8803352261496193,,0.15190286116260973,%,text
+fig7_sempa_M2,Fig. 7a,SemPA-Look ATS at M=2,"COCO, K=12, 7 dB",0.886,0.8848495006263891,,-0.12985320243915252,%,text
+fig7_sempa_M3,Fig. 7a,SemPA-Look ATS at M=3,"COCO, K=12, 7 dB",0.885,0.8847734021964254,,-0.02560427159034924,%,text
+fig7_sempa_M4,Fig. 7a,SemPA-Look ATS at M=4,"COCO, K=12, 7 dB",0.883,0.8809002283252002,,-0.23779973667041898,%,text
+fig7_sempa_M6,Fig. 7a,SemPA-Look ATS at M=6,"COCO, K=12, 7 dB",0.871,0.8713861750546673,,0.044336975277533275,%,text
+fig7_sempa_M12,Fig. 7a,ATS at M=12 (no packetization,"COCO, K=12, 7 dB",0.793,0.7930317779114219,,0.004007302827470051,%,text
+fig8_full_M3,Fig. 8a,Full Search ATS at M=3 (peak),"COCO, K=12, 7 dB",0.896,0.8962599988437384,,0.029017728095803122,%,plot
+fig8_full_M6,Fig. 8a,Full Search ATS at M=6,"COCO, K=12, 7 dB",0.883,0.883620173757053,,0.07023485357338992,%,plot
+fig8_random_M2,Fig. 8a,Random PA ATS at M=2,"COCO, K=12, 7 dB",0.874,0.8757940257775013,,0.20526610726559702,%,plot
+fig8_random_M6,Fig. 8a,Random PA ATS at M=6,"COCO, K=12, 7 dB",0.849,0.8467940811547146,,-0.2598255412585897,%,plot
+fig9a_M1,Fig. 9a,ATS at M=1 (best M at 4 dB),"COCO, K=12, 4 dB",0.052,0.049928846644936194,,-3.982987221276546,%,plot
+fig9a_full_M3,Fig. 9a,Full Search ATS at M=3,"COCO, K=12, 4 dB",0.048,0.04743336514334986,,-1.180489284687798,%,plot
+fig9a_sempa_M3,Fig. 9a,SemPA-Look ATS at M=3,"COCO, K=12, 4 dB",0.04,0.0394634654631016,,-1.3413363422459974,%,plot
+fig9a_M12,Fig. 9a,ATS at M=12 (= 1 - p),"COCO, K=12, 4 dB",0.023,0.022962722902190844,,-0.1620743383006755,%,plot
+fig9b_M1,Fig. 9b,ATS at M=1,"COCO, K=12, 8 dB",0.971,0.9703743317675378,,-0.06443545133492573,%,plot
+fig9b_full_M3,Fig. 9b,Full Search ATS at M=3 (peak),"COCO, K=12, 8 dB",0.977,0.9752563631047511,,-0.17846846420152748,%,plot
+fig9b_sempa_M3,Fig. 9b,SemPA-Look ATS at M=3,"COCO, K=12, 8 dB",0.975,0.97241977848103,,-0.2646381045097407,%,plot
+fig9b_random_M3,Fig. 9b,Random PA ATS at M=3,"COCO, K=12, 8 dB",0.97,0.9668596726334131,,-0.3237450893388526,%,plot
 table3_sempa_calls,Table III,"SemPA-Look encoder calls, closed form (N-1)P(k+1)","K=24, M=4, N=6, P=10, k=4",250.0,,,,%,text
 table3_ga_calls,Table III,"GA encoder calls, G P 2^N","K=24, M=4, N=6, G=5, P=10",3200.0,,,,%,text
 table3_random_calls,Table III,Random PA encoder calls,"K=24, M=4",0.0,,,,abs,text
