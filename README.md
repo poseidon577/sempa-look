@@ -877,6 +877,7 @@ Results are written to `results/<experiment>/` as `results.csv`, `summary.json`,
 * Full report with the gaps we could not close: [docs/reproduction.md](docs/reproduction.md)
 * Every compared number (about 70, paper vs ours): [docs/reproduction_table.md](docs/reproduction_table.md)
 * Every interpretation we had to make: [docs/assumptions.md](docs/assumptions.md)
+* Limitations of the paper and ranked novelty directions: [docs/limitations.md](docs/limitations.md)
 
 ### Headline numbers
 
