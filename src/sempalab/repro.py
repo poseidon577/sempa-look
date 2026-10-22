@@ -71,6 +71,7 @@ DEFAULTS = {
     "M": 4,
     "P": 10,
     "k": 4,
+    "lookahead_mode": "disjoint",
     "packet_bits": 300,
     "snr_db": [2, 4, 6, 8, 10],
     "algorithms": ["random_pa", "sempa_look"],
@@ -120,6 +121,9 @@ def validate_repro_config(config: dict) -> None:
 
     if not algorithms or set(algorithms) - set(ALGORITHMS):
         raise ValueError(f"algorithms must be a non-empty subset of {ALGORITHMS}")
+
+    if config["lookahead_mode"] not in {"disjoint", "independent"}:
+        raise ValueError("lookahead_mode must be 'disjoint' or 'independent'")
 
     if set(config["metrics"]) - {"ats", "wts"}:
         raise ValueError("metrics must be a subset of ['ats', 'wts']")
@@ -254,7 +258,15 @@ def packetize(name, message, encoder, point, config, p, seed):
     elif name == "sempa_look":
         from sempalab.algorithms.sempa_look import sempa_look
 
-        result = sempa_look(message, encoder, M, P=point["P"], k=point["k"], seed=seed)
+        result = sempa_look(
+            message,
+            encoder,
+            M,
+            P=point["P"],
+            k=point["k"],
+            seed=seed,
+            lookahead_mode=config["lookahead_mode"],
+        )
 
     elif name == "genetic":
         from sempalab.algorithms.genetic import genetic

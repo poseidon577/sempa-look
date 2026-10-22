@@ -73,6 +73,33 @@ def _sample_disjoint_lookaheads(remaining, candidate, M, k, rng):
     return lookaheads
 
 
+def _sample_independent_lookaheads(remaining, candidate, M, k, rng):
+    """
+    Sample k lookahead groups of size M, each drawn independently and
+    uniformly from the M-subsets of remaining \\ candidate. Different
+    lookaheads may overlap or repeat.
+    """
+
+    candidate_set = set(candidate)
+
+    available = [
+        index
+        for index in remaining
+        if index not in candidate_set
+    ]
+
+    if len(available) < M:
+        raise ValueError(
+            f"Cannot sample a lookahead group of size {M}: "
+            f"only {len(available)} tokens available."
+        )
+
+    return [
+        tuple(sorted(int(i) for i in rng.choice(available, size=M, replace=False)))
+        for _ in range(k)
+    ]
+
+
 def sempa_look(
     message,
     encoder,
@@ -80,6 +107,7 @@ def sempa_look(
     P=10,
     k=4,
     seed=None,
+    lookahead_mode="disjoint",
 ):
     """
     Paper-faithful SemPA-Look.
@@ -104,6 +132,16 @@ def sempa_look(
 
     seed:
         Random seed for reproducibility.
+
+    lookahead_mode:
+        "disjoint" (default): the k lookaheads of a candidate are
+        mutually disjoint, so k is capped at the number of future
+        subpackets at each depth.
+
+        "independent": each of the k lookaheads is drawn on its own,
+        uniformly from the M-subsets of the pool minus the candidate,
+        so all k are used at every depth and the logical call count
+        is exactly (N-1) * P * (k+1).
 
     Returns
     -------
@@ -150,6 +188,9 @@ def sempa_look(
 
     if k < 0:
         raise ValueError("k must be non-negative.")
+
+    if lookahead_mode not in {"disjoint", "independent"}:
+        raise ValueError("lookahead_mode must be 'disjoint' or 'independent'.")
 
     N = K // M
 
@@ -226,15 +267,26 @@ def sempa_look(
             future_groups = (len(remaining) // M) - 1
 
             # The requested k cannot exceed the number of future groups.
-            effective_k = min(k, future_groups)
+            if lookahead_mode == "disjoint":
+                effective_k = min(k, future_groups)
 
-            lookaheads = _sample_disjoint_lookaheads(
-                remaining=remaining,
-                candidate=candidate,
-                M=M,
-                k=effective_k,
-                rng=rng,
-            )
+                lookaheads = _sample_disjoint_lookaheads(
+                    remaining=remaining,
+                    candidate=candidate,
+                    M=M,
+                    k=effective_k,
+                    rng=rng,
+                )
+            else:
+                effective_k = k
+
+                lookaheads = _sample_independent_lookaheads(
+                    remaining=remaining,
+                    candidate=candidate,
+                    M=M,
+                    k=k,
+                    rng=rng,
+                )
 
             candidate_lookahead_counts.append(
                 len(lookaheads)

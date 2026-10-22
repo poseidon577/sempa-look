@@ -1,6 +1,5 @@
 import csv
 import json
-import zlib
 from math import comb
 
 import numpy as np
@@ -16,44 +15,6 @@ from sempalab.repro import (
     sweep_points,
     union_states,
 )
-
-
-class CachingFakeEncoder:
-    """
-    Torch-free stand-in with the InstrumentedEncoder interface,
-    including a (message_id, indices) cache.
-    """
-
-    def __init__(self, dim=32):
-        self.dim = dim
-        self.logical_calls = 0
-        self.miss_calls = 0
-        self.cache_hits = 0
-        self.encoder_batches = 0
-        self.cache = {}
-
-    def _embed(self, tokens):
-        vector = np.zeros(self.dim)
-        for token in tokens:
-            vector += np.random.default_rng(zlib.crc32(token.encode())).standard_normal(self.dim)
-        norm = np.linalg.norm(vector)
-        return vector / norm if norm > 0 else vector
-
-    def embed_original(self, message_id, tokens):
-        return self._embed(tokens)
-
-    def embed_sets(self, index_sets, message_id, tokens):
-        out = []
-        for indices in index_sets:
-            key = (message_id, tuple(sorted(indices)))
-            if key in self.cache:
-                self.cache_hits += 1
-            else:
-                self.miss_calls += 1
-                self.cache[key] = self._embed([tokens[i] for i in key[1]])
-            out.append(self.cache[key])
-        self.encoder_batches += 1
-        return np.stack(out)
 
 
 CAPTIONS = [
@@ -131,7 +92,7 @@ def test_sweep_points(workspace):
     assert all(point["K"] == 8 for point in sweep_points(config))
 
 
-def test_run_end_to_end(workspace):
+def test_run_end_to_end(workspace, fake_encoder):
     make_config, tmp_path = workspace
 
     config = make_config(
@@ -144,7 +105,7 @@ def test_run_end_to_end(workspace):
         algorithms=["full_search", "random_pa", "no_packetization", "greedy_rss", "sempa_look"],
     )
 
-    summary = run(config, encoder=CachingFakeEncoder())
+    summary = run(config, encoder=fake_encoder())
 
     out = tmp_path / "results" / "fig6_smoke"
     assert (out / "results.csv").exists()
@@ -185,18 +146,18 @@ def test_run_end_to_end(workspace):
         assert by[(name, 8)]["mean_wts"] <= by[(name, 8)]["mean_ats"] + 1e-9
 
 
-def test_run_is_reproducible(workspace):
+def test_run_is_reproducible(workspace, fake_encoder):
     make_config, _ = workspace
 
     config = make_config(K=8, M=4, k=1, snr_db=[6], algorithms=["random_pa", "sempa_look"])
 
-    a = run(config, encoder=CachingFakeEncoder())
-    b = run(config, encoder=CachingFakeEncoder())
+    a = run(config, encoder=fake_encoder())
+    b = run(config, encoder=fake_encoder())
 
     assert a == b
 
 
-def test_sweep_over_K_loads_new_messages(workspace):
+def test_sweep_over_K_loads_new_messages(workspace, fake_encoder):
     make_config, tmp_path = workspace
 
     # M=4 does not divide 9
@@ -219,7 +180,7 @@ def test_sweep_over_K_loads_new_messages(workspace):
         coco={"num_messages": 1},
     )
 
-    summary = run(config, encoder=CachingFakeEncoder())
+    summary = run(config, encoder=fake_encoder())
 
     assert {row["K"] for row in summary} == {8, 10}
     assert (tmp_path / "eval_sets" / "coco_val2017_K10_n1_seed0.txt").exists()
