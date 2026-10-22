@@ -1,0 +1,4 @@
+experiment,encoder,sweep_param,sweep_value,K,M,P,k,G,algorithm,snr_db,p,messages,mean_logical_calls,mean_ats,sem_ats
+complexity_k24,mpnet,,,24,4,10,4,5,genetic,6,0.5119533038709356,10,3200.0,0.7182660111561434,0.009334026644519594
+complexity_k24,mpnet,,,24,4,10,4,5,sempa_look,6,0.5119533038709356,10,190.0,0.6991755747558497,0.01070928064831353
+complexity_k24,mpnet,,,24,4,10,4,5,random_pa,6,0.5119533038709356,10,0.0,0.6889504983806715,0.010144138932062867

@@ -477,6 +477,11 @@ def run(config: dict, encoder=None) -> list[dict]:
         if K not in messages_by_K:
             messages_by_K[K] = load_messages(config, K)
 
+            # Message ids restart at 0 for every K, and the encoder cache
+            # is keyed by (message_id, indices): without this, the next K
+            # would reuse embeddings of the previous K's sentences.
+            encoder.clear_cache()
+
         sweep_value = point[sweep["param"]] if sweep else None
 
         rows.extend(run_point(point, messages_by_K[K], encoder, config, sweep_value))

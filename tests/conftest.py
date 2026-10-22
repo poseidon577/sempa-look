@@ -18,6 +18,9 @@ class CachingFakeEncoder:
         self.encoder_batches = 0
         self.cache = {}
 
+    def clear_cache(self):
+        self.cache.clear()
+
     def _embed(self, tokens):
         vector = np.zeros(self.dim)
         for token in tokens:

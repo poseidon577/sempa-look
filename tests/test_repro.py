@@ -188,6 +188,22 @@ def test_sweep_over_K_loads_new_messages(workspace, fake_encoder):
     assert (tmp_path / "eval_sets" / "coco_val2017_K10_n1_seed0.txt").exists()
 
 
+def test_k_sweep_does_not_reuse_embeddings_of_other_K(workspace, fake_encoder):
+    make_config, _ = workspace
+
+    common = dict(M=2, snr_db=[7], algorithms=["full_search"], data={"num_messages": 1})
+
+    swept = run(make_config(experiment="swept", K=8, sweep={"param": "K", "values": [8, 10]}, **common),
+                encoder=fake_encoder())
+    alone = run(make_config(experiment="alone", K=10, **common), encoder=fake_encoder())
+
+    swept_10 = [row for row in swept if row["K"] == 10]
+
+    assert len(swept_10) == 1
+    assert swept_10[0]["mean_ats"] == pytest.approx(alone[0]["mean_ats"])
+    assert swept_10[0]["mean_wts_L1"] == pytest.approx(alone[0]["mean_wts_L1"])
+
+
 def summary_rows(summary):
     return summary
 

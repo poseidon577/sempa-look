@@ -54,6 +54,16 @@ class InstrumentedEncoder:
     # Generic embedding cache
     # ---------------------------------------------------------
 
+    def clear_cache(self):
+        """
+        Drop every cached embedding. Cache keys are (message_id, indices),
+        so call this before encoding a different message set that reuses
+        the same ids (e.g. the next K of a sentence-length sweep).
+        """
+
+        self.cache.clear()
+        self.original_cache.clear()
+
     def _cache_get(self, key):
         if key not in self.cache:
             return None
