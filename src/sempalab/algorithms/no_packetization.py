@@ -34,6 +34,7 @@ def no_packetization(
     initial_logical_calls = encoder.logical_calls
     initial_miss_calls = encoder.miss_calls
     initial_cache_hits = encoder.cache_hits
+    initial_encoder_batches = encoder.encoder_batches
 
     # One packet containing the entire message.
     partition = (
@@ -68,6 +69,10 @@ def no_packetization(
         cache_hits=(
             encoder.cache_hits
             - initial_cache_hits
+        ),
+        encoder_batches=(
+            encoder.encoder_batches
+            - initial_encoder_batches
         ),
         runtime_seconds=runtime_seconds,
     )

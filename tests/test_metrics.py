@@ -62,15 +62,13 @@ assert abs(score_1 - score_2) < 1e-6
 # Second evaluation should hit the cache.
 assert encoder.cache_hits >= 2
 
-# We requested 4 embeddings logically:
+# logical_calls counts similarity evaluations,
+# one per semantic_similarity() call:
 #
-# first call:
-#   original + subset = 2
+# first call  = 1
+# second call = 1
 #
-# second call:
-#   original + subset = 2
-#
-assert encoder.logical_calls == 4
+assert encoder.logical_calls == 2
 
 # But only the first two should require
 # actual encoder computations.
