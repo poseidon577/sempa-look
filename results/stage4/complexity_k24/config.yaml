@@ -1,0 +1,36 @@
+experiment: complexity_k24
+description: Table III - encoder calls at K=24, M=4
+encoder: mpnet
+device: null
+cache_size: 1000000
+data:
+  source: coco
+  path: data/coco/annotations/captions_train2017.json
+  max_articles: null
+  num_messages: 10
+  seed: 42
+  eval_set_dir: results/stage4/eval_sets
+K: 24
+M: 4
+fixed_N: null
+P: 10
+k: 4
+lookahead_mode: disjoint
+packet_bits: 300
+snr_db:
+- 6
+algorithms:
+- genetic
+- sempa_look
+- random_pa
+G: 5
+genetic: {}
+sweep: null
+metrics:
+- ats
+prefetch_max_sets: 5000
+seed: 42
+results_dir: results/stage4
+run_at: '2026-10-22T06:36:11'
+wall_seconds: 153.3
+model_name: sentence-transformers/all-mpnet-base-v2

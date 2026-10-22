@@ -1,0 +1,66 @@
+id,figure,quantity,setting,paper,ours,unit,diff,diff_kind,source
+fig6a_gain_random,Fig. 6a,SemPA-Look ATS gain over Random PA at 6 dB,"COCO, K=8, M=4, P=10, k=4",14.32,5.813662893094329,%,-8.506337106905672,pp,text
+fig6a_gain_nopack,Fig. 6a,SemPA-Look ATS gain over no packetization at 6 dB,"COCO, K=8, M=4",24.0,22.216212473476094,%,-1.7837875265239056,pp,text
+fig6a_gap_full,Fig. 6a,SemPA-Look ATS relative to Full Search at 6 dB,"COCO, K=8, M=4",-1.79,-2.0271161400045035,%,-0.23711614000450343,pp,text
+fig6a_gap_ga,Fig. 6a,SemPA-Look ATS relative to GA at 6 dB,"COCO, K=8, M=4, G=5",-1.41,-0.6717160605799966,%,0.7382839394200034,pp,text
+fig6a_ats_sempa_6db,Fig. 6a,SemPA-Look ATS at 6 dB,"COCO, K=8, M=4",0.6,0.5964722070202846,,-0.5879654966192324,%,plot
+fig6c_wts_gain_L3,Fig. 6c,SemPA-Look WTS gain over Random PA (paper does not name L; L=3 shown),"COCO, N=6 (ours K=12, M=2), 6 dB",46.2,10.914293629530158,%,-35.285706370469846,pp,text
+fig6c_sempa_L1,Fig. 6c,SemPA-Look WTS at L=1,"COCO, N=6",0.82,0.8149366688728332,,-0.6174794057520399,%,plot
+fig6c_sempa_L3,Fig. 6c,SemPA-Look WTS at L=3,"COCO, N=6",0.43,0.3869070690870285,,-10.021611840225932,%,plot
+fig6c_sempa_L5,Fig. 6c,SemPA-Look WTS at L=5,"COCO, N=6",0.12,0.0933387959562242,,-22.21767003647983,%,plot
+fig6c_random_L1,Fig. 6c,Random PA WTS at L=1,"COCO, N=6",0.73,0.786937205195427,,7.799617150058494,%,plot
+fig6c_random_L3,Fig. 6c,Random PA WTS at L=3,"COCO, N=6",0.3,0.3488342723250389,,16.278090775012966,%,plot
+fig6c_full_L3,Fig. 6c,Full Search WTS at L=3,"COCO, N=6",0.51,0.5016342389583588,,-1.6403453022825916,%,plot
+fig3_rss_6db,Fig. 3,RSS-based PA ATS at 6 dB,"COCO, K, M unstated (ours K=12, M=3)",0.61,0.6180388796606993,,1.3178491247047988,%,plot
+fig3_tss_6db,Fig. 3,TSS-based PA ATS at 6 dB,"COCO (ours K=12, M=3)",0.555,0.622137708999545,,12.096884504422516,%,plot
+fig3_random_6db,Fig. 3,Random PA ATS at 6 dB,"COCO (ours K=12, M=3)",0.49,0.6201740955300129,,26.566141944900597,%,plot
+fig3_rss_4db,Fig. 3,RSS-based PA ATS at 4 dB,"COCO (ours K=12, M=3)",0.05,0.037221324676303416,,-25.55735064739317,%,plot
+fig3_tss_4db,Fig. 3,TSS-based PA ATS at 4 dB,"COCO (ours K=12, M=3)",0.06,0.039353387661187206,,-34.41102056468799,%,plot
+fig7_sempa_M1,Fig. 7a,SemPA-Look ATS at M=1,"COCO, K=12, 7 dB",0.879,0.8803352261496193,,0.15190286116260973,%,text
+fig7_sempa_M2,Fig. 7a,SemPA-Look ATS at M=2,"COCO, K=12, 7 dB",0.886,0.8848495006263891,,-0.12985320243915252,%,text
+fig7_sempa_M3,Fig. 7a,SemPA-Look ATS at M=3,"COCO, K=12, 7 dB",0.885,0.8847734021964254,,-0.02560427159034924,%,text
+fig7_sempa_M4,Fig. 7a,SemPA-Look ATS at M=4,"COCO, K=12, 7 dB",0.883,0.8809002283252002,,-0.23779973667041898,%,text
+fig7_sempa_M6,Fig. 7a,SemPA-Look ATS at M=6,"COCO, K=12, 7 dB",0.871,0.8713861750546673,,0.044336975277533275,%,text
+fig7_sempa_M12,Fig. 7a,"ATS at M=12 (no packetization, = 1 - p)","COCO, K=12, 7 dB",0.793,0.7930317779114219,,0.004007302827470051,%,text
+fig8_full_M3,Fig. 8a,Full Search ATS at M=3 (peak),"COCO, K=12, 7 dB",0.896,0.8962599988437384,,0.029017728095803122,%,plot
+fig8_full_M6,Fig. 8a,Full Search ATS at M=6,"COCO, K=12, 7 dB",0.883,0.883620173757053,,0.07023485357338992,%,plot
+fig8_random_M2,Fig. 8a,Random PA ATS at M=2,"COCO, K=12, 7 dB",0.874,0.8757940257775013,,0.20526610726559702,%,plot
+fig8_random_M6,Fig. 8a,Random PA ATS at M=6,"COCO, K=12, 7 dB",0.849,0.8467940811547146,,-0.2598255412585897,%,plot
+fig9a_M1,Fig. 9a,ATS at M=1 (best M at 4 dB),"COCO, K=12, 4 dB",0.052,0.049928846644936194,,-3.982987221276546,%,plot
+fig9a_full_M3,Fig. 9a,Full Search ATS at M=3,"COCO, K=12, 4 dB",0.048,0.04743336514334986,,-1.180489284687798,%,plot
+fig9a_sempa_M3,Fig. 9a,SemPA-Look ATS at M=3,"COCO, K=12, 4 dB",0.04,0.0394634654631016,,-1.3413363422459974,%,plot
+fig9a_M12,Fig. 9a,ATS at M=12 (= 1 - p),"COCO, K=12, 4 dB",0.023,0.022962722902190844,,-0.1620743383006755,%,plot
+fig9b_M1,Fig. 9b,ATS at M=1,"COCO, K=12, 8 dB",0.971,0.9703743317675378,,-0.06443545133492573,%,plot
+fig9b_full_M3,Fig. 9b,Full Search ATS at M=3 (peak),"COCO, K=12, 8 dB",0.977,0.9752563631047511,,-0.17846846420152748,%,plot
+fig9b_sempa_M3,Fig. 9b,SemPA-Look ATS at M=3,"COCO, K=12, 8 dB",0.975,0.97241977848103,,-0.2646381045097407,%,plot
+fig9b_random_M3,Fig. 9b,Random PA ATS at M=3,"COCO, K=12, 8 dB",0.97,0.9668596726334131,,-0.3237450893388526,%,plot
+table3_sempa_calls,Table III,"SemPA-Look encoder calls, closed form (N-1)P(k+1)","K=24, M=4, N=6, P=10, k=4",250.0,190.0,,-24.0,%,text
+table3_ga_calls,Table III,"GA encoder calls, G P 2^N","K=24, M=4, N=6, G=5, P=10",3200.0,3200.0,,0.0,%,text
+table3_random_calls,Table III,Random PA encoder calls,"K=24, M=4",0.0,0.0,,0.0,abs,text
+fig11_sempa_calls_P130,Fig. 11b,SemPA-Look encoder calls at P=130,"K=24, M=12, k=4",260.0,260.0,,0.0,%,text
+fig11_ga_calls_P130,Fig. 11b,GA encoder calls at P=130,"K=24, M=12, G=5",2600.0,2600.0,,0.0,%,text
+fig10b_ga_calls_G1,Fig. 10b,GA encoder calls at G=1,"K=24, M=4, P=10",640.0,640.0,,0.0,%,text
+table2_sempa,Table II,SemPA-Look ATS,"WikiHow, K=24, M=4, 6 dB",0.6421,0.6341151859386192,,-1.2435468091233222,%,text
+table2_random,Table II,Random PA ATS,"WikiHow, K=24, M=4, 6 dB",0.5417,0.6191492365836292,,14.297440757546473,%,text
+table5_6db,Table V,SemPA-Look ATS (no post-correction),"WikiHow, K=24, M=6, 6 dB",0.6206,0.6316082571265692,,1.7738087538783702,%,text
+table5_7db,Table V,SemPA-Look ATS (no post-correction),"WikiHow, K=24, M=6, 7 dB",0.8716,0.8777539146340335,,0.7060480305224272,%,text
+table5_8db,Table V,SemPA-Look ATS (no post-correction),"WikiHow, K=24, M=6, 8 dB",0.9696,0.9704949258899229,,0.09229846224452393,%,text
+fig16_sempa_k0,Fig. 16 / 10a,SemPA-Look ATS at k=0,"WikiHow, K=24, M=4, 7 dB",0.8649,0.8658326226210776,,0.10783010996388344,%,text
+fig16_sempa_kmax,Fig. 16 / 10a,SemPA-Look ATS at k=k_max=5,"WikiHow, K=24, M=4, 7 dB",0.8777,0.876603991684747,,-0.12487277147693147,%,text
+fig16_random,Fig. 16 / 10a,Random PA ATS,"WikiHow, K=24, M=4, 7 dB",0.86,0.8611911029292341,,0.13850034060861371,%,text
+fig10a_k1,Fig. 10a,SemPA-Look ATS at k=1,"WikiHow, K=24, M=4, 7 dB",0.875,0.8725247441704229,,-0.2828863805230952,%,plot
+fig10b_ga_G1,Fig. 10b,GA ATS at G=1,"WikiHow, K=24, M=4, 7 dB",0.875,0.8741991386973287,,-0.09152700601957926,%,plot
+fig10b_ga_G30,Fig. 10b,GA ATS at G=30,"WikiHow, K=24, M=4, 7 dB",0.8865,0.8891274057687153,,0.296379669341832,%,plot
+fig11_sempa_P130,Fig. 11a,SemPA-Look ATS at P=130,"WikiHow, K=24, M=12, 7 dB",0.8814,0.8827981589468742,,0.1586293336594314,%,text
+fig11_ga_P130,Fig. 11a,GA ATS at P=130,"WikiHow, K=24, M=12, 7 dB",0.8863,0.8871381692364707,,0.09456947269217326,%,text
+fig11_sempa_P10,Fig. 11a,SemPA-Look ATS at P=10,"WikiHow, K=24, M=12, 7 dB",0.867,0.8698719165832673,,0.33124758745874894,%,plot
+fig12_sempa_K10,Fig. 12a,SemPA-Look ATS at K=10,"WikiHow, M=5, 7 dB",0.86,0.8481124331617729,,-1.3822752137473389,%,plot
+fig12_sempa_K40,Fig. 12a,SemPA-Look ATS at K=40,"WikiHow, M=5, 7 dB",0.895,0.8860169143269091,,-1.003696723250382,%,plot
+fig12_random_K10,Fig. 12a,Random PA ATS at K=10,"WikiHow, M=5, 7 dB",0.833,0.8200203822235409,,-1.5581774041367422,%,plot
+fig12_random_K40,Fig. 12a,Random PA ATS at K=40,"WikiHow, M=5, 7 dB",0.88,0.8744919286760175,,-0.6259171959070972,%,plot
+fig12_wts_sempa_K10,Fig. 12b,SemPA-Look WTS (L=1) at K=10,"WikiHow, M=5",0.59,0.5664775858819485,,-3.9868498505171948,%,plot
+fig12_wts_random_K10,Fig. 12b,Random PA WTS (L=1) at K=10,"WikiHow, M=5",0.45,0.44920716017484663,,-0.17618662781186215,%,plot
+fig12_sempa_K60,Fig. 12a,SemPA-Look ATS at K=60,"WikiHow, M=5, 7 dB",0.913,0.896503556228941,,-1.806839405373393,%,plot
+fig13_n2_sempa_K28,Fig. 13,"SemPA-Look ATS at K=28, N=2","WikiHow, 7 dB",0.88,0.8716279787007121,,-0.9513660567372654,%,plot
+fig13_n4_sempa_K28,Fig. 13,"SemPA-Look ATS at K=28, N=4","WikiHow, 7 dB",0.868,0.8804555696100312,,1.4349734573768718,%,plot
+fig13_n4_random_K28,Fig. 13,"Random PA ATS at K=28, N=4","WikiHow, 7 dB",0.842,0.8576421997170048,,1.8577434343236185,%,plot

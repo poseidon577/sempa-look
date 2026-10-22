@@ -83,3 +83,27 @@ def generate_partitions(
             )
 
     yield from recurse(remaining, ())
+
+def sample_random_partition(
+    K: int,
+    M: int,
+    rng,
+) -> tuple[tuple[int, ...], ...]:
+    """
+    Draw one partition uniformly at random without enumerating.
+
+    Every partition is produced by exactly (M!)^N N! permutations,
+    so chunking a uniform permutation is uniform over partitions.
+    Returned in canonical form (blocks sorted, ordered by first index).
+    """
+
+    assert K % M == 0
+
+    permutation = rng.permutation(K)
+
+    blocks = [
+        tuple(sorted(int(i) for i in permutation[start:start + M]))
+        for start in range(0, K, M)
+    ]
+
+    return tuple(sorted(blocks))

@@ -46,6 +46,8 @@ WHAT CAN BE IMPROVED
 
 Extensions are only introduced after the baseline has been verified.
 
+> **Reproduction status:** the paper's MS-COCO and WikiHow results are reproduced with its encoder and channel, most within 1 % of the published numbers. See [Stage 4](#stage-4--paper-reproduction) and the [reproduction report](docs/reproduction.md).
+
 ---
 
 # Research Question
@@ -870,23 +872,50 @@ Results are written to `results/<experiment>/` as `results.csv`, `summary.json`,
 
 # Stage 4 — Paper Reproduction
 
-The main reproduction dataset is **MS-COCO 2017 caption annotations**.
+**Status: done.** Every number below uses the paper's encoder (`all-mpnet-base-v2`), exact ATS over all 2^N erasure patterns, the paper's WTS, and the paper's BPSK/AWGN channel with 300-bit packets. Datasets are MS-COCO 2017 captions and WikiHow sentences; the 100-message evaluation sets are frozen in `results/stage4/eval_sets/`.
 
-The initial experiments use captions only; the images are not required for the text packetization experiments.
+* Full report with the gaps we could not close: [docs/reproduction.md](docs/reproduction.md)
+* Every compared number (about 70, paper vs ours): [docs/reproduction_table.md](docs/reproduction_table.md)
+* Every interpretation we had to make: [docs/assumptions.md](docs/assumptions.md)
 
-Planned reproduction targets include:
+### Headline numbers
 
-| Experiment   | Configuration         | Target                      |
-| ------------ | --------------------- | --------------------------- |
-| Fig. 3       | `K=8, M=4`            | TSS/RSS behavior across SNR |
-| Fig. 6       | `K=8, M=4, P=10, k=4` | SemPA-Look ≈ Full Search    |
-| Table III    | `K=24, M=4, N=6`      | Complexity comparison       |
-| Fig. 8       | `K=12`                | ATS vs. `M`                 |
-| Fig. 9       | `K=12`                | `M` behavior at 4/8 dB      |
-| Fig. 10      | Sweep `k`             | Lookahead saturation        |
-| Fig. 11      | Sweep `P`             | Diminishing returns         |
-| Fig. 12      | Sweep `K`             | Scaling behavior            |
-| Tokenization | Word vs. subword      | Robustness comparison       |
+| Result | Paper | Ours |
+| --- | --- | --- |
+| Fig. 7a: SemPA-Look ATS vs M (K=12, 7 dB), M = 1, 2, 3, 4, 6, 12 | 0.879, 0.886, 0.885, 0.883, 0.871, 0.793 | 0.880, 0.885, 0.885, 0.881, 0.871, 0.793 |
+| Fig. 6a: SemPA-Look vs Full Search (K=8, M=4, 6 dB) | −1.79 % | −2.03 % |
+| Fig. 6a: SemPA-Look vs no packetization (6 dB) | +24.0 % | +22.2 % |
+| Fig. 10a: SemPA-Look ATS, k = 0 → 5 (K=24, M=4, 7 dB) | 0.8649 → 0.8777 | 0.8658 → 0.8766 |
+| Fig. 11a: ATS at P=130, SemPA-Look / GA | 0.8814 / 0.8863 | 0.8828 / 0.8871 |
+| Table V: SemPA-Look ATS at 6 / 7 / 8 dB (K=24, M=6) | 0.6206 / 0.8716 / 0.9696 | 0.6316 / 0.8778 / 0.9705 |
+| Table III: GA encoder calls, G·P·2^N | 3,200 | 3,200 |
+| Table III: SemPA-Look encoder calls | 250 (closed form) | 190 (measured, disjoint lookaheads) |
+| Fig. 6a / Table II: SemPA-Look gain over Random PA at 6 dB | +14.3 % / +18.5 % | +5.8 % / +2.4 % (not reproduced) |
+| Fig. 13: N=2 above N=4 at large K | yes | no, N=4 slightly above (not reproduced) |
+
+Two results are not reproduced: the size of the gain over Random PA at 6 dB, and the N=2 vs N=4 ordering of Fig. 13 at large K. Our Random PA matches the paper at 4, 7 and 8 dB but is stronger at 6 dB, while Full Search, GA and SemPA-Look match at 6 dB too. See [docs/reproduction.md](docs/reproduction.md#gaps-we-could-not-close).
+
+### Figures
+
+Solid lines are ours, dashed lines with hollow markers are read off the paper.
+
+![Fig. 6](results/stage4/figures/fig6_ats_wts.png)
+![Fig. 8](results/stage4/figures/fig8_ats_vs_M.png)
+![Fig. 9](results/stage4/figures/fig9_ats_vs_M_4_8dB.png)
+![Fig. 10](results/stage4/figures/fig10_k_and_G.png)
+![Fig. 11](results/stage4/figures/fig11_P.png)
+![Fig. 12](results/stage4/figures/fig12_length.png)
+![Fig. 13](results/stage4/figures/fig13_fixed_N.png)
+
+### Rerun
+
+```bash
+bash scripts/get_coco_captions.sh       # MS-COCO caption annotations into data/coco/
+# WikiHow: put wikihowAll.csv into data/wikihow/
+python -m sempalab.repro --config configs/repro/coco_k12.yaml    # any file in configs/repro/
+python scripts/make_figures.py          # results/stage4/figures/
+python scripts/compare_paper.py         # docs/reproduction_table.md
+```
 
 ---
 
@@ -982,10 +1011,10 @@ mode: paper_faithful
 seed: 42
 ```
 
-Experiments will eventually be launched through:
+Paper-reproduction experiments are launched through:
 
 ```bash
-python -m sempalab.run --config configs/repro_fig6.yaml
+python -m sempalab.repro --config configs/repro/coco_k8.yaml
 ```
 
 This allows the same experiment to be reproduced without modifying source code.
@@ -1153,9 +1182,9 @@ Current next milestone:
 
 Then:
 
-* [ ] Physical communication system
-* [ ] MS-COCO reproduction
-* [ ] Paper reproduction report
+* [x] Physical communication system
+* [x] MS-COCO / WikiHow reproduction (Stage 4)
+* [x] Paper reproduction report ([docs/reproduction.md](docs/reproduction.md))
 * [ ] Limitation analysis
 * [ ] Research extension
 * [ ] Final ablation and evaluation

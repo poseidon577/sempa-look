@@ -23,12 +23,21 @@ def cosine_similarity(
     return float(np.dot(a, b))
 
 
+# Similarity of an empty reconstruction. Nothing was received, so it
+# carries no meaning: the paper's ATS example (eq. 5) drops the
+# both-lost term, and its M = K points equal 1 - p exactly (Fig. 7, 8).
+EMPTY_SIMILARITY = 0.0
+
+
 def semantic_similarity(
     encoder,
     message,
     surviving_indices,
 ):
     encoder.logical_calls += 1
+
+    if len(surviving_indices) == 0:
+        return EMPTY_SIMILARITY
 
     original_embedding = encoder.embed_original(
         message_id=message.message_id,
@@ -78,22 +87,32 @@ def batch_semantic_similarity(
         for indices in surviving_index_sets
     ]
 
-    reconstructed_embeddings = encoder.embed_sets(
-        canonical_sets,
-        message_id=message.message_id,
-        tokens=message.tokens,
+    similarities = np.full(
+        len(canonical_sets),
+        EMPTY_SIMILARITY,
+        dtype=np.float32,
     )
 
-    return np.array(
-        [
-            cosine_similarity(
+    non_empty = [
+        position
+        for position, indices in enumerate(canonical_sets)
+        if indices
+    ]
+
+    if non_empty:
+        reconstructed_embeddings = encoder.embed_sets(
+            [canonical_sets[position] for position in non_empty],
+            message_id=message.message_id,
+            tokens=message.tokens,
+        )
+
+        for position, embedding in zip(non_empty, reconstructed_embeddings):
+            similarities[position] = cosine_similarity(
                 original_embedding,
                 embedding,
             )
-            for embedding in reconstructed_embeddings
-        ],
-        dtype=np.float32,
-    )
+
+    return similarities
 
 def exact_ats(
     partition: tuple[tuple[int, ...], ...],
@@ -159,7 +178,8 @@ def wts(
     then weight according to the probability of exactly L losses.
 
     This corresponds to the WTS definition used in the
-    implementation plan.
+    implementation plan. The paper's own WTS (Sec. V) is the
+    unweighted minimum for one L; see `wts_lost`.
     """
 
     if not 0.0 <= p <= 1.0:
@@ -209,6 +229,46 @@ def wts(
         total += probability * best_similarity
 
     return total
+
+
+def wts_lost(
+    partition: tuple[tuple[int, ...], ...],
+    message: Message,
+    encoder: InstrumentedEncoder,
+    L: int,
+) -> float:
+    """
+    Paper WTS for one message (Sec. V): the lowest similarity over
+    every way of losing exactly L of the N subpackets,
+
+        min_{H subset G, |H| = L} phi(W \\ F(H), W).
+
+    The paper reports the mean of this over the B messages, for
+    L = 1, ..., N-1. It does not depend on the SNR.
+    """
+
+    N = len(partition)
+
+    if not 0 <= L <= N:
+        raise ValueError(f"L must be between 0 and N={N}")
+
+    surviving_sets = [
+        tuple(
+            index
+            for packet_index, group in enumerate(partition)
+            if packet_index not in lost
+            for index in group
+        )
+        for lost in map(set, combinations(range(N), L))
+    ]
+
+    return float(
+        batch_semantic_similarity(
+            encoder,
+            message,
+            surviving_sets,
+        ).min()
+    )
 
 
 def _binomial_probability(

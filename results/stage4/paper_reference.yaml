@@ -1,0 +1,236 @@
+# Numbers reported in Lee et al., "Low-Complexity Semantic Packet Aggregation
+# for Token Communication via Lookahead Search", IEEE TCOM vol. 74, 2026,
+# and where our runs produce the matching quantity.
+#
+# source: text   = stated in the paper's text or a table (exact)
+#         plot   = read off a figure by eye (about +-0.003 for ATS axes,
+#                  +-0.02 for the WTS axis)
+#
+# ours: how to compute the matching number from results/stage4/<experiment>/summary.csv
+#   value:  {experiment, algorithm, metric, where: {column: value}}
+#   gain:   relative gain of `a` over `b` in percent, (a / b - 1) * 100
+#
+# metric is a summary column without the "mean_" prefix: ats, wts_L1..., logical_calls.
+
+entries:
+
+  # ---------------- Fig. 6a: ATS vs SNR (MS-COCO, K=8, M=4) ----------------
+  - id: fig6a_gain_random
+    figure: Fig. 6a
+    quantity: SemPA-Look ATS gain over Random PA at 6 dB
+    setting: COCO, K=8, M=4, P=10, k=4
+    paper: 14.32
+    unit: "%"
+    source: text
+    ours:
+      gain:
+        a: {experiment: coco_k8, algorithm: sempa_look, metric: ats, where: {snr_db: 6}}
+        b: {experiment: coco_k8, algorithm: random_pa, metric: ats, where: {snr_db: 6}}
+
+  - id: fig6a_gain_nopack
+    figure: Fig. 6a
+    quantity: SemPA-Look ATS gain over no packetization at 6 dB
+    setting: COCO, K=8, M=4
+    paper: 24
+    unit: "%"
+    source: text
+    ours:
+      gain:
+        a: {experiment: coco_k8, algorithm: sempa_look, metric: ats, where: {snr_db: 6}}
+        b: {experiment: coco_k8, algorithm: no_packetization, metric: ats, where: {snr_db: 6}}
+
+  - id: fig6a_gap_full
+    figure: Fig. 6a
+    quantity: SemPA-Look ATS relative to Full Search at 6 dB
+    setting: COCO, K=8, M=4
+    paper: -1.79
+    unit: "%"
+    source: text
+    ours:
+      gain:
+        a: {experiment: coco_k8, algorithm: sempa_look, metric: ats, where: {snr_db: 6}}
+        b: {experiment: coco_k8, algorithm: full_search, metric: ats, where: {snr_db: 6}}
+
+  - id: fig6a_gap_ga
+    figure: Fig. 6a
+    quantity: SemPA-Look ATS relative to GA at 6 dB
+    setting: COCO, K=8, M=4, G=5
+    paper: -1.41
+    unit: "%"
+    source: text
+    ours:
+      gain:
+        a: {experiment: coco_k8, algorithm: sempa_look, metric: ats, where: {snr_db: 6}}
+        b: {experiment: coco_k8, algorithm: genetic, metric: ats, where: {snr_db: 6}}
+
+  - id: fig6a_ats_sempa_6db
+    figure: Fig. 6a
+    quantity: SemPA-Look ATS at 6 dB
+    setting: COCO, K=8, M=4
+    paper: 0.60
+    source: plot
+    ours:
+      value: {experiment: coco_k8, algorithm: sempa_look, metric: ats, where: {snr_db: 6}}
+
+  # ---------------- Fig. 6c: WTS vs lost subpackets L ----------------
+  # The caption says K=8, M=4, which allows only L=1. The axis runs to L=5,
+  # so N=6: we read it at K=12, M=2 (N=6) at 6 dB.
+  - id: fig6c_wts_gain_L3
+    figure: Fig. 6c
+    quantity: SemPA-Look WTS gain over Random PA (paper does not name L; L=3 shown)
+    setting: COCO, N=6 (ours K=12, M=2), 6 dB
+    paper: 46.2
+    unit: "%"
+    source: text
+    ours:
+      gain:
+        a: {experiment: coco_k12, algorithm: sempa_look, metric: wts_L3, where: {M: 2, snr_db: 6}}
+        b: {experiment: coco_k12, algorithm: random_pa, metric: wts_L3, where: {M: 2, snr_db: 6}}
+
+  - {id: fig6c_sempa_L1, figure: Fig. 6c, quantity: SemPA-Look WTS at L=1, setting: "COCO, N=6", paper: 0.82, source: plot,
+     ours: {value: {experiment: coco_k12, algorithm: sempa_look, metric: wts_L1, where: {M: 2, snr_db: 6}}}}
+  - {id: fig6c_sempa_L3, figure: Fig. 6c, quantity: SemPA-Look WTS at L=3, setting: "COCO, N=6", paper: 0.43, source: plot,
+     ours: {value: {experiment: coco_k12, algorithm: sempa_look, metric: wts_L3, where: {M: 2, snr_db: 6}}}}
+  - {id: fig6c_sempa_L5, figure: Fig. 6c, quantity: SemPA-Look WTS at L=5, setting: "COCO, N=6", paper: 0.12, source: plot,
+     ours: {value: {experiment: coco_k12, algorithm: sempa_look, metric: wts_L5, where: {M: 2, snr_db: 6}}}}
+  - {id: fig6c_random_L1, figure: Fig. 6c, quantity: Random PA WTS at L=1, setting: "COCO, N=6", paper: 0.73, source: plot,
+     ours: {value: {experiment: coco_k12, algorithm: random_pa, metric: wts_L1, where: {M: 2, snr_db: 6}}}}
+  - {id: fig6c_random_L3, figure: Fig. 6c, quantity: Random PA WTS at L=3, setting: "COCO, N=6", paper: 0.30, source: plot,
+     ours: {value: {experiment: coco_k12, algorithm: random_pa, metric: wts_L3, where: {M: 2, snr_db: 6}}}}
+  - {id: fig6c_full_L3, figure: Fig. 6c, quantity: Full Search WTS at L=3, setting: "COCO, N=6", paper: 0.51, source: plot,
+     ours: {value: {experiment: coco_k12, algorithm: full_search, metric: wts_L3, where: {M: 2, snr_db: 6}}}}
+
+  # ---------------- Fig. 3: TSS vs RSS vs Random ----------------
+  # K and M are not stated; ours at K=12, M=3.
+  - {id: fig3_rss_6db, figure: Fig. 3, quantity: RSS-based PA ATS at 6 dB, setting: "COCO, K, M unstated (ours K=12, M=3)", paper: 0.61, source: plot,
+     ours: {value: {experiment: coco_k12, algorithm: greedy_rss, metric: ats, where: {M: 3, snr_db: 6}}}}
+  - {id: fig3_tss_6db, figure: Fig. 3, quantity: TSS-based PA ATS at 6 dB, setting: "COCO (ours K=12, M=3)", paper: 0.555, source: plot,
+     ours: {value: {experiment: coco_k12, algorithm: greedy_tss, metric: ats, where: {M: 3, snr_db: 6}}}}
+  - {id: fig3_random_6db, figure: Fig. 3, quantity: Random PA ATS at 6 dB, setting: "COCO (ours K=12, M=3)", paper: 0.49, source: plot,
+     ours: {value: {experiment: coco_k12, algorithm: random_pa, metric: ats, where: {M: 3, snr_db: 6}}}}
+  - {id: fig3_rss_4db, figure: Fig. 3, quantity: RSS-based PA ATS at 4 dB, setting: "COCO (ours K=12, M=3)", paper: 0.05, source: plot,
+     ours: {value: {experiment: coco_k12, algorithm: greedy_rss, metric: ats, where: {M: 3, snr_db: 4}}}}
+  - {id: fig3_tss_4db, figure: Fig. 3, quantity: TSS-based PA ATS at 4 dB, setting: "COCO (ours K=12, M=3)", paper: 0.06, source: plot,
+     ours: {value: {experiment: coco_k12, algorithm: greedy_tss, metric: ats, where: {M: 3, snr_db: 4}}}}
+
+  # ---------------- Fig. 7a / Fig. 8: ATS vs M at 7 dB (K=12) ----------------
+  - {id: fig7_sempa_M1, figure: Fig. 7a, quantity: SemPA-Look ATS at M=1, setting: "COCO, K=12, 7 dB", paper: 0.879, source: text,
+     ours: {value: {experiment: coco_k12, algorithm: sempa_look, metric: ats, where: {M: 1, snr_db: 7}}}}
+  - {id: fig7_sempa_M2, figure: Fig. 7a, quantity: SemPA-Look ATS at M=2, setting: "COCO, K=12, 7 dB", paper: 0.886, source: text,
+     ours: {value: {experiment: coco_k12, algorithm: sempa_look, metric: ats, where: {M: 2, snr_db: 7}}}}
+  - {id: fig7_sempa_M3, figure: Fig. 7a, quantity: SemPA-Look ATS at M=3, setting: "COCO, K=12, 7 dB", paper: 0.885, source: text,
+     ours: {value: {experiment: coco_k12, algorithm: sempa_look, metric: ats, where: {M: 3, snr_db: 7}}}}
+  - {id: fig7_sempa_M4, figure: Fig. 7a, quantity: SemPA-Look ATS at M=4, setting: "COCO, K=12, 7 dB", paper: 0.883, source: text,
+     ours: {value: {experiment: coco_k12, algorithm: sempa_look, metric: ats, where: {M: 4, snr_db: 7}}}}
+  - {id: fig7_sempa_M6, figure: Fig. 7a, quantity: SemPA-Look ATS at M=6, setting: "COCO, K=12, 7 dB", paper: 0.871, source: text,
+     ours: {value: {experiment: coco_k12, algorithm: sempa_look, metric: ats, where: {M: 6, snr_db: 7}}}}
+  - {id: fig7_sempa_M12, figure: Fig. 7a, quantity: "ATS at M=12 (no packetization, = 1 - p)", setting: "COCO, K=12, 7 dB", paper: 0.793, source: text,
+     ours: {value: {experiment: coco_k12, algorithm: sempa_look, metric: ats, where: {M: 12, snr_db: 7}}}}
+  - {id: fig8_full_M3, figure: Fig. 8a, quantity: Full Search ATS at M=3 (peak), setting: "COCO, K=12, 7 dB", paper: 0.896, source: plot,
+     ours: {value: {experiment: coco_k12, algorithm: full_search, metric: ats, where: {M: 3, snr_db: 7}}}}
+  - {id: fig8_full_M6, figure: Fig. 8a, quantity: Full Search ATS at M=6, setting: "COCO, K=12, 7 dB", paper: 0.883, source: plot,
+     ours: {value: {experiment: coco_k12, algorithm: full_search, metric: ats, where: {M: 6, snr_db: 7}}}}
+  - {id: fig8_random_M2, figure: Fig. 8a, quantity: Random PA ATS at M=2, setting: "COCO, K=12, 7 dB", paper: 0.874, source: plot,
+     ours: {value: {experiment: coco_k12, algorithm: random_pa, metric: ats, where: {M: 2, snr_db: 7}}}}
+  - {id: fig8_random_M6, figure: Fig. 8a, quantity: Random PA ATS at M=6, setting: "COCO, K=12, 7 dB", paper: 0.849, source: plot,
+     ours: {value: {experiment: coco_k12, algorithm: random_pa, metric: ats, where: {M: 6, snr_db: 7}}}}
+
+  # ---------------- Fig. 9: ATS vs M at 4 dB and 8 dB (K=12) ----------------
+  - {id: fig9a_M1, figure: Fig. 9a, quantity: ATS at M=1 (best M at 4 dB), setting: "COCO, K=12, 4 dB", paper: 0.052, source: plot,
+     ours: {value: {experiment: coco_k12, algorithm: sempa_look, metric: ats, where: {M: 1, snr_db: 4}}}}
+  - {id: fig9a_full_M3, figure: Fig. 9a, quantity: Full Search ATS at M=3, setting: "COCO, K=12, 4 dB", paper: 0.048, source: plot,
+     ours: {value: {experiment: coco_k12, algorithm: full_search, metric: ats, where: {M: 3, snr_db: 4}}}}
+  - {id: fig9a_sempa_M3, figure: Fig. 9a, quantity: SemPA-Look ATS at M=3, setting: "COCO, K=12, 4 dB", paper: 0.040, source: plot,
+     ours: {value: {experiment: coco_k12, algorithm: sempa_look, metric: ats, where: {M: 3, snr_db: 4}}}}
+  - {id: fig9a_M12, figure: Fig. 9a, quantity: ATS at M=12 (= 1 - p), setting: "COCO, K=12, 4 dB", paper: 0.023, source: plot,
+     ours: {value: {experiment: coco_k12, algorithm: sempa_look, metric: ats, where: {M: 12, snr_db: 4}}}}
+  - {id: fig9b_M1, figure: Fig. 9b, quantity: ATS at M=1, setting: "COCO, K=12, 8 dB", paper: 0.971, source: plot,
+     ours: {value: {experiment: coco_k12, algorithm: sempa_look, metric: ats, where: {M: 1, snr_db: 8}}}}
+  - {id: fig9b_full_M3, figure: Fig. 9b, quantity: Full Search ATS at M=3 (peak), setting: "COCO, K=12, 8 dB", paper: 0.977, source: plot,
+     ours: {value: {experiment: coco_k12, algorithm: full_search, metric: ats, where: {M: 3, snr_db: 8}}}}
+  - {id: fig9b_sempa_M3, figure: Fig. 9b, quantity: SemPA-Look ATS at M=3, setting: "COCO, K=12, 8 dB", paper: 0.975, source: plot,
+     ours: {value: {experiment: coco_k12, algorithm: sempa_look, metric: ats, where: {M: 3, snr_db: 8}}}}
+  - {id: fig9b_random_M3, figure: Fig. 9b, quantity: Random PA ATS at M=3, setting: "COCO, K=12, 8 dB", paper: 0.970, source: plot,
+     ours: {value: {experiment: coco_k12, algorithm: random_pa, metric: ats, where: {M: 3, snr_db: 8}}}}
+
+  # ---------------- Table III / Fig. 10b / Fig. 11b: encoder calls ----------------
+  - id: table3_sempa_calls
+    figure: Table III
+    quantity: SemPA-Look encoder calls, closed form (N-1)P(k+1)
+    setting: K=24, M=4, N=6, P=10, k=4
+    paper: 250
+    source: text
+    ours:
+      value: {experiment: complexity_k24, algorithm: sempa_look, metric: logical_calls, where: {snr_db: 6}}
+  - id: table3_ga_calls
+    figure: Table III
+    quantity: GA encoder calls, G P 2^N
+    setting: K=24, M=4, N=6, G=5, P=10
+    paper: 3200
+    source: text
+    ours:
+      value: {experiment: complexity_k24, algorithm: genetic, metric: logical_calls, where: {snr_db: 6}}
+  - id: table3_random_calls
+    figure: Table III
+    quantity: Random PA encoder calls
+    setting: K=24, M=4
+    paper: 0
+    source: text
+    ours:
+      value: {experiment: complexity_k24, algorithm: random_pa, metric: logical_calls, where: {snr_db: 6}}
+  - {id: fig11_sempa_calls_P130, figure: Fig. 11b, quantity: SemPA-Look encoder calls at P=130, setting: "K=24, M=12, k=4", paper: 260, source: text,
+     ours: {value: {experiment: wikihow_p, algorithm: sempa_look, metric: logical_calls, where: {P: 130}}}}
+  - {id: fig11_ga_calls_P130, figure: Fig. 11b, quantity: GA encoder calls at P=130, setting: "K=24, M=12, G=5", paper: 2600, source: text,
+     ours: {value: {experiment: wikihow_p, algorithm: genetic, metric: logical_calls, where: {P: 130}}}}
+  - {id: fig10b_ga_calls_G1, figure: Fig. 10b, quantity: GA encoder calls at G=1, setting: "K=24, M=4, P=10", paper: 640, source: text,
+     ours: {value: {experiment: wikihow_ga_g, algorithm: genetic, metric: logical_calls, where: {G: 1}}}}
+
+  # ---------------- WikiHow: Table II, Table V, Figs. 10-13, Fig. 16 ----------------
+  - {id: table2_sempa, figure: Table II, quantity: SemPA-Look ATS, setting: "WikiHow, K=24, M=4, 6 dB", paper: 0.6421, source: text,
+     ours: {value: {experiment: wikihow_k24_m4, algorithm: sempa_look, metric: ats, where: {k: 4, snr_db: 6}}}}
+  - {id: table2_random, figure: Table II, quantity: Random PA ATS, setting: "WikiHow, K=24, M=4, 6 dB", paper: 0.5417, source: text,
+     ours: {value: {experiment: wikihow_k24_m4, algorithm: random_pa, metric: ats, where: {k: 4, snr_db: 6}}}}
+  - {id: table5_6db, figure: Table V, quantity: SemPA-Look ATS (no post-correction), setting: "WikiHow, K=24, M=6, 6 dB", paper: 0.6206, source: text,
+     ours: {value: {experiment: wikihow_k24_m6, algorithm: sempa_look, metric: ats, where: {snr_db: 6}}}}
+  - {id: table5_7db, figure: Table V, quantity: SemPA-Look ATS (no post-correction), setting: "WikiHow, K=24, M=6, 7 dB", paper: 0.8716, source: text,
+     ours: {value: {experiment: wikihow_k24_m6, algorithm: sempa_look, metric: ats, where: {snr_db: 7}}}}
+  - {id: table5_8db, figure: Table V, quantity: SemPA-Look ATS (no post-correction), setting: "WikiHow, K=24, M=6, 8 dB", paper: 0.9696, source: text,
+     ours: {value: {experiment: wikihow_k24_m6, algorithm: sempa_look, metric: ats, where: {snr_db: 8}}}}
+  - {id: fig16_sempa_k0, figure: Fig. 16 / 10a, quantity: SemPA-Look ATS at k=0, setting: "WikiHow, K=24, M=4, 7 dB", paper: 0.8649, source: text,
+     ours: {value: {experiment: wikihow_k24_m4, algorithm: sempa_look, metric: ats, where: {k: 0, snr_db: 7}}}}
+  - {id: fig16_sempa_kmax, figure: Fig. 16 / 10a, quantity: SemPA-Look ATS at k=k_max=5, setting: "WikiHow, K=24, M=4, 7 dB", paper: 0.8777, source: text,
+     ours: {value: {experiment: wikihow_k24_m4, algorithm: sempa_look, metric: ats, where: {k: 5, snr_db: 7}}}}
+  - {id: fig16_random, figure: Fig. 16 / 10a, quantity: Random PA ATS, setting: "WikiHow, K=24, M=4, 7 dB", paper: 0.8600, source: text,
+     ours: {value: {experiment: wikihow_k24_m4, algorithm: random_pa, metric: ats, where: {k: 4, snr_db: 7}}}}
+  - {id: fig10a_k1, figure: Fig. 10a, quantity: SemPA-Look ATS at k=1, setting: "WikiHow, K=24, M=4, 7 dB", paper: 0.875, source: plot,
+     ours: {value: {experiment: wikihow_k24_m4, algorithm: sempa_look, metric: ats, where: {k: 1, snr_db: 7}}}}
+  - {id: fig10b_ga_G1, figure: Fig. 10b, quantity: GA ATS at G=1, setting: "WikiHow, K=24, M=4, 7 dB", paper: 0.875, source: plot,
+     ours: {value: {experiment: wikihow_ga_g, algorithm: genetic, metric: ats, where: {G: 1}}}}
+  - {id: fig10b_ga_G30, figure: Fig. 10b, quantity: GA ATS at G=30, setting: "WikiHow, K=24, M=4, 7 dB", paper: 0.8865, source: plot,
+     ours: {value: {experiment: wikihow_ga_g, algorithm: genetic, metric: ats, where: {G: 30}}}}
+  - {id: fig11_sempa_P130, figure: Fig. 11a, quantity: SemPA-Look ATS at P=130, setting: "WikiHow, K=24, M=12, 7 dB", paper: 0.8814, source: text,
+     ours: {value: {experiment: wikihow_p, algorithm: sempa_look, metric: ats, where: {P: 130}}}}
+  - {id: fig11_ga_P130, figure: Fig. 11a, quantity: GA ATS at P=130, setting: "WikiHow, K=24, M=12, 7 dB", paper: 0.8863, source: text,
+     ours: {value: {experiment: wikihow_p, algorithm: genetic, metric: ats, where: {P: 130}}}}
+  - {id: fig11_sempa_P10, figure: Fig. 11a, quantity: SemPA-Look ATS at P=10, setting: "WikiHow, K=24, M=12, 7 dB", paper: 0.867, source: plot,
+     ours: {value: {experiment: wikihow_p, algorithm: sempa_look, metric: ats, where: {P: 10}}}}
+  - {id: fig12_sempa_K10, figure: Fig. 12a, quantity: SemPA-Look ATS at K=10, setting: "WikiHow, M=5, 7 dB", paper: 0.860, source: plot,
+     ours: {value: {experiment: wikihow_len, algorithm: sempa_look, metric: ats, where: {K: 10}}}}
+  - {id: fig12_sempa_K40, figure: Fig. 12a, quantity: SemPA-Look ATS at K=40, setting: "WikiHow, M=5, 7 dB", paper: 0.895, source: plot,
+     ours: {value: {experiment: wikihow_len, algorithm: sempa_look, metric: ats, where: {K: 40}}}}
+  - {id: fig12_random_K10, figure: Fig. 12a, quantity: Random PA ATS at K=10, setting: "WikiHow, M=5, 7 dB", paper: 0.833, source: plot,
+     ours: {value: {experiment: wikihow_len, algorithm: random_pa, metric: ats, where: {K: 10}}}}
+  - {id: fig12_random_K40, figure: Fig. 12a, quantity: Random PA ATS at K=40, setting: "WikiHow, M=5, 7 dB", paper: 0.880, source: plot,
+     ours: {value: {experiment: wikihow_len, algorithm: random_pa, metric: ats, where: {K: 40}}}}
+  - {id: fig12_wts_sempa_K10, figure: Fig. 12b, quantity: SemPA-Look WTS (L=1) at K=10, setting: "WikiHow, M=5", paper: 0.59, source: plot,
+     ours: {value: {experiment: wikihow_len, algorithm: sempa_look, metric: wts_L1, where: {K: 10}}}}
+  - {id: fig12_wts_random_K10, figure: Fig. 12b, quantity: Random PA WTS (L=1) at K=10, setting: "WikiHow, M=5", paper: 0.45, source: plot,
+     ours: {value: {experiment: wikihow_len, algorithm: random_pa, metric: wts_L1, where: {K: 10}}}}
+  - {id: fig12_sempa_K60, figure: Fig. 12a, quantity: SemPA-Look ATS at K=60, setting: "WikiHow, M=5, 7 dB", paper: 0.913, source: plot,
+     ours: {value: {experiment: wikihow_len_long, algorithm: sempa_look, metric: ats, where: {K: 60}}}}
+  - {id: fig13_n2_sempa_K28, figure: Fig. 13, quantity: "SemPA-Look ATS at K=28, N=2", setting: "WikiHow, 7 dB", paper: 0.880, source: plot,
+     ours: {value: {experiment: wikihow_fixed_n2, algorithm: sempa_look, metric: ats, where: {K: 28}}}}
+  - {id: fig13_n4_sempa_K28, figure: Fig. 13, quantity: "SemPA-Look ATS at K=28, N=4", setting: "WikiHow, 7 dB", paper: 0.868, source: plot,
+     ours: {value: {experiment: wikihow_fixed_n4, algorithm: sempa_look, metric: ats, where: {K: 28}}}}
+  - {id: fig13_n4_random_K28, figure: Fig. 13, quantity: "Random PA ATS at K=28, N=4", setting: "WikiHow, 7 dB", paper: 0.842, source: plot,
+     ours: {value: {experiment: wikihow_fixed_n4, algorithm: random_pa, metric: ats, where: {K: 28}}}}

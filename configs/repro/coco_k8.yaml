@@ -1,0 +1,13 @@
+# Fig. 6a: ATS vs SNR for every baseline, as captioned in the paper
+# (K=8, M=4, P=10, k=4, B=100; MS-COCO, word tokens, MPNet).
+# With N=2 the disjoint lookahead width is capped at k_max = N-1 = 1.
+experiment: coco_k8
+description: Fig. 6a - ATS and WTS vs SNR at K=8, M=4
+encoder: mpnet
+K: 8
+M: 4
+P: 10
+k: 4
+G: 5
+snr_db: [2, 3, 4, 5, 6, 7, 8, 9, 10]
+algorithms: [full_search, genetic, sempa_look, random_pa, no_packetization, greedy_tss, greedy_rss]

@@ -7,5 +7,6 @@ __pycache__/
 data/
 results/*
 !results/stage2/
+!results/stage4/
 .ipynb_checkpoints/
 *.egg-info/
