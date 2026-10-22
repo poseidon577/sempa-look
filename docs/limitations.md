@@ -157,7 +157,7 @@ The ranking weighs three things: how much headroom the direction opens beyond th
 
 **7. Learned amortised packetiser (addresses L10).** A GNN or pointer-network policy trained on Full Search labels would replace per-message search with one forward pass ([NeuroCUT](https://arxiv.org/html/2310.11787v3)). It is ranked last because the gain it would amortise is only about 0.015 ATS at 7 dB for K = 24. *Effort:* high. *First experiment:* not recommended until directions 1–3 show that more headroom exists.
 
-## Open questions for Tejas
+## Open questions
 
 These items need your decision before the next stage starts:
 - **Contacting the authors.** Should we write to them about the 6 dB Random PA values in Fig. 6a and Table II? Our N = 2 algebra points to an SNR shift or a different baseline definition at that one point, and only their per-message data can settle it.
