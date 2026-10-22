@@ -877,6 +877,7 @@ Results are written to `results/<experiment>/` as `results.csv`, `summary.json`,
 * Full report with the gaps we could not close: [docs/reproduction.md](docs/reproduction.md)
 * Every compared number (about 70, paper vs ours): [docs/reproduction_table.md](docs/reproduction_table.md)
 * Every interpretation we had to make: [docs/assumptions.md](docs/assumptions.md)
+* Limitations of the paper and ranked novelty directions: [docs/limitations.md](docs/limitations.md)
 
 ### Headline numbers
 
@@ -892,8 +893,13 @@ Results are written to `results/<experiment>/` as `results.csv`, `summary.json`,
 | Table III: SemPA-Look encoder calls | 250 (closed form) | 190 (measured, disjoint lookaheads) |
 | Fig. 6a / Table II: SemPA-Look gain over Random PA at 6 dB | +14.3 % / +18.5 % | +5.8 % / +2.4 % (not reproduced) |
 | Fig. 13: N=2 above N=4 at large K | yes | no, N=4 slightly above (not reproduced) |
+| Fig. 7b (subword): SemPA-Look ATS vs M, M = 1, 2, 3, 4, 6, 12 | 0.874, 0.882, 0.883, 0.880, 0.869, 0.793 | 0.869, 0.877, 0.880, 0.876, 0.868, 0.793 |
+| Fig. 11a (subword): ATS at P=130, SemPA-Look / GA | 0.8772 / 0.8830 | 0.8772 / 0.8828 |
+| Fig. 6d (subword): SemPA-Look WTS gain over Random PA | +45.5 % | +14.5 % at L=3 (not reproduced) |
 
 Two results are not reproduced: the size of the gain over Random PA at 6 dB, and the N=2 vs N=4 ordering of Fig. 13 at large K. Our Random PA matches the paper at 4, 7 and 8 dB but is stronger at 6 dB, while Full Search, GA and SemPA-Look match at 6 dB too. See [docs/reproduction.md](docs/reproduction.md#gaps-we-could-not-close).
+
+Subword tokenization (MPNet's WordPiece tokenizer, an assumption since the paper does not name one) reproduces the same way: absolute numbers within about 1 %, a smaller gain over Random PA than reported. The paper's own subword Fig. 13b has N=4 above N=2, as in our runs. See [docs/reproduction.md](docs/reproduction.md#subword-tokenization).
 
 ### Figures
 
@@ -906,6 +912,15 @@ Solid lines are ours, dashed lines with hollow markers are read off the paper.
 ![Fig. 11](results/stage4/figures/fig11_P.png)
 ![Fig. 12](results/stage4/figures/fig12_length.png)
 ![Fig. 13](results/stage4/figures/fig13_fixed_N.png)
+
+Subword tokenization:
+
+![Fig. 6b/6d](results/stage4/figures/fig6_ats_wts_subword.png)
+![Fig. 7b/8b](results/stage4/figures/fig8_ats_vs_M_subword.png)
+![Fig. 10a](results/stage4/figures/fig10a_k_subword.png)
+![Fig. 11a](results/stage4/figures/fig11_P_subword.png)
+![Fig. 12](results/stage4/figures/fig12_length_subword.png)
+![Fig. 13b](results/stage4/figures/fig13_fixed_N_subword.png)
 
 ### Rerun
 

@@ -1,0 +1,19 @@
+# Sensitivity check for the subword reconstruction rule: coco_k12_subword
+# with the "strict" rule (a word survives only when all of its pieces
+# arrive) instead of "fragment". See src/sempalab/tokenization.py.
+# At K=8 the rule cannot matter: almost every 8-piece COCO caption is an
+# 8-word caption with no split word (none of the 100 in the eval set).
+experiment: coco_k12_subword_strict
+description: K=12 sweep over M, subword tokens, strict reconstruction
+encoder: mpnet
+tokenization: subword
+reconstruction: strict
+K: 12
+P: 10
+k: 4
+G: 5
+snr_db: [5, 6, 7, 8]
+sweep:
+  param: M
+  values: [2, 3, 4, 6]
+algorithms: [sempa_look, random_pa]

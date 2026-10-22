@@ -1,0 +1,24 @@
+# Subword-tokenization counterpart of coco_k12.yaml: same settings, but
+# messages have exactly K MPNet WordPiece tokens (see
+# src/sempalab/tokenization.py and docs/assumptions.md, A11-A12).
+# K=12 MS-COCO sweep over the subpacket size M. One run covers:
+#   Fig. 3   TSS- vs RSS-based vs Random PA over SNR (read at M=3; the
+#            paper does not state K or M for Fig. 3 - assumption)
+#   Fig. 6c  WTS vs number of lost subpackets L=1..5 (read at M=2, N=6;
+#            the caption's K=8, M=4 only allows L=1 - see docs)
+#   Fig. 7a  ATS heatmap over (B, M) at 7 dB: B only masks M < K/B
+#   Fig. 8   ATS vs M at 7 dB
+#   Fig. 9   ATS vs M at 4 dB and 8 dB
+experiment: coco_k12_subword
+description: K=12 sweep over M (Figs. 3, 6c, 7a, 8, 9), subword tokens
+encoder: mpnet
+tokenization: subword
+K: 12
+P: 10
+k: 4
+G: 5
+snr_db: [2, 3, 4, 5, 6, 7, 8, 9, 10]
+sweep:
+  param: M
+  values: [1, 2, 3, 4, 6, 12]
+algorithms: [full_search, genetic, sempa_look, random_pa, greedy_tss, greedy_rss]

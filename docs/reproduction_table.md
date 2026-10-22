@@ -65,3 +65,42 @@
 | Fig. 13 | SemPA-Look ATS at K=28, N=2 | WikiHow, 7 dB | 0.8800 | 0.8716 | -1.0% | read off plot |
 | Fig. 13 | SemPA-Look ATS at K=28, N=4 | WikiHow, 7 dB | 0.8680 | 0.8805 | +1.4% | read off plot |
 | Fig. 13 | Random PA ATS at K=28, N=4 | WikiHow, 7 dB | 0.8420 | 0.8576 | +1.9% | read off plot |
+| Fig. 6b | SemPA-Look ATS, subword relative to word, at 6 dB (0.0002 of 0.60) | COCO, K=8, M=4 | -0.03% | -0.65% | -0.62 pp | text/table |
+| Fig. 6b | SemPA-Look ATS at 6 dB | COCO, K=8, M=4, subword | 0.6050 | 0.5926 | -2.1% | read off plot |
+| Fig. 6b | SemPA-Look ATS gain over Random PA at 6 dB (plot, about 0.605 vs 0.53) | COCO, K=8, M=4, subword | +14.00% | +6.02% | -7.98 pp | read off plot |
+| Fig. 6d | SemPA-Look WTS gain over Random PA (paper does not name L; L=3 shown) | COCO, N=6 (ours K=12, M=2), 6 dB, subword | +45.50% | +14.55% | -30.95 pp | text/table |
+| Fig. 6d | SemPA-Look WTS at L=1 | COCO, N=6, subword | 0.8200 | 0.8087 | -1.4% | read off plot |
+| Fig. 6d | SemPA-Look WTS at L=3 | COCO, N=6, subword | 0.4000 | 0.3998 | -0.1% | read off plot |
+| Fig. 6d | SemPA-Look WTS at L=5 | COCO, N=6, subword | 0.1000 | 0.0937 | -6.3% | read off plot |
+| Fig. 6d | Random PA WTS at L=1 | COCO, N=6, subword | 0.7400 | 0.7703 | +4.1% | read off plot |
+| Fig. 6d | Random PA WTS at L=3 | COCO, N=6, subword | 0.2800 | 0.3490 | +24.6% | read off plot |
+| Fig. 6d | Full Search WTS at L=3 | COCO, N=6, subword | 0.4900 | 0.4914 | +0.3% | read off plot |
+| Fig. 7b | SemPA-Look ATS at M=1 | COCO, K=12, 7 dB, subword | 0.8740 | 0.8685 | -0.6% | text/table |
+| Fig. 7b | SemPA-Look ATS at M=2 | COCO, K=12, 7 dB, subword | 0.8820 | 0.8767 | -0.6% | text/table |
+| Fig. 7b | SemPA-Look ATS at M=3 | COCO, K=12, 7 dB, subword | 0.8830 | 0.8797 | -0.4% | text/table |
+| Fig. 7b | SemPA-Look ATS at M=4 | COCO, K=12, 7 dB, subword | 0.8800 | 0.8757 | -0.5% | text/table |
+| Fig. 7b | SemPA-Look ATS at M=6 | COCO, K=12, 7 dB, subword | 0.8690 | 0.8680 | -0.1% | text/table |
+| Fig. 7b | ATS at M=12 (no packetization, = 1 - p) | COCO, K=12, 7 dB, subword | 0.7930 | 0.7930 | +0.0% | text/table |
+| Fig. 8b | Full Search ATS at M=3 (peak) | COCO, K=12, 7 dB, subword | 0.8950 | 0.8943 | -0.1% | read off plot |
+| Fig. 8b | Full Search ATS at M=6 | COCO, K=12, 7 dB, subword | 0.8840 | 0.8825 | -0.2% | read off plot |
+| Fig. 8b | Random PA ATS at M=2 | COCO, K=12, 7 dB, subword | 0.8690 | 0.8641 | -0.6% | read off plot |
+| Fig. 8b | Random PA ATS at M=6 | COCO, K=12, 7 dB, subword | 0.8430 | 0.8410 | -0.2% | read off plot |
+| Fig. 10a | SemPA-Look ATS at k=0 | WikiHow, K=24, M=4, 7 dB, subword | 0.8575 | 0.8582 | +0.1% | read off plot |
+| Fig. 10a | SemPA-Look ATS at k=1 | WikiHow, K=24, M=4, 7 dB, subword | 0.8695 | 0.8628 | -0.8% | read off plot |
+| Fig. 10a | SemPA-Look ATS at k=k_max=5 | WikiHow, K=24, M=4, 7 dB, subword | 0.8730 | 0.8672 | -0.7% | read off plot |
+| Fig. 10a | Random PA ATS | WikiHow, K=24, M=4, 7 dB, subword | 0.8490 | 0.8463 | -0.3% | read off plot |
+| Fig. 11a | SemPA-Look ATS at P=130 | WikiHow, K=24, M=12, 7 dB, subword | 0.8772 | 0.8772 | +0.0% | text/table |
+| Fig. 11a | GA ATS at P=130 | WikiHow, K=24, M=12, 7 dB, subword | 0.8830 | 0.8828 | -0.0% | text/table |
+| Fig. 11a | SemPA-Look ATS at P=10 | WikiHow, K=24, M=12, 7 dB, subword | 0.8600 | 0.8613 | +0.1% | read off plot |
+| Fig. 12a | SemPA-Look ATS at K=10 | WikiHow, M=5, 7 dB, subword | 0.8460 | 0.8491 | +0.4% | read off plot |
+| Fig. 12a | SemPA-Look ATS at K=40 | WikiHow, M=5, 7 dB, subword | 0.8860 | 0.8791 | -0.8% | read off plot |
+| Fig. 12a | Random PA ATS at K=10 | WikiHow, M=5, 7 dB, subword | 0.8120 | 0.8157 | +0.5% | read off plot |
+| Fig. 12a | Random PA ATS at K=40 | WikiHow, M=5, 7 dB, subword | 0.8630 | 0.8642 | +0.1% | read off plot |
+| Fig. 12b | SemPA-Look WTS (L=1) at K=10 | WikiHow, M=5, subword | 0.5400 | 0.5800 | +7.4% | read off plot |
+| Fig. 12b | Random PA WTS (L=1) at K=10 | WikiHow, M=5, subword | 0.4000 | 0.4455 | +11.4% | read off plot |
+| Fig. 12a | SemPA-Look ATS at K=60 | WikiHow, M=5, 7 dB, subword | 0.9070 | 0.9025 | -0.5% | read off plot |
+| Fig. 13b | SemPA-Look ATS at K=28, N=2 | WikiHow, 7 dB, subword | 0.8620 | 0.8643 | +0.3% | read off plot |
+| Fig. 13b | SemPA-Look ATS at K=28, N=4 | WikiHow, 7 dB, subword | 0.8690 | 0.8708 | +0.2% | read off plot |
+| Fig. 13b | Random PA ATS at K=28, N=2 | WikiHow, 7 dB, subword | 0.8330 | 0.8372 | +0.5% | read off plot |
+| Fig. 13b | Random PA ATS at K=28, N=4 | WikiHow, 7 dB, subword | 0.8450 | 0.8455 | +0.1% | read off plot |
+| Fig. 13b | SemPA-Look ATS at K=8, N=2 | WikiHow, 7 dB, subword | 0.8390 | 0.8391 | +0.0% | read off plot |

@@ -64,3 +64,42 @@ fig12_sempa_K60,Fig. 12a,SemPA-Look ATS at K=60,"WikiHow, M=5, 7 dB",0.913,0.896
 fig13_n2_sempa_K28,Fig. 13,"SemPA-Look ATS at K=28, N=2","WikiHow, 7 dB",0.88,0.8716279787007121,,-0.9513660567372654,%,plot
 fig13_n4_sempa_K28,Fig. 13,"SemPA-Look ATS at K=28, N=4","WikiHow, 7 dB",0.868,0.8804555696100312,,1.4349734573768718,%,plot
 fig13_n4_random_K28,Fig. 13,"Random PA ATS at K=28, N=4","WikiHow, 7 dB",0.842,0.8576421997170048,,1.8577434343236185,%,plot
+fig6b_subword_vs_word_6db,Fig. 6b,"SemPA-Look ATS, subword relative to word, at 6 dB (0.0002 of 0.60)","COCO, K=8, M=4",-0.03,-0.6498922459496348,%,-0.6198922459496348,pp,text
+fig6b_sempa_6db,Fig. 6b,SemPA-Look ATS at 6 dB,"COCO, K=8, M=4, subword",0.605,0.5925957803976151,,-2.0502842317991594,%,plot
+fig6b_gain_random,Fig. 6b,"SemPA-Look ATS gain over Random PA at 6 dB (plot, about 0.605 vs 0.53)","COCO, K=8, M=4, subword",14.0,6.021428366198767,%,-7.978571633801233,pp,plot
+fig6d_wts_gain_L3,Fig. 6d,SemPA-Look WTS gain over Random PA (paper does not name L; L=3 shown),"COCO, N=6 (ours K=12, M=2), 6 dB, subword",45.5,14.547834261210447,%,-30.952165738789553,pp,text
+fig6d_sempa_L1,Fig. 6d,SemPA-Look WTS at L=1,"COCO, N=6, subword",0.82,0.8086914432048797,,-1.3790922920878312,%,plot
+fig6d_sempa_L3,Fig. 6d,SemPA-Look WTS at L=3,"COCO, N=6, subword",0.4,0.3997889444604516,,-0.05276388488710537,%,plot
+fig6d_sempa_L5,Fig. 6d,SemPA-Look WTS at L=5,"COCO, N=6, subword",0.1,0.09366399693768472,,-6.336003062315284,%,plot
+fig6d_random_L1,Fig. 6d,Random PA WTS at L=1,"COCO, N=6, subword",0.74,0.7702884638309478,,4.093035652830792,%,plot
+fig6d_random_L3,Fig. 6d,Random PA WTS at L=3,"COCO, N=6, subword",0.28,0.34901484348345546,,24.648158386948367,%,plot
+fig6d_full_L3,Fig. 6d,Full Search WTS at L=3,"COCO, N=6, subword",0.49,0.49135094165802,,0.2757023791877595,%,plot
+fig7b_sempa_M1,Fig. 7b,SemPA-Look ATS at M=1,"COCO, K=12, 7 dB, subword",0.874,0.868520843360007,,-0.6269057940495409,%,text
+fig7b_sempa_M2,Fig. 7b,SemPA-Look ATS at M=2,"COCO, K=12, 7 dB, subword",0.882,0.876674583665152,,-0.6037887000961399,%,text
+fig7b_sempa_M3,Fig. 7b,SemPA-Look ATS at M=3,"COCO, K=12, 7 dB, subword",0.883,0.8797136138706765,,-0.37218415960628837,%,text
+fig7b_sempa_M4,Fig. 7b,SemPA-Look ATS at M=4,"COCO, K=12, 7 dB, subword",0.88,0.8756930151323996,,-0.4894300985909539,%,text
+fig7b_sempa_M6,Fig. 7b,SemPA-Look ATS at M=6,"COCO, K=12, 7 dB, subword",0.869,0.8679529229352823,,-0.12049218236107463,%,text
+fig7b_sempa_M12,Fig. 7b,"ATS at M=12 (no packetization, = 1 - p)","COCO, K=12, 7 dB, subword",0.793,0.793031757586021,,0.004004739725210542,%,text
+fig8b_full_M3,Fig. 8b,Full Search ATS at M=3 (peak),"COCO, K=12, 7 dB, subword",0.895,0.894263212822495,,-0.08232258966536617,%,plot
+fig8b_full_M6,Fig. 8b,Full Search ATS at M=6,"COCO, K=12, 7 dB, subword",0.884,0.8825217689054543,,-0.16722071205268113,%,plot
+fig8b_random_M2,Fig. 8b,Random PA ATS at M=2,"COCO, K=12, 7 dB, subword",0.869,0.8641410104193503,,-0.5591472474855782,%,plot
+fig8b_random_M6,Fig. 8b,Random PA ATS at M=6,"COCO, K=12, 7 dB, subword",0.843,0.8410394554293172,,-0.23256756473104767,%,plot
+fig10a_sub_k0,Fig. 10a,SemPA-Look ATS at k=0,"WikiHow, K=24, M=4, 7 dB, subword",0.8575,0.8582138360531454,,0.08324618695572533,%,plot
+fig10a_sub_k1,Fig. 10a,SemPA-Look ATS at k=1,"WikiHow, K=24, M=4, 7 dB, subword",0.8695,0.862836476382891,,-0.7663626931695331,%,plot
+fig10a_sub_k5,Fig. 10a,SemPA-Look ATS at k=k_max=5,"WikiHow, K=24, M=4, 7 dB, subword",0.873,0.8671713150701982,,-0.6676615039864627,%,plot
+fig10a_sub_random,Fig. 10a,Random PA ATS,"WikiHow, K=24, M=4, 7 dB, subword",0.849,0.8462770392555409,,-0.3207256471683277,%,plot
+fig11_sub_sempa_P130,Fig. 11a,SemPA-Look ATS at P=130,"WikiHow, K=24, M=12, 7 dB, subword",0.8772,0.8772186220105932,,0.002122892224488904,%,text
+fig11_sub_ga_P130,Fig. 11a,GA ATS at P=130,"WikiHow, K=24, M=12, 7 dB, subword",0.883,0.8828399066126803,,-0.018130621440510093,%,text
+fig11_sub_sempa_P10,Fig. 11a,SemPA-Look ATS at P=10,"WikiHow, K=24, M=12, 7 dB, subword",0.86,0.8612508566267397,,0.145448444969737,%,plot
+fig12_sub_sempa_K10,Fig. 12a,SemPA-Look ATS at K=10,"WikiHow, M=5, 7 dB, subword",0.846,0.8491442943005193,,0.3716659929691872,%,plot
+fig12_sub_sempa_K40,Fig. 12a,SemPA-Look ATS at K=40,"WikiHow, M=5, 7 dB, subword",0.886,0.8790637685525508,,-0.7828703665292617,%,plot
+fig12_sub_random_K10,Fig. 12a,Random PA ATS at K=10,"WikiHow, M=5, 7 dB, subword",0.812,0.8156885586254526,,0.4542559883562299,%,plot
+fig12_sub_random_K40,Fig. 12a,Random PA ATS at K=40,"WikiHow, M=5, 7 dB, subword",0.863,0.8641922758046664,,0.13815478617223748,%,plot
+fig12_sub_wts_sempa_K10,Fig. 12b,SemPA-Look WTS (L=1) at K=10,"WikiHow, M=5, subword",0.54,0.5799832367897033,,7.40430310920431,%,plot
+fig12_sub_wts_random_K10,Fig. 12b,Random PA WTS (L=1) at K=10,"WikiHow, M=5, subword",0.4,0.44553697742521764,,11.384244356304404,%,plot
+fig12_sub_sempa_K60,Fig. 12a,SemPA-Look ATS at K=60,"WikiHow, M=5, 7 dB, subword",0.907,0.9025113958619967,,-0.49488468996729196,%,plot
+fig13b_n2_sempa_K28,Fig. 13b,"SemPA-Look ATS at K=28, N=2","WikiHow, 7 dB, subword",0.862,0.8643043417320034,,0.26732502691455284,%,plot
+fig13b_n4_sempa_K28,Fig. 13b,"SemPA-Look ATS at K=28, N=4","WikiHow, 7 dB, subword",0.869,0.870829788567054,,0.21056255086927023,%,plot
+fig13b_n2_random_K28,Fig. 13b,"Random PA ATS at K=28, N=2","WikiHow, 7 dB, subword",0.833,0.8371691963194557,,0.5005037598386293,%,plot
+fig13b_n4_random_K28,Fig. 13b,"Random PA ATS at K=28, N=4","WikiHow, 7 dB, subword",0.845,0.8455072755769508,,0.060032612656905286,%,plot
+fig13b_n2_sempa_K8,Fig. 13b,"SemPA-Look ATS at K=8, N=2","WikiHow, 7 dB, subword",0.839,0.8391077956752043,,0.012848113850340705,%,plot

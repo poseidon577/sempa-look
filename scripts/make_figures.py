@@ -172,6 +172,98 @@ def main(argv=None):
         "Fig. 13: ATS vs K with N fixed (WikiHow, 7 dB)",
     )
 
+    # ---------------- Subword tokenization (Figs. 6b/6d, 8b, 10a, 11a, 12, 13b) ----------------
+
+    figure(
+        "fig6_ats_wts_subword",
+        ["coco_k8_subword", "coco_k12_subword"],
+        lambda: [
+            {
+                "rows": [r for r in runs["coco_k8_subword"] if r["algorithm"] not in ("greedy_tss", "greedy_rss")],
+                "x_key": "snr_db", "y_key": "mean_ats", "xlabel": "SNR (dB)", "ylabel": "ATS",
+                "paper": paper["fig6b"], "xticks": snr_ticks, "title": "(b) ATS, K=8, M=4",
+            },
+            {
+                "rows": wts_by_L([r for r in select(runs["coco_k12_subword"], M=2, snr_db=6)
+                                  if r["algorithm"] in ("full_search", "genetic", "sempa_look", "random_pa")]),
+                "x_key": "L", "y_key": "mean_wts", "xlabel": "Lost subpackets L", "ylabel": "WTS",
+                "paper": paper["fig6d"], "xticks": [1, 2, 3, 4, 5], "title": "(d) WTS, K=12, M=2 (N=6), 6 dB",
+            },
+        ],
+        "Fig. 6b/6d: ATS and WTS, subword tokens (MS-COCO, MPNet)",
+    )
+
+    figure(
+        "fig8_ats_vs_M_subword",
+        ["coco_k12_subword"],
+        lambda: [
+            {
+                "rows": [r for r in select(runs["coco_k12_subword"], snr_db=7) if r["algorithm"] in main_algos],
+                "x_key": "M", "y_key": "mean_ats", "xlabel": "Subpacket size M", "ylabel": "ATS",
+                "paper": paper["fig8b"], "xticks": M_ticks,
+            }
+        ],
+        "Fig. 7b / 8b: ATS vs M, subword tokens (COCO, K=12, 7 dB)",
+    )
+
+    figure(
+        "fig10a_k_subword",
+        ["wikihow_k24_m4_subword"],
+        lambda: [
+            {
+                "rows": select(runs["wikihow_k24_m4_subword"], snr_db=7),
+                "x_key": "k", "y_key": "mean_ats", "xlabel": "Lookahead width k (k_max = 5)", "ylabel": "ATS",
+                "paper": paper["fig10a_subword"], "xticks": [0, 1, 2, 3, 4, 5],
+            },
+        ],
+        "Fig. 10a: SemPA-Look vs k, subword tokens (WikiHow, K=24, M=4, 7 dB)",
+    )
+
+    figure(
+        "fig11_P_subword",
+        ["wikihow_p_subword"],
+        lambda: [
+            {
+                "rows": runs["wikihow_p_subword"], "x_key": "P", "y_key": "mean_ats", "xlabel": "P", "ylabel": "ATS",
+                "paper": paper["fig11_subword"],
+            },
+        ],
+        "Fig. 11a: P sweep, subword tokens (WikiHow, K=24, M=12, 7 dB, 30 messages)",
+    )
+
+    def length_rows_subword():
+        return list(runs["wikihow_len_subword"]) + runs.get("wikihow_len_long_subword", [])
+
+    figure(
+        "fig12_length_subword",
+        ["wikihow_len_subword"],
+        lambda: [
+            {
+                "rows": length_rows_subword(), "x_key": "K", "y_key": "mean_ats", "xlabel": "Sentence length K",
+                "ylabel": "ATS", "paper": paper["fig12a_subword"], "title": "(a) ATS",
+            },
+            {
+                "rows": length_rows_subword(), "x_key": "K", "y_key": "mean_wts_L1", "xlabel": "Sentence length K",
+                "ylabel": "WTS (L=1)", "paper": paper["fig12b_subword"], "title": "(b) WTS",
+            },
+        ],
+        "Fig. 12: ATS and WTS vs K with M=5, subword tokens (WikiHow, 7 dB)",
+    )
+
+    figure(
+        "fig13_fixed_N_subword",
+        ["wikihow_fixed_n2_subword", "wikihow_fixed_n4_subword"],
+        lambda: [
+            {
+                "rows": runs[f"wikihow_fixed_n{n}_subword"], "x_key": "K", "y_key": "mean_ats",
+                "xlabel": "Sentence length K", "ylabel": "ATS", "paper": paper[f"fig13b_n{n}"],
+                "title": f"N = {n}", "xticks": [8, 12, 16, 20, 24, 28],
+            }
+            for n in (2, 4)
+        ],
+        "Fig. 13b: ATS vs K with N fixed, subword tokens (WikiHow, 7 dB)",
+    )
+
 
 if __name__ == "__main__":
     main()

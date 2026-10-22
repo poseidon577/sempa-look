@@ -7,6 +7,8 @@ import numpy as np
 import torch
 from sentence_transformers import SentenceTransformer
 
+from sempalab.tokenization import render
+
 
 class InstrumentedEncoder:
     def __init__(
@@ -15,8 +17,12 @@ class InstrumentedEncoder:
         device=None,
         batch_size=64,
         cache_size=200_000,
+        reconstruction="fragment",
     ):
         self.model_name = model_name
+        # How received subword pieces become text (see tokenization.py).
+        # Word tokens are joined with spaces under either rule.
+        self.reconstruction = reconstruction
         self.batch_size = batch_size
         self.cache_size = cache_size
 
@@ -105,7 +111,7 @@ class InstrumentedEncoder:
             self.cache_hits += 1
             return self.original_cache[key]
 
-        text = " ".join(tokens)
+        text = render(tokens, range(len(tokens)), self.reconstruction)
 
         start = time.perf_counter()
 
@@ -185,10 +191,7 @@ class InstrumentedEncoder:
                 missing_key_to_positions[key] = []
                 missing_keys.append(key)
 
-                text = " ".join(
-                    tokens[i]
-                    for i in indices
-                )
+                text = render(tokens, indices, self.reconstruction)
 
                 missing_texts.append(text)
 
