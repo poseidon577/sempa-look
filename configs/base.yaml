@@ -1,0 +1,13 @@
+# Shared defaults for SEMPA-LAB experiments.
+# Experiment files set `base: base.yaml` and override what they need.
+
+tokenization: word
+dictionary_size: 200000   # |D| -> ceil(log2 |D|) = 18 bits per token
+packet_bits: 300          # d, bits per physical packet
+encoder: minilm           # minilm (development) | mpnet (reporting)
+objective: ats
+mode: paper_faithful      # paper_faithful | research
+trials: 1000              # physical transmissions per batch per SNR
+bit_level: false          # true = simulate every bit through BPSK/AWGN
+seed: 42
+results_dir: results
