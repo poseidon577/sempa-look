@@ -1,0 +1,19 @@
+# Channel-aware aggregation on MS-COCO K=12 captions (docs/channel_aware.md).
+# Exact ATS under each channel's joint slot law; Full Search is the oracle.
+experiment: coco_k12
+description: K=12 COCO, N=3/4/6, i.i.d. vs Gilbert-Elliott vs correlated Rayleigh at matched PER
+encoder: mpnet
+K: 12
+M: [4, 3, 2]
+p: [0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
+channels:
+  - {name: iid}
+  - {name: gilbert, parameter: 0.3}
+  - {name: gilbert, parameter: 0.6}
+  - {name: gilbert, parameter: 0.9}
+  - {name: rayleigh, parameter: 0.5}
+  - {name: rayleigh, parameter: 0.9}
+  - {name: rayleigh, parameter: 0.99}
+stride: [1]
+P: 10
+k: 4

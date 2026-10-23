@@ -47,6 +47,8 @@ WHAT CAN BE IMPROVED
 Extensions are only introduced after the baseline has been verified.
 
 > **Reproduction status:** the paper's MS-COCO and WikiHow results are reproduced with its encoder and channel, most within 1 % of the published numbers. See [Stage 4](#stage-4--paper-reproduction) and the [reproduction report](docs/reproduction.md).
+>
+> **First extension:** [channel-aware aggregation](docs/channel_aware.md) under bursty (Gilbert–Elliott) and fading erasures. See [Research extension 1](#research-extension-1--channel-aware-aggregation).
 
 ---
 
@@ -1087,6 +1089,23 @@ Screenshot
 
 ---
 
+# Research Extension 1 — Channel-Aware Aggregation
+
+The paper assumes independent packet erasures. Under bursty (Gilbert–Elliott) and correlated Rayleigh fading erasures, at the same average packet error rate p = 0.05–0.6, SemPA-Look's advantage over Random PA largely disappears. At N = 6 and Gilbert–Elliott ρ = 0.6 it keeps 8% of the attainable gain, against 36% under i.i.d. losses. **CASA** (channel-aware semantic aggregation) fits a p- and channel-aware pairwise surrogate of φ. Under the channel's slot survival probabilities it reduces aggregation to a quadratic assignment problem, which CASA searches with swaps before checking the best candidates exactly. It also optimises which packet each group rides in.
+
+| COCO K = 12, MPNet, 100 messages | Share of the oracle's gain over Random PA (p = 0.2–0.6) |
+|---|---|
+| SemPA-Look | 1–47% (falls with channel memory) |
+| Full Search assuming i.i.d. losses | 32–100% |
+| Swap local search + channel-aware slot order | 59–76% |
+| **CASA** | **85–92% on every channel** |
+
+CASA beats SemPA-Look by up to +0.040 ATS (+8.1%) with every 95% CI above zero. The gains hold, smaller, when the partitions are re-scored under MiniLM and BGE-small, and on WikiHow K = 24. A deep packet interleaver is the main competitor: SemPA-Look needs a 1.5–2.3× deeper interleaver to match CASA. Details, limits and rerun commands: [docs/channel_aware.md](docs/channel_aware.md). Full tables: [docs/channel_aware_tables.md](docs/channel_aware_tables.md).
+
+![CASA, N=6](results/channel/figures/coco_k12_N6_gain_vs_p.png)
+
+---
+
 # Research Extensions
 
 Only after reproduction and analysis will SEMPA-LAB introduce an original research contribution.
@@ -1200,8 +1219,8 @@ Then:
 * [x] Physical communication system
 * [x] MS-COCO / WikiHow reproduction (Stage 4)
 * [x] Paper reproduction report ([docs/reproduction.md](docs/reproduction.md))
-* [ ] Limitation analysis
-* [ ] Research extension
+* [x] Limitation analysis ([docs/limitations.md](docs/limitations.md))
+* [x] Research extension 1: channel-aware aggregation ([docs/channel_aware.md](docs/channel_aware.md))
 * [ ] Final ablation and evaluation
 
 ---

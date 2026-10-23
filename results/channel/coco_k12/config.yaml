@@ -1,0 +1,74 @@
+experiment: coco_k12
+description: K=12 COCO, N=3/4/6, i.i.d. vs Gilbert-Elliott vs correlated Rayleigh
+  at matched PER
+encoder: mpnet
+device: cpu
+cache_size: 2000000
+data:
+  source: coco
+  path: data/coco/annotations/captions_train2017.json
+  max_articles: null
+  num_messages: 100
+  seed: 42
+  eval_set_dir: results/stage4/eval_sets
+K: 12
+M:
+- 4
+- 3
+- 2
+p:
+- 0.05
+- 0.1
+- 0.2
+- 0.3
+- 0.4
+- 0.5
+- 0.6
+channels:
+- name: iid
+- name: gilbert
+  parameter: 0.3
+- name: gilbert
+  parameter: 0.6
+- name: gilbert
+  parameter: 0.9
+- name: rayleigh
+  parameter: 0.5
+- name: rayleigh
+  parameter: 0.9
+- name: rayleigh
+  parameter: 0.99
+stride:
+- 1
+algorithms:
+- random_pa
+- interleave
+- sempa_look
+- swap_ls
+- random_pa+order
+- interleave+order
+- sempa_look+order
+- swap_ls+order
+- casa_iid
+- casa
+- full_search_iid
+- full_search
+P: 10
+k: 4
+swap_ls:
+  restarts: 1
+casa:
+  budget: null
+  restarts: 20
+  top: 5
+  ridge: 0.001
+r2_samples: 200
+rayleigh_samples: 400000
+packet_bits: 300
+prefetch_max_sets: 5000
+limit: null
+seed: 42
+results_dir: results/channel
+run_at: '2026-10-23T00:28:46'
+wall_seconds: 1776.9
+model_name: sentence-transformers/all-mpnet-base-v2
