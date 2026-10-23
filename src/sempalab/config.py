@@ -11,6 +11,8 @@ ENCODER_REGISTRY = {
     "mpnet": "sentence-transformers/all-mpnet-base-v2",
     "all-MiniLM-L6-v2": "sentence-transformers/all-MiniLM-L6-v2",
     "all-mpnet-base-v2": "sentence-transformers/all-mpnet-base-v2",
+    # Re-scoring encoder for the channel-aware results (a different model family).
+    "bge-small": "BAAI/bge-small-en-v1.5",
 }
 
 ALGORITHMS = {

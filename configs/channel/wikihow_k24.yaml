@@ -1,0 +1,20 @@
+# Longer messages (WikiHow K=24, N=6), where Full Search is infeasible.
+# CASA fits share one reweighted subset pool per message (shared_pool);
+# reported calls are still those of a standalone run.
+experiment: wikihow_k24
+description: K=24 WikiHow, N=6, i.i.d. vs Gilbert-Elliott vs correlated Rayleigh
+encoder: mpnet
+data:
+  source: wikihow
+  path: data/wikihow/wikihowAll.csv
+  max_articles: 20000
+K: 24
+M: [4]
+p: [0.1, 0.3, 0.5]
+channels:
+  - {name: iid}
+  - {name: gilbert, parameter: 0.6}
+  - {name: rayleigh, parameter: 0.9}
+algorithms: [random_pa, interleave, sempa_look, swap_ls, sempa_look+order, swap_ls+order, casa_iid, casa]
+shared_pool: true
+r2_samples: 0

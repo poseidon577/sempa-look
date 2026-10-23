@@ -1,0 +1,63 @@
+experiment: coco_k12_stride
+description: K=12 COCO, N=6 and N=4, interleaving depth 1/2/4/8 under strong memory
+encoder: mpnet
+device: cpu
+cache_size: 2000000
+data:
+  source: coco
+  path: data/coco/annotations/captions_train2017.json
+  max_articles: null
+  num_messages: 100
+  seed: 42
+  eval_set_dir: results/stage4/eval_sets
+K: 12
+M:
+- 3
+- 2
+p:
+- 0.05
+- 0.1
+- 0.2
+- 0.3
+- 0.4
+- 0.5
+- 0.6
+channels:
+- name: iid
+- name: gilbert
+  parameter: 0.9
+- name: rayleigh
+  parameter: 0.99
+stride:
+- 1
+- 2
+- 4
+- 8
+algorithms:
+- random_pa
+- sempa_look
+- swap_ls
+- swap_ls+order
+- casa
+- full_search_iid
+- full_search
+P: 10
+k: 4
+swap_ls:
+  restarts: 1
+casa:
+  budget: null
+  restarts: 20
+  top: 5
+  ridge: 0.001
+shared_pool: false
+r2_samples: 0
+rayleigh_samples: 400000
+packet_bits: 300
+prefetch_max_sets: 5000
+limit: null
+seed: 42
+results_dir: results/channel
+run_at: '2026-10-23T00:56:30'
+wall_seconds: 1645.5
+model_name: sentence-transformers/all-mpnet-base-v2

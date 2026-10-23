@@ -1,0 +1,17 @@
+# Compute-matched ablation: swap local search with 3 restarts, and CASA at
+# half its default fitting budget (158 subsets). Compare with the default
+# CASA (316 subsets) and 1-restart swap search in coco_k12.
+experiment: coco_k12_matched
+description: K=12 COCO, swap_ls x3 restarts vs CASA at two fitting budgets
+encoder: mpnet
+K: 12
+M: [4, 3, 2]
+p: [0.1, 0.3, 0.5]
+channels:
+  - {name: iid}
+  - {name: gilbert, parameter: 0.6}
+  - {name: rayleigh, parameter: 0.9}
+algorithms: [sempa_look, swap_ls, swap_ls+order, casa, full_search]
+swap_ls: {restarts: 3}
+casa: {budget: 158}
+r2_samples: 0

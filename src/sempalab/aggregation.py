@@ -206,3 +206,61 @@ def packet_bits(
         message_id_bits=message_id_bits,
         total_bits=payload_bits + position_bits + message_id_bits,
     )
+
+
+def aggregate_diagonal(
+    messages: list[Message],
+    partitions: list[tuple[tuple[int, ...], ...]],
+    stride: int = 1,
+) -> list[Packet]:
+    """
+    Diagonal (convolutional) layout for a channel with memory:
+
+        subpacket n of message b -> packet b + n * stride
+
+    over num_packets = B + (N - 1) * stride packets, with no wrap-around,
+    so every message's N subpackets sit exactly `stride` packets apart
+    and see the same joint erasure law on a stationary channel (see
+    `channel.correlated`). stride = 1 is the paper's cyclic layout
+    without its wrap; a larger stride interleaves at packet level, at
+    the cost of (N - 1) * stride packets of extra delay.
+
+    Unused slots at the start and end of the stream are dummy padding.
+    """
+
+    if len(messages) != len(partitions):
+        raise ValueError(
+            "messages and partitions must have the same length"
+        )
+
+    if not messages:
+        raise ValueError("Batch must contain at least one message")
+
+    if stride < 1:
+        raise ValueError("stride must be a positive integer")
+
+    group_counts = {len(partition) for partition in partitions}
+
+    if len(group_counts) != 1:
+        raise ValueError(
+            "All messages in a batch must have the same number "
+            "of subpackets N"
+        )
+
+    N = group_counts.pop()
+    B = len(messages)
+
+    num_packets = B + (N - 1) * stride
+
+    slots: list[list[Subpacket]] = [[] for _ in range(num_packets)]
+
+    for b, (message, partition) in enumerate(zip(messages, partitions)):
+        for n, group in enumerate(partition):
+            slots[b + n * stride].append(
+                Subpacket(message_id=message.message_id, indices=tuple(group))
+            )
+
+    return [
+        Packet(packet_id=j, subpackets=tuple(subpackets), dummy_slots=N - len(subpackets))
+        for j, subpackets in enumerate(slots)
+    ]

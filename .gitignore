@@ -8,5 +8,6 @@ data/
 results/*
 !results/stage2/
 !results/stage4/
+!results/channel/
 .ipynb_checkpoints/
 *.egg-info/
