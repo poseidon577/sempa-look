@@ -19,6 +19,8 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
+from sempalab.delay import matching_depth, span_packets  # noqa: E402
+
 
 # Fixed categorical order (one colour per algorithm, never re-cycled).
 STYLE = {
@@ -28,6 +30,9 @@ STYLE = {
     "swap_ls": ("Swap LS (RSS)", "#eda100", "D", "-"),
     "sempa_look+order": ("SemPA-Look + slot order", "#2a78d6", "s", "--"),
     "swap_ls+order": ("Swap LS + slot order", "#eda100", "D", "--"),
+    "interleave+order": ("Interleaving + slot order", "#e87ba4", "v", "--"),
+    "interleave_swap_ls": ("Interleaver-seeded swap LS", "#008f9c", "X", "-"),
+    "interleave_swap_ls+order": ("Interleaver-seeded swap LS + order", "#008f9c", "X", "--"),
     "casa_iid": ("CASA, i.i.d. model", "#6250d6", "^", "--"),
     "casa": ("CASA", "#eb6834", "o", "-"),
     "full_search_iid": ("Full Search (i.i.d.)", "#1baf7a", "P", "-"),
@@ -153,7 +158,8 @@ def stride_sweep(summary, p, channels, algorithms, out, title):
             if "full_search_iid" in iid:
                 ax.axhline(iid["full_search_iid"], color="#1baf7a", linewidth=1, linestyle=":")
             ax.set_xscale("log", base=2)
-            ax.set_xticks([1, 2, 4, 8], ["1", "2", "4", "8"])
+            ticks = sorted({int(r["stride"]) for r in rows})
+            ax.set_xticks(ticks, [str(t) for t in ticks])
             ax.set_title(f"N={int(12 // M)}, {channel_label(channel, parameter)}", fontsize=10)
             ax.set_xlabel("interleaver depth (packets between subpackets)")
             ax.set_ylabel("ATS")
@@ -165,6 +171,78 @@ def stride_sweep(summary, p, channels, algorithms, out, title):
     fig.savefig(out, dpi=150)
     plt.close(fig)
     print(out)
+
+
+def delay_vs_gain(summary, p, channels, algorithms, out, title):
+    """
+    ATS gain over Random PA at depth 1 (the paper's layout, no
+    interleaving) against the message span (N-1)*D in packets. Reading
+    across at a fixed gain gives the delay each method needs.
+    """
+
+    Ms = sorted({r["M"] for r in summary}, reverse=True)
+    fig, axes = plt.subplots(len(Ms), len(channels), figsize=(4.3 * len(channels), 3.4 * len(Ms)), squeeze=False)
+
+    for i, M in enumerate(Ms):
+        N = int(round(summary[0]["K"] / M))
+        for j, (channel, parameter) in enumerate(channels):
+            ax = axes[i][j]
+            rows = select(summary, M=M, p=p, channel=channel, parameter=parameter)
+            base = select(rows, algorithm="random_pa", stride=1)[0]["mean_ats"]
+            for name in algorithms:
+                label, color, marker, dash = STYLE[name]
+                points = sorted(select(rows, algorithm=name), key=lambda r: r["stride"])
+                ax.plot([span_packets(N, int(r["stride"])) for r in points], [r["mean_ats"] - base for r in points],
+                        color=color, marker=marker, linestyle=dash, linewidth=2, markersize=6, label=label)
+            iid = select(summary, M=M, p=p, channel="iid", algorithm="full_search_iid")
+            if iid:
+                ax.axhline(iid[0]["mean_ats"] - base, color="#1baf7a", linewidth=1, linestyle=":")
+            ax.set_xscale("log", base=2)
+            spans = sorted({span_packets(N, int(r["stride"])) for r in rows})
+            ax.set_xticks(spans, [str(s) for s in spans])
+            ax.set_title(f"N={N}, {channel_label(channel, parameter)}", fontsize=10)
+            ax.set_xlabel("delay: message span (N-1)D, packets")
+            ax.set_ylabel("ATS gain over Random PA, no interleaving")
+            style_axis(ax)
+
+    bottom_legend(fig, axes[0][0])
+    fig.suptitle(title, fontsize=11)
+    fig.tight_layout(rect=(0, 0.1, 1, 1))
+    fig.savefig(out, dpi=150)
+    plt.close(fig)
+    print(out)
+
+
+def depth_ratio_table(summary, channels, p_values, algorithms, reference="casa") -> str:
+    """
+    For each blind method, how much deeper an interleaver it needs to
+    match `reference` at depth D: matching depth / D, interpolated over
+    log2 D. '>' marks a method that never matches within the depths run.
+    """
+
+    Ms = sorted({r["M"] for r in summary}, reverse=True)
+    depths = sorted({int(r["stride"]) for r in summary if r["channel"] != "iid"})
+    shown = [d for d in depths if d < depths[-1]]
+    lines = [
+        "| N | Channel | p | Method | " + " | ".join(f"match CASA at D={d}" for d in shown) + " |",
+        "|---|---|---:|---|" + "---:|" * len(shown),
+    ]
+    for M in Ms:
+        N = int(round(summary[0]["K"] / M))
+        for channel, parameter in channels:
+            for p in p_values:
+                rows = select(summary, M=M, p=p, channel=channel, parameter=parameter)
+                target = {int(r["stride"]): r["mean_ats"] for r in select(rows, algorithm=reference)}
+                for name in algorithms:
+                    curve = sorted((int(r["stride"]), r["mean_ats"]) for r in select(rows, algorithm=name))
+                    if not curve:
+                        continue
+                    cells = []
+                    for d in shown:
+                        need = matching_depth([c[0] for c in curve], [c[1] for c in curve], target[d])
+                        cells.append(f"> {depths[-1] / d:.0f}x" if need == float("inf") else f"{need / d:.2f}x")
+                    lines.append(f"| {N} | {channel_label(channel, parameter)} | {p:g} | {STYLE[name][0]} | " + " | ".join(cells) + " |")
+    return "\n".join(lines)
 
 
 def rescore_figure(summaries, M, channels, out, title):
@@ -208,9 +286,13 @@ def fmt_gain(row, reference):
 
 
 def main_table(summary, M, p_values, channels, algorithms) -> str:
+    return main_table_k(summary, 12, M, p_values, channels, algorithms)
+
+
+def main_table_k(summary, K, M, p_values, channels, algorithms) -> str:
     lines = []
     for channel, parameter in channels:
-        lines.append(f"\n**{channel_label(channel, parameter)}**, N = {int(12 // M)} (M = {int(M)})\n")
+        lines.append(f"\n**{channel_label(channel, parameter)}**, N = {int(K // M)} (M = {int(M)})\n")
         lines.append("| Algorithm | calls | " + " | ".join(f"p = {p:g}" for p in p_values) + " |")
         lines.append("|---|---:|" + "---:|" * len(p_values))
         rows = select(summary, M=M, channel=channel, parameter=parameter, stride=1)
@@ -284,6 +366,9 @@ def main(argv=None):
     main_algos = ["sempa_look", "swap_ls", "swap_ls+order", "casa", "full_search_iid", "full_search"]
     all_algos = list(STYLE)
 
+    def present(rows, names):
+        return [n for n in names if select(rows, algorithm=n)]
+
     coco = load("coco_k12")
     if coco:
         p_values = sorted({r["p"] for r in coco})
@@ -300,11 +385,12 @@ def main(argv=None):
 
         tables.append("\n## COCO K = 12: share of the oracle's gain over Random PA, averaged over p = 0.2 to 0.6\n")
         tables.append(headroom_table(coco, [p for p in p_values if p >= 0.2], channels,
-                                     ["sempa_look", "swap_ls+order", "full_search_iid", "casa"]))
+                                     [a for a in ["sempa_look", "swap_ls+order", "interleave_swap_ls+order", "full_search_iid", "casa"]
+                                      if select(coco, algorithm=a)]))
 
         tables.append("\n## COCO K = 12: mean ATS\n")
         for M in sorted({r["M"] for r in coco}, reverse=True):
-            tables.append(main_table(coco, M, p_values, channels, all_algos))
+            tables.append(main_table(coco, M, p_values, channels, present(coco, all_algos)))
 
         tables.append("\n## COCO K = 12: CASA gain over SemPA-Look\n")
         for M in sorted({r["M"] for r in coco}, reverse=True):
@@ -338,21 +424,37 @@ def main(argv=None):
     stride = load("coco_k12_stride")
     if stride:
         strong = [("gilbert", 0.9), ("rayleigh", 0.99)]
+        depths = sorted({int(r["stride"]) for r in stride})
+        delay_algos = [a for a in ["sempa_look", "sempa_look+order", "swap_ls+order", "interleave_swap_ls+order", "casa", "full_search"]
+                       if select(stride, algorithm=a)]
         for p in (0.3, 0.5):
-            stride_sweep(stride, p, strong, ["sempa_look", "swap_ls", "swap_ls+order", "casa", "full_search"],
+            stride_sweep(stride, p, strong, [a for a in ["sempa_look", "swap_ls", "swap_ls+order", "interleave_swap_ls+order", "casa", "full_search"]
+                                             if select(stride, algorithm=a)],
                          out / f"coco_k12_stride_p{p}.png",
                          f"COCO K=12, p={p}: ATS vs packet interleaver depth (dotted: i.i.d. optimum)")
+            delay_vs_gain(stride, p, strong, delay_algos, out / f"coco_k12_delay_p{p}.png",
+                          f"COCO K=12, p={p}: gain vs delay, packet interleaving at depth D=" + "/".join(map(str, depths))
+                          + " (dotted: i.i.d. optimum)")
+        shown_algos = [a for a in ["random_pa", "interleave+order", "sempa_look", "sempa_look+order", "swap_ls+order",
+                                   "interleave_swap_ls+order", "casa", "full_search"] if select(stride, algorithm=a)]
         tables.append("\n## Interleaver depth (COCO K = 12)\n")
-        tables.append("| N | Channel | p | Algorithm | depth 1 | depth 2 | depth 4 | depth 8 |")
-        tables.append("|---|---|---:|---|---:|---:|---:|---:|")
+        tables.append("Mean ATS at packet interleaver depth D; the message span is (N-1)D packets.\n")
+        tables.append("| N | Channel | p | Algorithm | " + " | ".join(f"D = {d}" for d in depths) + " |")
+        tables.append("|---|---|---:|---|" + "---:|" * len(depths))
         for M in sorted({r["M"] for r in stride}, reverse=True):
             for channel, parameter in strong:
                 for p in (0.1, 0.3, 0.5):
-                    for name in ["sempa_look", "swap_ls+order", "casa", "full_search"]:
+                    for name in shown_algos:
                         rows = {r["stride"]: r["mean_ats"] for r in select(stride, M=M, channel=channel, parameter=parameter, p=p, algorithm=name)}
                         if rows:
                             tables.append(f"| {int(12 // M)} | {channel_label(channel, parameter)} | {p:g} | {STYLE[name][0]} | "
-                                          + " | ".join(f"{rows.get(d, float('nan')):.4f}" for d in (1, 2, 4, 8)) + " |")
+                                          + " | ".join(f"{rows.get(d, float('nan')):.4f}" for d in depths) + " |")
+        tables.append("\n## Delay a channel-blind method needs to match CASA (COCO K = 12)\n")
+        tables.append("Interleaver depth at which the method's ATS reaches CASA's ATS at depth D, divided by D "
+                      "(linear in log2 D). Delay scales with depth, so 2.00x means twice CASA's delay for the same quality.\n")
+        tables.append(depth_ratio_table(stride, strong, (0.1, 0.3, 0.5),
+                                        [a for a in ["sempa_look", "sempa_look+order", "swap_ls+order", "interleave_swap_ls+order"]
+                                         if select(stride, algorithm=a)]))
 
     matched = load("coco_k12_matched")
     if matched:
@@ -362,17 +464,33 @@ def main(argv=None):
         for M in sorted({r["M"] for r in matched}, reverse=True):
             tables.append(main_table(matched, M, p_values, channels, ["sempa_look", "swap_ls", "swap_ls+order", "casa", "full_search"]))
 
-    wikihow = load("wikihow_k24")
-    if wikihow:
+    long_algos = ["random_pa", "interleave", "sempa_look", "swap_ls", "interleave_swap_ls", "sempa_look+order",
+                  "swap_ls+order", "interleave_swap_ls+order", "casa_iid", "casa"]
+    for K in (24, 48, 60):
+        wikihow = load(f"wikihow_k{K}")
+        if not wikihow:
+            continue
         p_values = sorted({r["p"] for r in wikihow})
         channels = list(dict.fromkeys((r["channel"], r["parameter"]) for r in wikihow))
-        tables.append("\n## WikiHow K = 24, N = 6 (no oracle)\n")
+        messages = int(wikihow[0]["messages"])
         for M in sorted({r["M"] for r in wikihow}, reverse=True):
-            tables.append(main_table(wikihow, M, p_values, channels,
-                                     ["random_pa", "interleave", "sempa_look", "swap_ls", "sempa_look+order", "swap_ls+order", "casa_iid", "casa"]))
-        gain_vs_p_k24 = [c for c in [("iid", 0.0), ("gilbert", 0.6), ("rayleigh", 0.9)] if c in channels]
-        gain_vs_p(wikihow, 4.0, gain_vs_p_k24, ["sempa_look", "swap_ls", "swap_ls+order", "casa_iid", "casa"],
-                  out / "wikihow_k24_N6_gain_vs_p.png", "WikiHow K=24, N=6: ATS gain over Random PA (MPNet, 95% CI)")
+            N = int(K // M)
+            tables.append(f"\n## WikiHow K = {K}, N = {N} ({messages} messages, no oracle)\n")
+            tables.append(main_table_k(wikihow, K, M, p_values, channels, [a for a in long_algos if select(wikihow, algorithm=a)]))
+            for reference in ("sempa_look", "swap_ls+order", "interleave_swap_ls+order"):
+                if select(wikihow, algorithm=reference):
+                    tables.append(f"\nCASA gain over {STYLE[reference][0]}, K = {K}\n")
+                    tables.append(gain_table(wikihow, M, p_values, channels, reference))
+            for encoder in ("minilm", "bge-small"):
+                other = load(f"wikihow_k{K}", f"summary_{encoder}.csv")
+                if other:
+                    tables.append(f"\n**{ENCODER_LABEL[encoder]}** re-score, K = {K}: CASA gain over SemPA-Look\n")
+                    tables.append(gain_table(other, M, p_values, channels, "sempa_look"))
+            shown = [c for c in [("iid", 0.0), ("gilbert", 0.6), ("rayleigh", 0.9)] if c in channels]
+            gain_vs_p(wikihow, M, shown, [a for a in ["sempa_look", "swap_ls+order", "interleave_swap_ls+order", "casa_iid", "casa"]
+                                          if select(wikihow, algorithm=a)],
+                      out / f"wikihow_k{K}_N{N}_gain_vs_p.png",
+                      f"WikiHow K={K}, N={N}: ATS gain over Random PA (MPNet, {messages} messages, 95% CI)")
 
     Path(args.tables).write_text("\n".join(tables) + "\n")
     print(args.tables)

@@ -14,6 +14,9 @@ Algorithms
     interleave         token i -> slot i mod N
     sempa_look         the paper's method (channel- and p-blind)
     swap_ls            swap local search on the RSS surrogate
+    interleave_swap_ls swap local search on the RSS surrogate started
+                       from the token interleaver (interleaving +
+                       semantic refinement, still channel-blind)
     <blind>+order      a channel-blind partition with its slots
                        reordered for Q (2^N extra calls)
     casa_iid           CASA fitted and searched as if the channel were
@@ -65,7 +68,7 @@ from sempalab.partition import sample_random_partition
 from sempalab.repro import block_unions, count_block_unions
 
 
-BLIND = ("random_pa", "interleave", "sempa_look", "swap_ls")
+BLIND = ("random_pa", "interleave", "sempa_look", "swap_ls", "interleave_swap_ls")
 
 ALGORITHMS = (
     *BLIND,
@@ -279,6 +282,13 @@ def blind_partitions(message, encoder, M: int, config: dict, seed: int) -> dict:
         result = swap_local_search(message, encoder, M, seed=seed, **config["swap_ls"])
         out["swap_ls"] = (result.best_partition, result.logical_calls)
 
+    if "interleave_swap_ls" in wanted:
+        from sempalab.algorithms.swap_local_search import swap_local_search
+
+        options = {key: value for key, value in config["swap_ls"].items() if key != "restarts"}
+        result = swap_local_search(message, encoder, M, seed=seed, init=interleave_partition(K, M), **options)
+        out["interleave_swap_ls"] = (result.best_partition, result.logical_calls)
+
     return out
 
 
@@ -402,7 +412,7 @@ def bootstrap_ci(values: np.ndarray, resamples: int = 5000, seed: int = 0) -> tu
     return float(np.percentile(means, 2.5)), float(np.percentile(means, 97.5))
 
 
-def summarize(rows: list[dict], references=("sempa_look", "random_pa", "swap_ls+order", "full_search_iid")) -> list[dict]:
+def summarize(rows: list[dict], references=("sempa_look", "random_pa", "swap_ls+order", "interleave_swap_ls+order", "full_search_iid")) -> list[dict]:
     """
     Mean ATS, SEM and mean calls per setting, plus the paired mean
     gain over each reference algorithm with a bootstrap 95% CI.
