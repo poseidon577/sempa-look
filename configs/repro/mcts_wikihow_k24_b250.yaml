@@ -1,0 +1,16 @@
+# Table II sensitivity: MCTS-UCT with 250 encoder calls, the closed form
+# (N-1)P(k+1) of Table III, instead of the 190 SemPA-Look actually makes.
+experiment: mcts_wikihow_k24_b250
+description: Table II - MCTS-UCT with a 250-call budget (Table III closed form)
+encoder: mpnet
+data:
+  source: wikihow
+  path: data/wikihow/wikihowAll.csv
+  max_articles: 20000
+K: 24
+M: 4
+P: 10
+k: 4
+mcts: {budget: 250}
+snr_db: [6, 7]
+algorithms: [sempa_look, mcts_uct, random_pa]

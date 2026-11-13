@@ -1,0 +1,13 @@
+# Fig. 6c with SemPA-GBeam: WTS vs L = 1..5 at K=12, M=2 (N=6), 6 dB
+# (assumption A5, as for the other Fig. 6c curves). GBeam: L=10, B=2, G=5.
+experiment: gbeam_coco_k12_m2
+description: Fig. 6c - SemPA-GBeam WTS at K=12, M=2
+encoder: mpnet
+K: 12
+M: 2
+P: 10
+k: 4
+G: 5
+gbeam: {B: 2}
+snr_db: [6, 7]
+algorithms: [full_search, sempa_gbeam, genetic, sempa_look, random_pa]

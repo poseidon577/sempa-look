@@ -50,6 +50,12 @@ the reruns use the same sentences. Runtimes on 4 CPU cores: about 1 minute
 | SemPA-Look vs Random PA, 6 dB (Fig. 6a, Table II) | +14.3 %, +18.5 % | +5.8 %, +2.4 % | **not reproduced**, gap 1 |
 | WTS gain over Random PA (Fig. 6c) | +46.2 % | +10.9 % at L=3 | **not reproduced**, gap 1 |
 | TSS vs RSS separation (Fig. 3) | RSS > TSS > Random | all three overlap | **not reproduced**, gap 2 |
+| SemPA-GBeam vs Full Search, K=8, M=4, 6 dB (Fig. 6a) | −0.15 % (derived from −1.79 % and −1.64 %) | −0.15 % | reproduced |
+| SemPA-Look vs SemPA-GBeam, 6 dB (Fig. 6a) | −1.64 % | −1.88 % | reproduced |
+| SemPA-GBeam WTS, L = 1 / 3 / 5 (Fig. 6c, N=6) | 0.82 / 0.49 / 0.16 | 0.819 / 0.479 / 0.149 | reproduced |
+| SemPA-GBeam encoder calls, G·L·2^N | 200 (K=8), 3,200 (K=12, M=2) | 200, 3,200 | exact |
+| MCTS ATS, K=24, M=4, 6 dB, equal budget (Table II) | 0.6238 | 0.6324 (190 calls) | absolute value reproduced (+1.4 %) |
+| SemPA-Look over MCTS (Table II) | +2.93 % | +0.27 % [−0.36, +0.92] | **sign only**, see [below](#sempa-gbeam-and-mcts-uct) |
 
 ## Figures
 
@@ -125,6 +131,60 @@ sentence pool is the most likely cause, but we have not verified it. The
 paper's own subword panel (Fig. 13b) has N=4 above N=2, as in our runs for both
 tokenizations; see [Subword tokenization](#subword-tokenization).
 
+## SemPA-GBeam and MCTS-UCT
+
+The paper compares SemPA-Look with two search baselines we had not built in
+the first pass. Both are now in `src/sempalab/algorithms/` and every choice
+the paper leaves open is listed as A13–A20 in [assumptions.md](assumptions.md).
+
+**SemPA-GBeam** (`sempa_gbeam.py`, configs `gbeam_coco_k8`, `gbeam_coco_k12_m2`).
+The TCOM paper summarises it in two lines; we follow the algorithm of the
+authors' conference paper (arXiv:2504.19591, Sec. III-B): L random groupings,
+exact-ATS fitness, keep the top B, give each beam L/B children by swapping one
+token between two random subpackets, repeat for G generations. We use that
+paper's L=10, B=2, G=5, so it costs G·L·2^N encoder calls, the same as GA.
+It reproduces closely:
+
+| Fig. 6, MPNet, 100 messages | Paper | Ours |
+| --- | --- | --- |
+| 6a: GBeam vs Full Search ATS, K=8, M=4, 6 dB | −0.15 % (derived) | −0.15 % [−0.23, −0.07]; equal on 83 of 100 messages |
+| 6a: SemPA-Look vs GBeam | −1.64 % | −1.88 % |
+| 6a: GBeam vs GA | above (by −1.41 + 1.64 = +0.23 %, derived) | +1.24 % [+0.94, +1.55] |
+| 6c: GBeam WTS, L = 1..5 (K=12, M=2, 6 dB) | 0.82, 0.645, 0.49, 0.315, 0.16 | 0.819, 0.646, 0.479, 0.309, 0.149 |
+| 6c: ordering at every L ≥ 2 | Full > GBeam > GA > SemPA-Look > Random | same |
+
+At K=12, M=2, 6 dB GBeam's ATS is 0.6684 against Full Search's 0.6767, GA's
+0.6640 and SemPA-Look's 0.6474, so "near-optimal" holds at N=6 too, at 3,200
+encoder calls per message versus SemPA-Look's 190.
+
+**MCTS-UCT** (`mcts_uct.py`, configs `mcts_wikihow_k24`, `mcts_wikihow_k24_b250`).
+The paper gives one sentence: a generic MCTS that "sequentially constructs G
+using UCT and Monte-Carlo rollouts with reward (1/N) Σ ψ(C_i, W)", under the
+same encoder budget as SemPA-Look. Our version makes the same N − 1 depth-wise
+commits as SemPA-Look, splits the budget evenly over them, uses UCT with
+c = 1/√2 and progressive widening (the root has 10,626 possible subpackets),
+and rolls out with random completions. ψ values are memoized, so the budget
+counts distinct encoder calls.
+
+| Table II, WikiHow K=24, M=4, MPNet, 100 messages | Paper | Ours |
+| --- | --- | --- |
+| SemPA-Look ATS, 6 dB | 0.6421 | 0.6341 (190 calls) |
+| MCTS ATS, 6 dB, budget 190 | 0.6238 | 0.6324 |
+| MCTS ATS, 6 dB / 7 dB, budget 250 (Table III closed form) | — | 0.6330 / 0.8770 (SemPA-Look +0.18 % [−0.43, +0.79] at 6 dB, MCTS ahead at 7 dB) |
+| Random PA ATS, 6 dB | 0.5417 | 0.6191 |
+| SemPA-Look over MCTS, 6 dB | +2.93 % | +0.27 % [−0.36, +0.92], SemPA-Look better on 55 of 100 |
+| SemPA-Look over MCTS, 7 dB | — | +0.04 % [−0.16, +0.24] |
+| MCTS over Random PA, 6 dB | +15.2 % | +2.14 % [+1.46, +2.80] |
+
+Our MCTS lands within 1.4 % of the paper's absolute value, and SemPA-Look is
+ahead of it, as in the paper, but by a margin that is not distinguishable from
+zero with 100 messages. The paper's "more sample-efficient" conclusion
+therefore rests on a 0.018 ATS gap that our generic MCTS does not show. Since
+the paper does not describe its MCTS beyond the sentence above, a weaker
+design (no widening, a different budget split, or rollouts that pay for
+every ψ again) could explain the difference; we report ours as one
+reasonable generic MCTS, not as the paper's.
+
 ## Subword tokenization
 
 The paper repeats most COCO and WikiHow experiments with subword tokens
@@ -184,7 +244,7 @@ Three more observations:
 
 ## Not reproduced
 
-SemPA-GBeam, MCTS, the DeepSC / UTF-8 / Huffman
+The DeepSC / UTF-8 / Huffman
 baselines of Table IV, the Fig. 4 sampling ablations, AIGC / LPIPS (Figs. 14,
 15), BLEURT / BERTScore, LLM post-correction and channel coding (Fig. 18).
 See [assumptions.md](assumptions.md#not-reproduced).

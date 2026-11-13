@@ -55,18 +55,24 @@ def main(argv=None):
         "Fig. 3: TSS- vs RSS-based PA (COCO, ours K=12, M=3)",
     )
 
+    # SemPA-GBeam curves come from their own runs at the same settings.
+    def gbeam_rows(experiment):
+        return [r for r in runs.get(experiment, []) if r["algorithm"] == "sempa_gbeam"]
+
     figure(
         "fig6_ats_wts",
         ["coco_k8", "coco_k12"],
         lambda: [
             {
-                "rows": [r for r in runs["coco_k8"] if r["algorithm"] not in ("greedy_tss", "greedy_rss")],
+                "rows": [r for r in runs["coco_k8"] if r["algorithm"] not in ("greedy_tss", "greedy_rss")]
+                + gbeam_rows("gbeam_coco_k8"),
                 "x_key": "snr_db", "y_key": "mean_ats", "xlabel": "SNR (dB)", "ylabel": "ATS",
                 "paper": paper["fig6a"], "xticks": snr_ticks, "title": "(a) ATS, K=8, M=4",
             },
             {
                 "rows": wts_by_L([r for r in select(runs["coco_k12"], M=2, snr_db=6)
-                                  if r["algorithm"] in ("full_search", "genetic", "sempa_look", "random_pa")]),
+                                  if r["algorithm"] in ("full_search", "genetic", "sempa_look", "random_pa")]
+                                 + select(gbeam_rows("gbeam_coco_k12_m2"), snr_db=6)),
                 "x_key": "L", "y_key": "mean_wts", "xlabel": "Lost subpackets L", "ylabel": "WTS",
                 "paper": paper["fig6c"], "xticks": [1, 2, 3, 4, 5], "title": "(c) WTS, K=12, M=2 (N=6), 6 dB",
             },

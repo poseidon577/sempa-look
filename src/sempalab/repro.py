@@ -53,10 +53,12 @@ ALGORITHMS = (
     "greedy_rss",
     "sempa_look",
     "genetic",
+    "sempa_gbeam",
+    "mcts_uct",
 )
 
 # Partition does not depend on the channel: computed once per message.
-P_INDEPENDENT = {"random_pa", "no_packetization", "greedy_tss", "greedy_rss", "sempa_look"}
+P_INDEPENDENT = {"random_pa", "no_packetization", "greedy_tss", "greedy_rss", "sempa_look", "mcts_uct"}
 
 SWEEPABLE = {"M", "k", "P", "K", "G"}
 
@@ -92,6 +94,11 @@ DEFAULTS = {
     # G * P * 2^N encoder calls (Table III, Fig. 10b).
     "G": 5,
     "genetic": {},
+    # SemPA-GBeam: population L = P, G generations as for GA, beam width B.
+    "gbeam": {"B": 2},
+    # MCTS-UCT: budget None = SemPA-Look's encoder calls at the same
+    # (K, M, P, k); see sempa_look_calls().
+    "mcts": {"budget": None, "c": 0.7071067811865476, "widening": 0.5},
     "sweep": None,
     "metrics": ["ats", "wts"],
     "prefetch_max_sets": 5000,
@@ -241,6 +248,21 @@ def block_unions(K: int, M: int):
 # -------------------------------------------------------------
 
 
+def sempa_look_calls(K: int, M: int, P: int, k: int, lookahead_mode: str = "disjoint") -> int:
+    """
+    Encoder calls SemPA-Look makes: P * (k_n + 1) at each of the N - 1
+    decisions, where k_n = min(k, subpackets left after the candidate)
+    with disjoint lookaheads and k otherwise. 190 at K=24, M=4, P=10, k=4.
+    """
+
+    N = K // M
+
+    return sum(
+        P * ((min(k, N - 1 - n) if lookahead_mode == "disjoint" else k) + 1)
+        for n in range(N - 1)
+    )
+
+
 def packetize(name, message, encoder, point, config, p, seed):
     """
     Returns (partition, logical_calls, partitions_evaluated, runtime).
@@ -301,6 +323,30 @@ def packetize(name, message, encoder, point, config, p, seed):
             seed=seed,
             **config["genetic"],
         )
+
+    elif name == "sempa_gbeam":
+        from sempalab.algorithms.sempa_gbeam import sempa_gbeam
+
+        # Same accounting as GA: G evaluated generations of P groupings.
+        result = sempa_gbeam(
+            message,
+            encoder,
+            M,
+            p=p,
+            L=point["P"],
+            G=point["G"],
+            seed=seed,
+            **config["gbeam"],
+        )
+
+    elif name == "mcts_uct":
+        from sempalab.algorithms.mcts_uct import mcts_uct
+
+        options = dict(config["mcts"])
+        if options.get("budget") is None:
+            options["budget"] = sempa_look_calls(K, M, point["P"], point["k"], config["lookahead_mode"])
+
+        result = mcts_uct(message, encoder, M, seed=seed, **options)
 
     else:
         raise ValueError(f"Unknown algorithm: {name}")
@@ -377,8 +423,8 @@ def run_point(point, messages, encoder, config, sweep_value=None) -> list[dict]:
 
                 if name in P_INDEPENDENT and cached is not None:
                     outcome = cached
-                elif name == "genetic" and M in (1, K):
-                    # Only one partition exists; GA would just re-evaluate it.
+                elif name in ("genetic", "sempa_gbeam") and M in (1, K):
+                    # Only one partition exists; GA / GBeam would just re-evaluate it.
                     outcome = (tuple((i,) for i in range(K)) if M == 1 else (tuple(range(K)),), 0, 1, 0.0)
                 elif name == "full_search":
                     partition, _, evaluated, calls = evaluation.full_search(table, K, M, p)

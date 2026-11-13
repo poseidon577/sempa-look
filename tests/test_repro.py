@@ -259,3 +259,25 @@ def test_genetic_prefetch_keeps_results(fake_encoder):
     # initial population + G evolved ones, 2^N exact-ATS terms each
     assert result.logical_calls == 8 * 4 * 2**4
     assert result.best_score == pytest.approx(exact_ats(result.best_partition, message, fake_encoder(), 0.3))
+
+
+def test_gbeam_calls_follow_paper_closed_form(workspace, fake_encoder):
+    make_config, _ = workspace
+
+    # SemPA-GBeam has GA's complexity: G * P * 2^N (Table III, ref. [29]).
+    config = make_config(K=8, M=4, P=10, G=5, k=1, snr_db=[6, 7], algorithms=["sempa_gbeam"])
+
+    summary = run(config, encoder=fake_encoder())
+
+    assert [row["mean_logical_calls"] for row in summary] == [5 * 10 * 2**2] * 2
+
+
+def test_mcts_budget_defaults_to_sempa_look_calls(workspace, fake_encoder):
+    make_config, _ = workspace
+
+    config = make_config(experiment="mcts", K=8, M=2, P=4, k=2, snr_db=[6], algorithms=["sempa_look", "mcts_uct"])
+
+    summary = run(config, encoder=fake_encoder())
+    by = {row["algorithm"]: row for row in summary}
+
+    assert by["mcts_uct"]["mean_logical_calls"] <= by["sempa_look"]["mean_logical_calls"]

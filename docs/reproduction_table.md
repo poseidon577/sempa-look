@@ -5,6 +5,9 @@
 | Fig. 6a | SemPA-Look ATS relative to Full Search at 6 dB | COCO, K=8, M=4 | -1.79% | -2.03% | -0.24 pp | text/table |
 | Fig. 6a | SemPA-Look ATS relative to GA at 6 dB | COCO, K=8, M=4, G=5 | -1.41% | -0.67% | +0.74 pp | text/table |
 | Fig. 6a | SemPA-Look ATS at 6 dB | COCO, K=8, M=4 | 0.6000 | 0.5965 | -0.6% | read off plot |
+| Fig. 6a | SemPA-Look ATS relative to SemPA-GBeam at 6 dB | COCO, K=8, M=4, L=10, B=2, G=5 | -1.64% | -1.88% | -0.24 pp | text/table |
+| Fig. 6a | SemPA-GBeam ATS relative to Full Search at 6 dB (derived: paper -1.79 vs -1.64) | COCO, K=8, M=4 | -0.15% | -0.15% | +0.00 pp | text/table |
+| Table III | SemPA-GBeam encoder calls, G*L*2^N | K=8, M=4, L=10, G=5 | 200 | 200 | +0.0% | text/table |
 | Fig. 6c | SemPA-Look WTS gain over Random PA (paper does not name L; L=3 shown) | COCO, N=6 (ours K=12, M=2), 6 dB | +46.20% | +10.91% | -35.29 pp | text/table |
 | Fig. 6c | SemPA-Look WTS at L=1 | COCO, N=6 | 0.8200 | 0.8149 | -0.6% | read off plot |
 | Fig. 6c | SemPA-Look WTS at L=3 | COCO, N=6 | 0.4300 | 0.3869 | -10.0% | read off plot |
@@ -12,6 +15,9 @@
 | Fig. 6c | Random PA WTS at L=1 | COCO, N=6 | 0.7300 | 0.7869 | +7.8% | read off plot |
 | Fig. 6c | Random PA WTS at L=3 | COCO, N=6 | 0.3000 | 0.3488 | +16.3% | read off plot |
 | Fig. 6c | Full Search WTS at L=3 | COCO, N=6 | 0.5100 | 0.5016 | -1.6% | read off plot |
+| Fig. 6c | SemPA-GBeam WTS at L=1 | COCO, N=6 | 0.8200 | 0.8187 | -0.2% | read off plot |
+| Fig. 6c | SemPA-GBeam WTS at L=3 | COCO, N=6 | 0.4900 | 0.4789 | -2.3% | read off plot |
+| Fig. 6c | SemPA-GBeam WTS at L=5 | COCO, N=6 | 0.1600 | 0.1493 | -6.7% | read off plot |
 | Fig. 3 | RSS-based PA ATS at 6 dB | COCO, K, M unstated (ours K=12, M=3) | 0.6100 | 0.6180 | +1.3% | read off plot |
 | Fig. 3 | TSS-based PA ATS at 6 dB | COCO (ours K=12, M=3) | 0.5550 | 0.6221 | +12.1% | read off plot |
 | Fig. 3 | Random PA ATS at 6 dB | COCO (ours K=12, M=3) | 0.4900 | 0.6202 | +26.6% | read off plot |
@@ -43,6 +49,9 @@
 | Fig. 10b | GA encoder calls at G=1 | K=24, M=4, P=10 | 640 | 640 | +0.0% | text/table |
 | Table II | SemPA-Look ATS | WikiHow, K=24, M=4, 6 dB | 0.6421 | 0.6341 | -1.2% | text/table |
 | Table II | Random PA ATS | WikiHow, K=24, M=4, 6 dB | 0.5417 | 0.6191 | +14.3% | text/table |
+| Table II | MCTS-UCT ATS (budget = SemPA-Look's 190 calls) | WikiHow, K=24, M=4, 6 dB | 0.6238 | 0.6324 | +1.4% | text/table |
+| Table II | MCTS-UCT ATS (budget 250 calls) | WikiHow, K=24, M=4, 6 dB | 0.6238 | 0.6330 | +1.5% | text/table |
+| Table II | SemPA-Look ATS gain over MCTS-UCT (equal budget) | WikiHow, K=24, M=4, 6 dB | +2.93% | +0.27% | -2.66 pp | text/table |
 | Table V | SemPA-Look ATS (no post-correction) | WikiHow, K=24, M=6, 6 dB | 0.6206 | 0.6316 | +1.8% | text/table |
 | Table V | SemPA-Look ATS (no post-correction) | WikiHow, K=24, M=6, 7 dB | 0.8716 | 0.8778 | +0.7% | text/table |
 | Table V | SemPA-Look ATS (no post-correction) | WikiHow, K=24, M=6, 8 dB | 0.9696 | 0.9705 | +0.1% | text/table |
