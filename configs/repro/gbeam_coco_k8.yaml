@@ -1,0 +1,14 @@
+# Fig. 6a with SemPA-GBeam: ATS vs SNR at the captioned K=8, M=4
+# (MS-COCO, word tokens, MPNet). GBeam uses the conference paper's
+# L=10, B=2, G=5 (arXiv:2504.19591, Fig. 3 caption); L is the runner's P.
+experiment: gbeam_coco_k8
+description: Fig. 6a - SemPA-GBeam vs Full Search, GA, SemPA-Look at K=8, M=4
+encoder: mpnet
+K: 8
+M: 4
+P: 10
+k: 4
+G: 5
+gbeam: {B: 2}
+snr_db: [2, 3, 4, 5, 6, 7, 8, 9, 10]
+algorithms: [full_search, sempa_gbeam, genetic, sempa_look, random_pa]

@@ -24,6 +24,8 @@ STYLE = {
     "sempa_look": ("SemPA-Look", "#2a78d6", "o"),
     "full_search": ("Full Search", "#0b0b0b", "s"),
     "genetic": ("Genetic", "#1baf7a", "^"),
+    "sempa_gbeam": ("SemPA-GBeam", "#b3449a", "*"),
+    "mcts_uct": ("MCTS-UCT", "#7a6a2f", "h"),
     "greedy_rss": ("Greedy RSS", "#eb6834", "D"),
     "greedy_tss": ("Greedy TSS", "#eda100", "v"),
     "random_pa": ("Random PA", "#e34948", "x"),

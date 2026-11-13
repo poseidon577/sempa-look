@@ -1,0 +1,55 @@
+experiment: gbeam_coco_k8
+description: Fig. 6a - SemPA-GBeam vs Full Search, GA, SemPA-Look at K=8, M=4
+encoder: mpnet
+device: null
+cache_size: 1000000
+tokenization: word
+reconstruction: fragment
+data:
+  source: coco
+  path: data/coco/annotations/captions_train2017.json
+  max_articles: null
+  num_messages: 100
+  seed: 42
+  eval_set_dir: results/stage4/eval_sets
+K: 8
+M: 4
+fixed_N: null
+P: 10
+k: 4
+lookahead_mode: disjoint
+packet_bits: 300
+snr_db:
+- 2
+- 3
+- 4
+- 5
+- 6
+- 7
+- 8
+- 9
+- 10
+algorithms:
+- full_search
+- sempa_gbeam
+- genetic
+- sempa_look
+- random_pa
+G: 5
+genetic: {}
+gbeam:
+  B: 2
+mcts:
+  budget: null
+  c: 0.7071067811865476
+  widening: 0.5
+sweep: null
+metrics:
+- ats
+- wts
+prefetch_max_sets: 5000
+seed: 42
+results_dir: results/stage4
+run_at: '2026-11-13T15:16:33'
+wall_seconds: 57.0
+model_name: sentence-transformers/all-mpnet-base-v2

@@ -1,0 +1,18 @@
+# Table II: SemPA-Look vs Random PA vs a generic MCTS (UCT) baseline at
+# K=24, M=4, 6 dB on WikiHow. MCTS gets SemPA-Look's encoder budget at the
+# same (K, M, P, k): 190 measured calls (mcts.budget: null). The
+# mcts_wikihow_k24_b250 config repeats it at Table III's closed form, 250.
+experiment: mcts_wikihow_k24
+description: Table II - MCTS-UCT vs SemPA-Look at K=24, M=4, 6 dB
+encoder: mpnet
+data:
+  source: wikihow
+  path: data/wikihow/wikihowAll.csv
+  max_articles: 20000
+K: 24
+M: 4
+P: 10
+k: 4
+mcts: {budget: null}
+snr_db: [6, 7]
+algorithms: [sempa_look, mcts_uct, random_pa]

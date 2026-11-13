@@ -72,6 +72,26 @@ entries:
     ours:
       value: {experiment: coco_k8, algorithm: sempa_look, metric: ats, where: {snr_db: 6}}
 
+  # SemPA-GBeam (arXiv:2504.19591; L=10, B=2, G=5), run at the same setting.
+  - id: fig6a_gap_gbeam
+    figure: Fig. 6a
+    quantity: SemPA-Look ATS relative to SemPA-GBeam at 6 dB
+    setting: COCO, K=8, M=4, L=10, B=2, G=5
+    paper: -1.64
+    unit: "%"
+    source: text
+    ours:
+      gain:
+        a: {experiment: gbeam_coco_k8, algorithm: sempa_look, metric: ats, where: {snr_db: 6}}
+        b: {experiment: gbeam_coco_k8, algorithm: sempa_gbeam, metric: ats, where: {snr_db: 6}}
+
+  - {id: fig6a_gbeam_vs_full, figure: Fig. 6a, quantity: "SemPA-GBeam ATS relative to Full Search at 6 dB (derived: paper -1.79 vs -1.64)", setting: "COCO, K=8, M=4", paper: -0.15, unit: "%", source: text,
+     ours: {gain: {a: {experiment: gbeam_coco_k8, algorithm: sempa_gbeam, metric: ats, where: {snr_db: 6}},
+                   b: {experiment: gbeam_coco_k8, algorithm: full_search, metric: ats, where: {snr_db: 6}}}}}
+
+  - {id: gbeam_calls_k8, figure: Table III, quantity: "SemPA-GBeam encoder calls, G*L*2^N", setting: "K=8, M=4, L=10, G=5", paper: 200, source: text,
+     ours: {value: {experiment: gbeam_coco_k8, algorithm: sempa_gbeam, metric: logical_calls, where: {snr_db: 6}}}}
+
   # ---------------- Fig. 6c: WTS vs lost subpackets L ----------------
   # The caption says K=8, M=4, which allows only L=1. The axis runs to L=5,
   # so N=6: we read it at K=12, M=2 (N=6) at 6 dB.
@@ -99,6 +119,13 @@ entries:
      ours: {value: {experiment: coco_k12, algorithm: random_pa, metric: wts_L3, where: {M: 2, snr_db: 6}}}}
   - {id: fig6c_full_L3, figure: Fig. 6c, quantity: Full Search WTS at L=3, setting: "COCO, N=6", paper: 0.51, source: plot,
      ours: {value: {experiment: coco_k12, algorithm: full_search, metric: wts_L3, where: {M: 2, snr_db: 6}}}}
+
+  - {id: fig6c_gbeam_L1, figure: Fig. 6c, quantity: SemPA-GBeam WTS at L=1, setting: "COCO, N=6", paper: 0.82, source: plot,
+     ours: {value: {experiment: gbeam_coco_k12_m2, algorithm: sempa_gbeam, metric: wts_L1, where: {snr_db: 6}}}}
+  - {id: fig6c_gbeam_L3, figure: Fig. 6c, quantity: SemPA-GBeam WTS at L=3, setting: "COCO, N=6", paper: 0.49, source: plot,
+     ours: {value: {experiment: gbeam_coco_k12_m2, algorithm: sempa_gbeam, metric: wts_L3, where: {snr_db: 6}}}}
+  - {id: fig6c_gbeam_L5, figure: Fig. 6c, quantity: SemPA-GBeam WTS at L=5, setting: "COCO, N=6", paper: 0.16, source: plot,
+     ours: {value: {experiment: gbeam_coco_k12_m2, algorithm: sempa_gbeam, metric: wts_L5, where: {snr_db: 6}}}}
 
   # ---------------- Fig. 3: TSS vs RSS vs Random ----------------
   # K and M are not stated; ours at K=12, M=3.
@@ -190,6 +217,13 @@ entries:
      ours: {value: {experiment: wikihow_k24_m4, algorithm: sempa_look, metric: ats, where: {k: 4, snr_db: 6}}}}
   - {id: table2_random, figure: Table II, quantity: Random PA ATS, setting: "WikiHow, K=24, M=4, 6 dB", paper: 0.5417, source: text,
      ours: {value: {experiment: wikihow_k24_m4, algorithm: random_pa, metric: ats, where: {k: 4, snr_db: 6}}}}
+  - {id: table2_mcts, figure: Table II, quantity: MCTS-UCT ATS (budget = SemPA-Look's 190 calls), setting: "WikiHow, K=24, M=4, 6 dB", paper: 0.6238, source: text,
+     ours: {value: {experiment: mcts_wikihow_k24, algorithm: mcts_uct, metric: ats, where: {snr_db: 6}}}}
+  - {id: table2_mcts_b250, figure: Table II, quantity: MCTS-UCT ATS (budget 250 calls), setting: "WikiHow, K=24, M=4, 6 dB", paper: 0.6238, source: text,
+     ours: {value: {experiment: mcts_wikihow_k24_b250, algorithm: mcts_uct, metric: ats, where: {snr_db: 6}}}}
+  - {id: table2_sempa_vs_mcts, figure: Table II, quantity: SemPA-Look ATS gain over MCTS-UCT (equal budget), setting: "WikiHow, K=24, M=4, 6 dB", paper: 2.93, unit: "%", source: text,
+     ours: {gain: {a: {experiment: mcts_wikihow_k24, algorithm: sempa_look, metric: ats, where: {snr_db: 6}},
+                   b: {experiment: mcts_wikihow_k24, algorithm: mcts_uct, metric: ats, where: {snr_db: 6}}}}}
   - {id: table5_6db, figure: Table V, quantity: SemPA-Look ATS (no post-correction), setting: "WikiHow, K=24, M=6, 6 dB", paper: 0.6206, source: text,
      ours: {value: {experiment: wikihow_k24_m6, algorithm: sempa_look, metric: ats, where: {snr_db: 6}}}}
   - {id: table5_7db, figure: Table V, quantity: SemPA-Look ATS (no post-correction), setting: "WikiHow, K=24, M=6, 7 dB", paper: 0.8716, source: text,

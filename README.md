@@ -220,8 +220,8 @@ SEMPA-LAB implements the packetization strategies as independent modules so they
 | **Greedy RSS**        | Residual semantic score surrogate     |
 | **SemPA-Look**        | Main proposed lookahead method        |
 | **Genetic Algorithm** | Evolutionary optimization baseline    |
-| **SemPA-GBeam**       | Optional predecessor baseline         |
-| **MCTS-UCT**          | Optional generic tree-search baseline |
+| **SemPA-GBeam**       | Predecessor: genetic beam search on exact ATS |
+| **MCTS-UCT**          | Generic tree search on the RSS surrogate (Table II) |
 
 The distinction between `greedy_rss` and `sempa_look` is intentional:
 
@@ -443,7 +443,9 @@ sempa-look/
 │           ├── greedy_tss.py
 │           ├── greedy_rss.py
 │           ├── sempa_look.py
-│           └── genetic.py
+│           ├── genetic.py
+│           ├── sempa_gbeam.py
+│           └── mcts_uct.py
 │
 ├── tests/
 │
@@ -880,6 +882,7 @@ Results are written to `results/<experiment>/` as `results.csv`, `summary.json`,
 * Every compared number (about 70, paper vs ours): [docs/reproduction_table.md](docs/reproduction_table.md)
 * Every interpretation we had to make: [docs/assumptions.md](docs/assumptions.md)
 * Limitations of the paper and ranked novelty directions: [docs/limitations.md](docs/limitations.md)
+* SemPA-GBeam and the Table II MCTS baseline: [docs/reproduction.md](docs/reproduction.md#sempa-gbeam-and-mcts-uct)
 
 ### Headline numbers
 
@@ -895,11 +898,21 @@ Results are written to `results/<experiment>/` as `results.csv`, `summary.json`,
 | Table III: SemPA-Look encoder calls | 250 (closed form) | 190 (measured, disjoint lookaheads) |
 | Fig. 6a / Table II: SemPA-Look gain over Random PA at 6 dB | +14.3 % / +18.5 % | +5.8 % / +2.4 % (not reproduced) |
 | Fig. 13: N=2 above N=4 at large K | yes | no, N=4 slightly above (not reproduced) |
+| Fig. 6a: SemPA-GBeam vs Full Search (K=8, M=4, 6 dB) | −0.15 % (derived) | −0.15 % |
+| Fig. 6c: SemPA-GBeam WTS at L = 1 / 3 / 5 (N=6, 6 dB) | 0.82 / 0.49 / 0.16 | 0.819 / 0.479 / 0.149 |
+| Table II: MCTS ATS at equal encoder budget (K=24, M=4, 6 dB) | 0.6238 | 0.6324 |
+| Table II: SemPA-Look gain over MCTS | +2.93 % | +0.27 %, CI includes 0 (sign only) |
 | Fig. 7b (subword): SemPA-Look ATS vs M, M = 1, 2, 3, 4, 6, 12 | 0.874, 0.882, 0.883, 0.880, 0.869, 0.793 | 0.869, 0.877, 0.880, 0.876, 0.868, 0.793 |
 | Fig. 11a (subword): ATS at P=130, SemPA-Look / GA | 0.8772 / 0.8830 | 0.8772 / 0.8828 |
 | Fig. 6d (subword): SemPA-Look WTS gain over Random PA | +45.5 % | +14.5 % at L=3 (not reproduced) |
 
-Two results are not reproduced: the size of the gain over Random PA at 6 dB, and the N=2 vs N=4 ordering of Fig. 13 at large K. Our Random PA matches the paper at 4, 7 and 8 dB but is stronger at 6 dB, while Full Search, GA and SemPA-Look match at 6 dB too. See [docs/reproduction.md](docs/reproduction.md#gaps-we-could-not-close).
+### Three gaps we cannot explain
+
+Everything else in the table above lands within about 1–2 % of the paper. These three do not, and we have not found a reading of the paper that closes them. Details and the checks we ran are in [docs/reproduction.md](docs/reproduction.md#gaps-we-could-not-close).
+
+1. **Random PA at 6 dB is much weaker in the paper than in our runs.** Our Random PA matches the paper at 4, 7 and 8 dB, but at 6 dB the paper reports 0.5417 (Table II, K=24, M=4) where we get 0.619, and 0.529 in Fig. 6a where we get 0.564. Full Search, GA and SemPA-Look all match the paper at 6 dB, so the gap sits in the baseline only. It alone accounts for the paper's headline gains (+14.3 % in Fig. 6a, +18.5 % in Table II, +46.2 % WTS in Fig. 6c), against our +5.8 %, +2.4 % and +10.9 %. For N=2 the algebra pins it down: the paper's 6 dB Random PA point implies a per-message similarity sum that disagrees with its own 8 dB point, while its SemPA-Look points agree with each other.
+2. **Fig. 3 (TSS vs RSS) does not separate.** The paper shows RSS-based greedy PA above TSS-based greedy PA, both above Random PA. In our runs the three overlap within 0.005 ATS. The paper does not state K or M for this figure (we use K=12, M=3), and its Random PA curve there is again almost exactly 1 − p at 6 dB, the same pattern as gap 1.
+3. **Fig. 13 (N fixed, K growing) has the opposite ordering.** The paper's word-based Fig. 13a has N=2 above N=4 with ATS saturating by K≈20. Ours has N=4 at or above N=2 from K=20 on, still rising at K=28. SemPA-Look's lead over Random PA, the point of the figure, does reproduce, and the paper's own subword Fig. 13b shows N=4 above N=2, as we find for both tokenizations.
 
 Subword tokenization (MPNet's WordPiece tokenizer, an assumption since the paper does not name one) reproduces the same way: absolute numbers within about 1 %, a smaller gain over Random PA than reported. The paper's own subword Fig. 13b has N=4 above N=2, as in our runs. See [docs/reproduction.md](docs/reproduction.md#subword-tokenization).
 
@@ -1208,6 +1221,8 @@ Completed:
 * [x] Greedy RSS
 * [x] SemPA-Look
 * [x] Genetic Algorithm
+* [x] SemPA-GBeam
+* [x] MCTS-UCT
 * [x] Algorithm-level tests
 
 Current next milestone:
