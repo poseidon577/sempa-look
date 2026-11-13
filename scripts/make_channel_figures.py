@@ -77,9 +77,9 @@ def style_axis(ax):
         ax.spines[side].set_visible(False)
 
 
-def bottom_legend(fig, ax):
+def bottom_legend(fig, ax, ncol=6):
     handles, labels = ax.get_legend_handles_labels()
-    fig.legend(handles, labels, loc="lower center", ncol=min(len(labels), 6), fontsize=8, frameon=False)
+    fig.legend(handles, labels, loc="lower center", ncol=min(len(labels), ncol), fontsize=8, frameon=False)
 
 
 def line(ax, rows, x, y, name, err=None):
@@ -202,12 +202,13 @@ def delay_vs_gain(summary, p, channels, algorithms, out, title):
             ax.set_xticks(spans, [str(s) for s in spans])
             ax.set_title(f"N={N}, {channel_label(channel, parameter)}", fontsize=10)
             ax.set_xlabel("delay: message span (N-1)D, packets")
-            ax.set_ylabel("ATS gain over Random PA, no interleaving")
+            if j == 0:
+                ax.set_ylabel("ATS gain over Random PA at D=1")
             style_axis(ax)
 
-    bottom_legend(fig, axes[0][0])
+    bottom_legend(fig, axes[0][0], ncol=3)
     fig.suptitle(title, fontsize=11)
-    fig.tight_layout(rect=(0, 0.1, 1, 1))
+    fig.tight_layout(rect=(0, 0.09, 1, 1))
     fig.savefig(out, dpi=150)
     plt.close(fig)
     print(out)

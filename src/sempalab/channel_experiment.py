@@ -608,8 +608,8 @@ def main(argv: list[str] | None = None) -> None:
     for row in summary:
         if row["algorithm"] in {"sempa_look", "casa", "full_search"}:
             print(
-                f"M={row['M']} {row['channel']}({row['parameter']}) D={row['stride']} p={row['p']:.2f} "
-                f"{row['algorithm']:>12} ATS={row['mean_ats']:.4f} calls={row['mean_logical_calls']:.0f}"
+                f"M={row['M']} {row['channel']}({row['parameter']}) D={row['stride']} p={float(row['p']):.2f} "
+                f"{row['algorithm']:>12} ATS={float(row['mean_ats']):.4f} calls={float(row['mean_logical_calls']):.0f}"
             )
 
 
