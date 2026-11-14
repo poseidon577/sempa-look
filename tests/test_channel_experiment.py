@@ -106,7 +106,7 @@ def test_run_end_to_end(workspace, fake_encoder):
         assert value <= oracle + 1e-9, key
 
         # Reordering slots never hurts; under i.i.d. it changes nothing.
-        if name in {"random_pa", "interleave", "sempa_look", "swap_ls"}:
+        if name in {"random_pa", "interleave", "sempa_look", "swap_ls", "interleave_swap_ls"}:
             ordered = by_key[(message_id, M, channel, stride, p, f"{name}+order")]
             assert ordered >= value - 1e-9
             if channel == "iid":
@@ -192,3 +192,88 @@ def test_shared_pool_keeps_calls_and_validity(workspace, fake_encoder):
         assert validate_partition(tuple(map(tuple, json.loads(row["partition"]))), 8, 2)
     casa_calls = {int(r["logical_calls"]) for r in rows if r["algorithm"] == "casa"}
     assert min(casa_calls) > 0
+
+
+def test_interleave_swap_ls_refines_the_interleaver(workspace, fake_encoder):
+    """
+    The combined baseline starts at the token interleaver and only
+    accepts improving swaps, so its RSS sum is never below the
+    interleaver's, and it is a swap local optimum.
+    """
+
+    from sempalab.algorithms.interleave import interleave_partition
+    from sempalab.algorithms.swap_local_search import swap_local_search
+    from sempalab.channel_experiment import blind_partitions
+
+    make_config, _ = workspace
+    config = make_config(algorithms=["interleave", "interleave_swap_ls", "interleave_swap_ls+order"])
+    message = Message(5, " ".join(TEXTS[0].split()[:8]), TEXTS[0].split()[:8])
+
+    blind = blind_partitions(message, fake_encoder(), 2, config, seed=0)
+    assert set(blind) == {"interleave", "interleave_swap_ls"}
+
+    table = SimilarityTable(fake_encoder(), message)
+    full = (1 << 8) - 1
+
+    def rss_sum(partition):
+        return sum(table.lookup([full & ~sum(1 << i for i in g)])[0] for g in partition)
+
+    refined, calls = blind["interleave_swap_ls"]
+    assert validate_partition(tuple(map(tuple, refined)), 8, 2)
+    assert rss_sum(refined) >= rss_sum(interleave_partition(8, 2)) - 1e-9
+    assert calls > 0
+
+    # Restarting the search from its own output changes nothing.
+    again = swap_local_search(message, fake_encoder(), 2, init=refined)
+    assert again.best_score == pytest.approx(rss_sum(refined))
+
+
+def test_interrupted_run_resumes_from_checkpoints(workspace, fake_encoder):
+    """
+    A run killed after some messages picks up from its per-message
+    checkpoints and ends with exactly the rows of an uninterrupted run.
+    """
+
+    import sempalab.channel_experiment as experiment
+
+    make_config, tmp_path = workspace
+    kwargs = dict(M=[4], p=[0.3], channels=CHANNELS[:2], P=4, k=1, r2_samples=0)
+
+    reference = make_config(experiment="whole", **kwargs)
+    run(reference, encoder=fake_encoder())
+    expected = read_csv(tmp_path / "results" / "whole" / "results.csv.gz")
+
+    config = make_config(experiment="resumed", **kwargs)
+    original = experiment.run_message
+    calls = []
+
+    def failing(message, *args, **kw):
+        calls.append(message.message_id)
+        if len(calls) == 3:
+            raise KeyboardInterrupt
+        return original(message, *args, **kw)
+
+    experiment.run_message = failing
+    try:
+        with pytest.raises(KeyboardInterrupt):
+            run(config, encoder=fake_encoder())
+    finally:
+        experiment.run_message = original
+
+    out = tmp_path / "results" / "resumed"
+    assert len(list(out.glob("_checkpoints/*/*.json"))) == 2
+    assert not (out / "results.csv.gz").exists()
+
+    seen = []
+    experiment.run_message = lambda message, *a, **kw: seen.append(message.message_id) or original(message, *a, **kw)
+    try:
+        run(config, encoder=fake_encoder())
+    finally:
+        experiment.run_message = original
+
+    assert len(seen) == 1  # only the message that had not finished
+    assert not (out / "_checkpoints").exists()
+
+    got = read_csv(out / "results.csv.gz")
+    strip = lambda rows: [{k: v for k, v in r.items() if k != "experiment"} for r in rows]
+    assert strip(got) == strip(expected)

@@ -15,6 +15,7 @@ channels:
   - {name: iid}
   - {name: gilbert, parameter: 0.6}
   - {name: rayleigh, parameter: 0.9}
-algorithms: [random_pa, interleave, sempa_look, swap_ls, sempa_look+order, swap_ls+order, casa_iid, casa]
+algorithms: [random_pa, interleave, sempa_look, swap_ls, interleave_swap_ls, sempa_look+order, swap_ls+order,
+             interleave_swap_ls+order, casa_iid, casa]
 shared_pool: true
 r2_samples: 0

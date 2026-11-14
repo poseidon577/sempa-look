@@ -1111,9 +1111,10 @@ The paper assumes independent packet erasures. Under bursty (Gilbert–Elliott) 
 | SemPA-Look | 1–47% (falls with channel memory) |
 | Full Search assuming i.i.d. losses | 32–100% |
 | Swap local search + channel-aware slot order | 59–76% |
+| Interleaver-seeded swap search + slot order | 59–76% |
 | **CASA** | **85–92% on every channel** |
 
-CASA beats SemPA-Look by up to +0.040 ATS (+8.1%) with every 95% CI above zero. The gains hold, smaller, when the partitions are re-scored under MiniLM and BGE-small, and on WikiHow K = 24. A deep packet interleaver is the main competitor: SemPA-Look needs a 1.5–2.3× deeper interleaver to match CASA. Details, limits and rerun commands: [docs/channel_aware.md](docs/channel_aware.md). Full tables: [docs/channel_aware_tables.md](docs/channel_aware_tables.md).
+CASA beats SemPA-Look by up to +0.040 ATS (+8.1%) with every 95% CI above zero. The gains hold, smaller, when the partitions are re-scored under MiniLM and BGE-small, and on WikiHow K = 24, 48 and 60, where CASA also needs 2.4–3.3× fewer encoder calls than swap search at K ≥ 48. At p = 0.1 under i.i.d. losses, swap search is slightly better. A deep packet interleaver is the main competitor: SemPA-Look needs a 1.5–2.3× deeper interleaver to match CASA, a well-searched blind partition with slot order 1.1–1.45×. Details, limits and rerun commands: [docs/channel_aware.md](docs/channel_aware.md). Full tables: [docs/channel_aware_tables.md](docs/channel_aware_tables.md).
 
 ![CASA, N=6](results/channel/figures/coco_k12_N6_gain_vs_p.png)
 

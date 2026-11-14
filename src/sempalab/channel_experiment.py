@@ -14,6 +14,9 @@ Algorithms
     interleave         token i -> slot i mod N
     sempa_look         the paper's method (channel- and p-blind)
     swap_ls            swap local search on the RSS surrogate
+    interleave_swap_ls swap local search on the RSS surrogate started
+                       from the token interleaver (interleaving +
+                       semantic refinement, still channel-blind)
     <blind>+order      a channel-blind partition with its slots
                        reordered for Q (2^N extra calls)
     casa_iid           CASA fitted and searched as if the channel were
@@ -38,6 +41,7 @@ import copy
 import csv
 import gzip
 import json
+import shutil
 import time
 import zlib
 from pathlib import Path
@@ -65,7 +69,7 @@ from sempalab.partition import sample_random_partition
 from sempalab.repro import block_unions, count_block_unions
 
 
-BLIND = ("random_pa", "interleave", "sempa_look", "swap_ls")
+BLIND = ("random_pa", "interleave", "sempa_look", "swap_ls", "interleave_swap_ls")
 
 ALGORITHMS = (
     *BLIND,
@@ -279,6 +283,13 @@ def blind_partitions(message, encoder, M: int, config: dict, seed: int) -> dict:
         result = swap_local_search(message, encoder, M, seed=seed, **config["swap_ls"])
         out["swap_ls"] = (result.best_partition, result.logical_calls)
 
+    if "interleave_swap_ls" in wanted:
+        from sempalab.algorithms.swap_local_search import swap_local_search
+
+        options = {key: value for key, value in config["swap_ls"].items() if key != "restarts"}
+        result = swap_local_search(message, encoder, M, seed=seed, init=interleave_partition(K, M), **options)
+        out["interleave_swap_ls"] = (result.best_partition, result.logical_calls)
+
     return out
 
 
@@ -402,7 +413,7 @@ def bootstrap_ci(values: np.ndarray, resamples: int = 5000, seed: int = 0) -> tu
     return float(np.percentile(means, 2.5)), float(np.percentile(means, 97.5))
 
 
-def summarize(rows: list[dict], references=("sempa_look", "random_pa", "swap_ls+order", "full_search_iid")) -> list[dict]:
+def summarize(rows: list[dict], references=("sempa_look", "random_pa", "swap_ls+order", "interleave_swap_ls+order", "full_search_iid")) -> list[dict]:
     """
     Mean ATS, SEM and mean calls per setting, plus the paired mean
     gain over each reference algorithm with a bootstrap 95% CI.
@@ -474,6 +485,15 @@ def read_csv(path: Path) -> list[dict]:
         return list(csv.DictReader(handle))
 
 
+def checkpoint_key(config: dict) -> str:
+    """
+    Short hash of everything that determines an experiment's rows.
+    """
+
+    relevant = {key: value for key, value in config.items() if key not in {"description", "results_dir", "device", "cache_size"}}
+    return f"{zlib.crc32(json.dumps(relevant, sort_keys=True, default=str).encode()):08x}"
+
+
 def run(config: dict, encoder=None) -> list[dict]:
     if encoder is None:
         encoder = build_encoder(config["encoder"], config)
@@ -484,12 +504,29 @@ def run(config: dict, encoder=None) -> list[dict]:
 
     messages = load_messages(config)
 
-    for count, message in enumerate(messages, 1):
-        rows.extend(run_message(message, encoder, config, laws))
-        print(f"[{config['experiment']}] message {count}/{len(messages)} ({time.time() - started:.0f}s)", flush=True)
-
     out_dir = Path(config["results_dir"]) / config["experiment"]
     out_dir.mkdir(parents=True, exist_ok=True)
+
+    # Per-message checkpoints, so an interrupted run resumes where it
+    # stopped. They are keyed by the config that produced them and
+    # removed once the full results are written.
+    checkpoints = out_dir / "_checkpoints" / checkpoint_key(config)
+    checkpoints.mkdir(parents=True, exist_ok=True)
+
+    for count, message in enumerate(messages, 1):
+        path = checkpoints / f"{message.message_id}.json"
+
+        if path.exists():
+            rows.extend(json.loads(path.read_text()))
+            print(f"[{config['experiment']}] message {count}/{len(messages)} resumed from checkpoint", flush=True)
+            continue
+
+        message_rows = run_message(message, encoder, config, laws)
+        tmp = path.with_suffix(".tmp")
+        tmp.write_text(json.dumps(message_rows))
+        tmp.replace(path)
+        rows.extend(message_rows)
+        print(f"[{config['experiment']}] message {count}/{len(messages)} ({time.time() - started:.0f}s)", flush=True)
 
     summary = summarize(rows)
 
@@ -503,6 +540,8 @@ def run(config: dict, encoder=None) -> list[dict]:
 
     with (out_dir / "config.yaml").open("w") as handle:
         yaml.safe_dump(provenance, handle, sort_keys=False)
+
+    shutil.rmtree(out_dir / "_checkpoints", ignore_errors=True)
 
     return summary
 
@@ -598,8 +637,8 @@ def main(argv: list[str] | None = None) -> None:
     for row in summary:
         if row["algorithm"] in {"sempa_look", "casa", "full_search"}:
             print(
-                f"M={row['M']} {row['channel']}({row['parameter']}) D={row['stride']} p={row['p']:.2f} "
-                f"{row['algorithm']:>12} ATS={row['mean_ats']:.4f} calls={row['mean_logical_calls']:.0f}"
+                f"M={row['M']} {row['channel']}({row['parameter']}) D={row['stride']} p={float(row['p']):.2f} "
+                f"{row['algorithm']:>12} ATS={float(row['mean_ats']):.4f} calls={float(row['mean_logical_calls']):.0f}"
             )
 
 

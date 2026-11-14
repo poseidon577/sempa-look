@@ -1,8 +1,9 @@
 # Packet-level interleaving depth: subpackets `stride` packets apart in the
-# diagonal layout (extra delay (N-1)*stride packets). Is channel-aware
-# aggregation at stride 1 worth a deeper interleaver for blind methods?
+# diagonal layout (message span (N-1)*stride packets). Is channel-aware
+# aggregation at stride 1 worth a deeper interleaver for blind methods,
+# including the combined interleaver + swap search baseline?
 experiment: coco_k12_stride
-description: K=12 COCO, N=6 and N=4, interleaving depth 1/2/4/8 under strong memory
+description: K=12 COCO, N=6 and N=4, interleaving depth 1/2/4/8/16 under strong memory
 encoder: mpnet
 K: 12
 M: [3, 2]
@@ -11,6 +12,7 @@ channels:
   - {name: iid}
   - {name: gilbert, parameter: 0.9}
   - {name: rayleigh, parameter: 0.99}
-stride: [1, 2, 4, 8]
-algorithms: [random_pa, sempa_look, swap_ls, swap_ls+order, casa, full_search_iid, full_search]
+stride: [1, 2, 4, 8, 16]
+algorithms: [random_pa, interleave, interleave+order, sempa_look, sempa_look+order, swap_ls, swap_ls+order,
+             interleave_swap_ls, interleave_swap_ls+order, casa, full_search_iid, full_search]
 r2_samples: 0

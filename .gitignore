@@ -11,3 +11,4 @@ results/*
 !results/channel/
 .ipynb_checkpoints/
 *.egg-info/
+results/channel/*/_checkpoints/

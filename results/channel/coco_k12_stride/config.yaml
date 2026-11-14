@@ -1,5 +1,5 @@
 experiment: coco_k12_stride
-description: K=12 COCO, N=6 and N=4, interleaving depth 1/2/4/8 under strong memory
+description: K=12 COCO, N=6 and N=4, interleaving depth 1/2/4/8/16 under strong memory
 encoder: mpnet
 device: cpu
 cache_size: 2000000
@@ -33,11 +33,17 @@ stride:
 - 2
 - 4
 - 8
+- 16
 algorithms:
 - random_pa
+- interleave
+- interleave+order
 - sempa_look
+- sempa_look+order
 - swap_ls
 - swap_ls+order
+- interleave_swap_ls
+- interleave_swap_ls+order
 - casa
 - full_search_iid
 - full_search
@@ -58,6 +64,6 @@ prefetch_max_sets: 5000
 limit: null
 seed: 42
 results_dir: results/channel
-run_at: '2026-10-23T00:56:30'
-wall_seconds: 1645.5
+run_at: '2026-11-13T16:51:50'
+wall_seconds: 2277.4
 model_name: sentence-transformers/all-mpnet-base-v2

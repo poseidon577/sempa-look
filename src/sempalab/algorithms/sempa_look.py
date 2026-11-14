@@ -1,10 +1,39 @@
 import time
-from itertools import combinations
+from math import comb
 
 import numpy as np
 
 from sempalab.metrics import batch_semantic_similarity
 from sempalab.types import SearchResult
+
+
+def unrank_combination(pool, M, index):
+    """
+    The `index`-th M-subset of `pool` in itertools.combinations order
+    (lexicographic in positions), without enumerating the others.
+    """
+
+    n = len(pool)
+
+    if not 0 <= index < comb(n, M):
+        raise IndexError("combination index out of range")
+
+    chosen = []
+    start = 0
+
+    for slots_left in range(M, 0, -1):
+        for position in range(start, n):
+            # subsets whose next element is `position`
+            block = comb(n - position - 1, slots_left - 1)
+
+            if index < block:
+                chosen.append(pool[position])
+                start = position + 1
+                break
+
+            index -= block
+
+    return tuple(chosen)
 
 
 def _rss_index_set(candidate, all_indices):
@@ -232,18 +261,18 @@ def sempa_look(
         # Sampling is WITH replacement across candidates.
         # -----------------------------------------------------
 
-        candidate_pool = list(
-            combinations(remaining, M)
-        )
-
+        # Uniform over the M-subsets of `remaining`, indexed in
+        # itertools.combinations order. Unranking the sampled index
+        # avoids listing all C(|remaining|, M) subsets (377 million at
+        # K = 48, M = 8) and draws exactly what indexing that list did.
         sampled_indices = rng.integers(
             low=0,
-            high=len(candidate_pool),
+            high=comb(len(remaining), M),
             size=P,
         )
 
         candidates = [
-            tuple(candidate_pool[index])
+            unrank_combination(remaining, M, int(index))
             for index in sampled_indices
         ]
 
