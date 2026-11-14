@@ -140,6 +140,8 @@ Full Search is infeasible here, so there is no oracle. CASA fits each message on
 
 At p = 0.1, CASA and Swap LS + order are within 0.004 of each other, and CASA is the one behind under i.i.d. losses (0.9528 vs 0.9562). The gap to SemPA-Look grows with K: +0.056 ATS (+9.5%) at Gilbert ρ = 0.6, p = 0.5. At this length SemPA-Look's cheapness is real, though. It uses about 8× fewer calls than either search.
 
+Rerun with the interleaver-seeded baseline added, every earlier number reproduces to within 2e-9. Interleaver-seeded swap LS + order is 0.0004 to 0.0019 ATS above randomly started swap LS + order, at 1,514 calls against 1,560. CASA beats it by +0.007 to +0.029 at p ≥ 0.3 (every CI above zero) and trails it by 0.004 under i.i.d. losses at p = 0.1.
+
 ![k24](../results/channel/figures/wikihow_k24_N6_gain_vs_p.png)
 
 ### K = 48 and K = 60

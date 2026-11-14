@@ -811,8 +811,10 @@ Interleaver depth at which the method's ATS reaches CASA's ATS at depth D, divid
 | Interleaving | 0 | 0.9327 | 0.7844 | 0.6154 |
 | SemPA-Look | 190 | 0.9444 | 0.8094 | 0.6450 |
 | Swap LS (RSS) | 1,560 | 0.9562 | 0.8325 | 0.6677 |
+| Interleaver-seeded swap LS | 1,514 | 0.9566 | 0.8340 | 0.6694 |
 | SemPA-Look + slot order | 253 | 0.9444 | 0.8094 | 0.6450 |
 | Swap LS + slot order | 1,623 | 0.9562 | 0.8325 | 0.6677 |
+| Interleaver-seeded swap LS + order | 1,577 | 0.9566 | 0.8340 | 0.6694 |
 | CASA, i.i.d. model | 1,467 | 0.9532 | 0.8404 | 0.6983 |
 | CASA | 1,467 | 0.9528 | 0.8407 | 0.6982 |
 
@@ -824,8 +826,10 @@ Interleaver depth at which the method's ATS reaches CASA's ATS at depth D, divid
 | Interleaving | 0 | 0.9265 | 0.7661 | 0.5845 |
 | SemPA-Look | 190 | 0.9304 | 0.7745 | 0.5940 |
 | Swap LS (RSS) | 1,560 | 0.9371 | 0.7890 | 0.6100 |
+| Interleaver-seeded swap LS | 1,514 | 0.9379 | 0.7910 | 0.6125 |
 | SemPA-Look + slot order | 253 | 0.9391 | 0.7957 | 0.6206 |
 | Swap LS + slot order | 1,623 | 0.9447 | 0.8078 | 0.6340 |
+| Interleaver-seeded swap LS + order | 1,577 | 0.9453 | 0.8094 | 0.6359 |
 | CASA, i.i.d. model | 1,467 | 0.9386 | 0.7985 | 0.6286 |
 | CASA | 1,476 | 0.9463 | 0.8161 | 0.6502 |
 
@@ -837,8 +841,10 @@ Interleaver depth at which the method's ATS reaches CASA's ATS at depth D, divid
 | Interleaving | 0 | 0.9301 | 0.7680 | 0.5797 |
 | SemPA-Look | 190 | 0.9380 | 0.7802 | 0.5920 |
 | Swap LS (RSS) | 1,560 | 0.9470 | 0.7949 | 0.6068 |
+| Interleaver-seeded swap LS | 1,514 | 0.9477 | 0.7965 | 0.6086 |
 | SemPA-Look + slot order | 253 | 0.9419 | 0.7940 | 0.6096 |
 | Swap LS + slot order | 1,623 | 0.9503 | 0.8071 | 0.6225 |
+| Interleaver-seeded swap LS + order | 1,577 | 0.9508 | 0.8085 | 0.6241 |
 | CASA, i.i.d. model | 1,467 | 0.9473 | 0.8056 | 0.6261 |
 | CASA | 1,469 | 0.9505 | 0.8180 | 0.6408 |
 
@@ -857,6 +863,30 @@ CASA gain over Swap LS + slot order, K = 24
 | i.i.d. | -0.0034 [-0.0040, -0.0028] | +0.0082 [+0.0059, +0.0107] | +0.0306 [+0.0264, +0.0353] |
 | Gilbert-Elliott, rho=0.6 | +0.0016 [+0.0010, +0.0022] | +0.0083 [+0.0066, +0.0101] | +0.0161 [+0.0136, +0.0189] |
 | Rayleigh fading, alpha=0.9 | +0.0002 [-0.0004, +0.0008] | +0.0109 [+0.0089, +0.0132] | +0.0183 [+0.0157, +0.0212] |
+
+CASA gain over Interleaver-seeded swap LS + order, K = 24
+
+| Channel | p = 0.1 | p = 0.3 | p = 0.5 |
+|---|---|---|---|
+| i.i.d. | -0.0038 [-0.0045, -0.0032] | +0.0067 [+0.0046, +0.0088] | +0.0288 [+0.0251, +0.0327] |
+| Gilbert-Elliott, rho=0.6 | +0.0010 [+0.0004, +0.0015] | +0.0067 [+0.0051, +0.0083] | +0.0143 [+0.0120, +0.0166] |
+| Rayleigh fading, alpha=0.9 | -0.0003 [-0.0008, +0.0003] | +0.0095 [+0.0077, +0.0115] | +0.0167 [+0.0144, +0.0191] |
+
+**MiniLM** re-score, K = 24: CASA gain over SemPA-Look
+
+| Channel | p = 0.1 | p = 0.3 | p = 0.5 |
+|---|---|---|---|
+| i.i.d. | +0.0047 [+0.0038, +0.0056] | +0.0173 [+0.0149, +0.0196] | +0.0302 [+0.0268, +0.0338] |
+| Gilbert-Elliott, rho=0.6 | +0.0097 [+0.0088, +0.0105] | +0.0254 [+0.0231, +0.0279] | +0.0350 [+0.0321, +0.0382] |
+| Rayleigh fading, alpha=0.9 | +0.0069 [+0.0062, +0.0077] | +0.0227 [+0.0207, +0.0248] | +0.0298 [+0.0274, +0.0323] |
+
+**BGE-small** re-score, K = 24: CASA gain over SemPA-Look
+
+| Channel | p = 0.1 | p = 0.3 | p = 0.5 |
+|---|---|---|---|
+| i.i.d. | +0.0019 [+0.0015, +0.0023] | +0.0077 [+0.0068, +0.0087] | +0.0125 [+0.0111, +0.0139] |
+| Gilbert-Elliott, rho=0.6 | +0.0044 [+0.0039, +0.0048] | +0.0114 [+0.0103, +0.0125] | +0.0153 [+0.0139, +0.0168] |
+| Rayleigh fading, alpha=0.9 | +0.0031 [+0.0027, +0.0035] | +0.0106 [+0.0098, +0.0115] | +0.0133 [+0.0121, +0.0145] |
 
 ## WikiHow K = 48, N = 6 (30 messages, no oracle)
 

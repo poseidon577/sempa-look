@@ -30,8 +30,10 @@ algorithms:
 - interleave
 - sempa_look
 - swap_ls
+- interleave_swap_ls
 - sempa_look+order
 - swap_ls+order
+- interleave_swap_ls+order
 - casa_iid
 - casa
 P: 10
@@ -51,6 +53,6 @@ prefetch_max_sets: 5000
 limit: null
 seed: 42
 results_dir: results/channel
-run_at: '2026-10-23T03:01:36'
-wall_seconds: 5436.8
+run_at: '2026-11-14T20:11:01'
+wall_seconds: 6099.2
 model_name: sentence-transformers/all-mpnet-base-v2
