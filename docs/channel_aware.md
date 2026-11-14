@@ -2,7 +2,7 @@
 
 This is the first research extension, direction 2 of [limitations.md](limitations.md), combined with the p-aware pairwise surrogate from direction 3. The paper assumes every packet is erased independently with the same probability p. We drop that assumption and model bursts and fading. Then we ask how the paper's method behaves and what an aggregator that knows the channel can recover.
 
-**Short answer.** Correlated losses break SemPA-Look's advantage. With six subpackets per message (N = 6) on a Gilbert–Elliott channel with lag-1 correlation ρ = 0.6, SemPA-Look keeps only 8% of the possible gain over Random PA. Under i.i.d. losses it keeps 36%. Under memory, *which packet each group rides in* matters, not only how tokens are grouped. Our channel-aware method, **CASA**, exploits that. It captures **85–92% of the oracle's gain over Random PA on every channel we tested**. It beats SemPA-Look by up to **+0.040 ATS (+8.1%)**, and it beats even the exhaustively searched i.i.d.-optimal partition by up to +0.018 ATS. All of these differences have 95% CIs that exclude zero. The gains hold, smaller, when the same partitions are re-scored under MiniLM and BGE-small. They also hold on 24-token WikiHow sentences, where Full Search is infeasible. Two honest limits apply. A packet interleaver, if the delay budget allows one, removes much of the burst problem for every method. CASA's quality equals SemPA-Look's with a 1.5–2.3× deeper interleaver. At low loss (p ≈ 0.1), CASA only ties a strong swap-search baseline.
+**Short answer.** Correlated losses break SemPA-Look's advantage. With six subpackets per message (N = 6) on a Gilbert–Elliott channel with lag-1 correlation ρ = 0.6, SemPA-Look keeps only 8% of the possible gain over Random PA. Under i.i.d. losses it keeps 36%. Under memory, *which packet each group rides in* matters, not only how tokens are grouped. Our channel-aware method, **CASA**, exploits that. It captures **85–92% of the oracle's gain over Random PA on every channel we tested**. It beats SemPA-Look by up to **+0.040 ATS (+8.1%)**, and it beats even the exhaustively searched i.i.d.-optimal partition by up to +0.018 ATS. All of these differences have 95% CIs that exclude zero. The gains hold, smaller, when the same partitions are re-scored under MiniLM and BGE-small. They also hold on 24- and 48-token WikiHow sentences, where Full Search is infeasible; at K = 48, CASA beats SemPA-Look by +0.06 to +0.07 ATS at p = 0.5 and uses about 2.4× fewer encoder calls than swap search. A stronger blind baseline, swap search started from the modular interleaver, behaves like randomly started swap search (within 0.002 ATS), so it does not close the gap. Two honest limits apply. A packet interleaver, if the delay budget allows one, removes much of the burst problem for every method: SemPA-Look matches CASA with a 1.5–2.3× deeper interleaver, but the best blind searches with slot ordering need only 1.1–1.45× (up to 1.85× at depth 8). At low loss (p ≈ 0.1), CASA only ties a strong swap-search baseline, and at K = 48 under i.i.d. losses it is behind it (−0.004).
 
 All numbers: MPNet (`all-mpnet-base-v2`) defines the objective and the headline numbers, 100 messages per point, exact ATS under each channel's joint loss law, paired per-message differences with bootstrap 95% CIs (5,000 resamples). Full tables: [channel_aware_tables.md](channel_aware_tables.md).
 
@@ -38,6 +38,7 @@ Under i.i.d. losses Q is exchangeable, so only the partition matters. Under memo
 - Deterministic modular interleaving (token i → slot i mod N).
 - SemPA-Look (P = 10, k = 4).
 - Swap local search on the paper's RSS surrogate, Σₙ φ(W∖Gₙ). It is new here, best improvement from one random start.
+- Interleaver-seeded swap local search: the same search, started from the modular interleaver instead of a random partition. It combines the two cheap blind ideas.
 - Their "+ order" variants.
 - CASA fitted as if the channel were i.i.d. (`casa_iid`, the p-aware but memory-blind ablation).
 - Full Search under i.i.d. losses, the best channel-blind partition.
@@ -88,6 +89,7 @@ CASA − SemPA-Look = +0.0388 [+0.0359, +0.0420]. CASA − Full Search (i.i.d.) 
 
 - **Slot order is the cheap half.** Reordering SemPA-Look's own partition lifts its ATS from 0.5998 to 0.6258 in the example above, for 63 extra calls. Every "+ order" variant gains under memory and, by construction, nothing under i.i.d. losses.
 - **Channel-aware grouping is the rest.** CASA beats the strongest blind baseline with ordering, Swap LS + order, by +0.001 to +0.023 ATS at p ≥ 0.3 on every channel and N (all CIs exclude zero). At p ≤ 0.1 the difference is between −0.001 and +0.002.
+- **Seeding the swap search with the interleaver changes little.** Interleaver-seeded swap LS lands within 0.002 ATS of randomly started swap LS at every point, at about the same number of calls (66 at N = 6, 176 at N = 4, 232 at N = 3). CASA beats it with ordering by +0.001 to +0.024 at p ≥ 0.3 (every CI excludes zero). At p ≤ 0.1 the difference is between −0.001 and +0.002, and under i.i.d. losses at p = 0.1 CASA is the one slightly behind (−0.0006 at N = 3, −0.0009 at N = 4).
 - **Memory-blind p-awareness is not enough.** `casa_iid` is as good as CASA under i.i.d. losses but falls behind once losses are correlated (e.g. 0.6177 vs 0.6387 above).
 - **Swap search on the paper's own surrogate beats SemPA-Look** at every point, typically by about 2× in captured headroom. This is a baseline the paper did not include (limitation L9).
 
@@ -95,15 +97,18 @@ CASA − SemPA-Look = +0.0388 [+0.0359, +0.0420]. CASA − Full Search (i.i.d.) 
 
 At K = 12, CASA uses 280–440 encoder calls per message, against 50–190 for SemPA-Look and 130–230 for Swap LS + order. In the compute-matched run, CASA's fitting budget is halved (158 subsets) and Swap LS gets 3 restarts. At N = 3 and N = 4, CASA then uses fewer calls than Swap LS + order. It still wins at p ≥ 0.3 on both bursty channels, by +0.002 to +0.006 (for example +0.006 at N = 4, Rayleigh α = 0.9, p = 0.5), and ties under i.i.d. losses at p = 0.3 (−0.0005 at N = 3). At N = 6, Swap LS already queries all 66 pairs, so extra restarts cost it nothing and change little. Tables: [compute-matched ablation](channel_aware_tables.md#compute-matched-ablation-swap-ls-with-3-restarts-casa-with-158-fitting-subsets).
 
-### Interleaving depth: the honest competitor
+### Interleaving depth and delay: the honest competitor
 
-A packet interleaver spaces a message's subpackets D packets apart at a delay cost of (N−1)·D packets. Under strong memory (Gilbert ρ = 0.9, Rayleigh α = 0.99), every method gains steeply with D.
+A packet interleaver spaces a message's subpackets D packets apart, so the receiver has a whole message only after a span of (N−1)·D packets (`sempalab.delay.span_packets`). We sweep D = 1, 2, 4, 8, 16 under strong memory (Gilbert ρ = 0.9, Rayleigh α = 0.99) at N = 4 and N = 6. Every method gains steeply with D. The figure below puts delay on the x-axis and the gain over Random PA at D = 1 on the y-axis, so both levers, deeper interleaving and smarter aggregation, are on one plot. CASA runs just below the channel oracle at every span and is the best non-oracle method at every depth on both bursty channels.
 
-To compare the two levers, we interpolate each method's ATS over log₂ D and ask how much deeper an interleaver SemPA-Look needs to match CASA at depth D:
-- **SemPA-Look needs a 1.5–2.3× deeper interleaver** to match CASA: 1.5–1.7× on Gilbert ρ = 0.9 at N = 4, and 1.7–2.3× elsewhere.
-- Swap LS + order needs a 1.1–1.4× deeper one.
+![delay](../results/channel/figures/coco_k12_delay_p0.3.png)
 
-For example, at N = 6, Gilbert ρ = 0.9, p = 0.3, CASA reaches 0.7705 at D = 2 and SemPA-Look 0.7728 at D = 4. CASA is also the best non-oracle method at every depth for p ≥ 0.1 on both bursty channels. So channel-aware aggregation buys roughly the delay of one doubling of interleaver depth against the paper's method. It combines with interleaving rather than replacing it. Against a well-searched blind partition with slot ordering, the delay it saves is small.
+To put a number on the trade, we interpolate each method's ATS over log₂ D (`sempalab.delay.matching_depth`) and ask how much deeper an interleaver it needs to match CASA at depth D, for D = 1 to 8:
+- **SemPA-Look needs a 1.5–2.3× deeper interleaver** at D = 1 and 2, 1.7–2.9× at D = 4, and more than 2× at D = 8 in most cases.
+- SemPA-Look + slot order needs 1.1–1.7× at D ≤ 4 and up to more than 2× at D = 8.
+- **Swap LS + order and interleaver-seeded swap LS + order need 1.07–1.45× at D ≤ 4.** The ratio grows with depth on the Gilbert channel at N = 6 and p ≥ 0.3, reaching 1.5–1.85× at D = 8, because the blind searches flatten out at large depth while CASA keeps climbing.
+
+For example, at N = 6, Gilbert ρ = 0.9, p = 0.3, CASA reaches 0.7705 at D = 2 and SemPA-Look 0.7728 at D = 4. So channel-aware aggregation buys roughly the delay of one doubling of interleaver depth against the paper's method. It combines with interleaving rather than replacing it. Against a well-searched blind partition with slot ordering, the delay it saves is small at shallow depth and grows to nearly a doubling at depth 8 under strong bursts. Full ratios: [depth-ratio table](channel_aware_tables.md#delay-a-channel-blind-method-needs-to-match-casa-coco-k--12).
 
 ![stride](../results/channel/figures/coco_k12_stride_p0.3.png)
 
