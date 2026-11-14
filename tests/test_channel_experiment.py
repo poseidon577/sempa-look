@@ -226,3 +226,54 @@ def test_interleave_swap_ls_refines_the_interleaver(workspace, fake_encoder):
     # Restarting the search from its own output changes nothing.
     again = swap_local_search(message, fake_encoder(), 2, init=refined)
     assert again.best_score == pytest.approx(rss_sum(refined))
+
+
+def test_interrupted_run_resumes_from_checkpoints(workspace, fake_encoder):
+    """
+    A run killed after some messages picks up from its per-message
+    checkpoints and ends with exactly the rows of an uninterrupted run.
+    """
+
+    import sempalab.channel_experiment as experiment
+
+    make_config, tmp_path = workspace
+    kwargs = dict(M=[4], p=[0.3], channels=CHANNELS[:2], P=4, k=1, r2_samples=0)
+
+    reference = make_config(experiment="whole", **kwargs)
+    run(reference, encoder=fake_encoder())
+    expected = read_csv(tmp_path / "results" / "whole" / "results.csv.gz")
+
+    config = make_config(experiment="resumed", **kwargs)
+    original = experiment.run_message
+    calls = []
+
+    def failing(message, *args, **kw):
+        calls.append(message.message_id)
+        if len(calls) == 3:
+            raise KeyboardInterrupt
+        return original(message, *args, **kw)
+
+    experiment.run_message = failing
+    try:
+        with pytest.raises(KeyboardInterrupt):
+            run(config, encoder=fake_encoder())
+    finally:
+        experiment.run_message = original
+
+    out = tmp_path / "results" / "resumed"
+    assert len(list(out.glob("_checkpoints/*/*.json"))) == 2
+    assert not (out / "results.csv.gz").exists()
+
+    seen = []
+    experiment.run_message = lambda message, *a, **kw: seen.append(message.message_id) or original(message, *a, **kw)
+    try:
+        run(config, encoder=fake_encoder())
+    finally:
+        experiment.run_message = original
+
+    assert len(seen) == 1  # only the message that had not finished
+    assert not (out / "_checkpoints").exists()
+
+    got = read_csv(out / "results.csv.gz")
+    strip = lambda rows: [{k: v for k, v in r.items() if k != "experiment"} for r in rows]
+    assert strip(got) == strip(expected)

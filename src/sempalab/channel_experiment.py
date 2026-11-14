@@ -41,6 +41,7 @@ import copy
 import csv
 import gzip
 import json
+import shutil
 import time
 import zlib
 from pathlib import Path
@@ -484,6 +485,15 @@ def read_csv(path: Path) -> list[dict]:
         return list(csv.DictReader(handle))
 
 
+def checkpoint_key(config: dict) -> str:
+    """
+    Short hash of everything that determines an experiment's rows.
+    """
+
+    relevant = {key: value for key, value in config.items() if key not in {"description", "results_dir", "device", "cache_size"}}
+    return f"{zlib.crc32(json.dumps(relevant, sort_keys=True, default=str).encode()):08x}"
+
+
 def run(config: dict, encoder=None) -> list[dict]:
     if encoder is None:
         encoder = build_encoder(config["encoder"], config)
@@ -494,12 +504,29 @@ def run(config: dict, encoder=None) -> list[dict]:
 
     messages = load_messages(config)
 
-    for count, message in enumerate(messages, 1):
-        rows.extend(run_message(message, encoder, config, laws))
-        print(f"[{config['experiment']}] message {count}/{len(messages)} ({time.time() - started:.0f}s)", flush=True)
-
     out_dir = Path(config["results_dir"]) / config["experiment"]
     out_dir.mkdir(parents=True, exist_ok=True)
+
+    # Per-message checkpoints, so an interrupted run resumes where it
+    # stopped. They are keyed by the config that produced them and
+    # removed once the full results are written.
+    checkpoints = out_dir / "_checkpoints" / checkpoint_key(config)
+    checkpoints.mkdir(parents=True, exist_ok=True)
+
+    for count, message in enumerate(messages, 1):
+        path = checkpoints / f"{message.message_id}.json"
+
+        if path.exists():
+            rows.extend(json.loads(path.read_text()))
+            print(f"[{config['experiment']}] message {count}/{len(messages)} resumed from checkpoint", flush=True)
+            continue
+
+        message_rows = run_message(message, encoder, config, laws)
+        tmp = path.with_suffix(".tmp")
+        tmp.write_text(json.dumps(message_rows))
+        tmp.replace(path)
+        rows.extend(message_rows)
+        print(f"[{config['experiment']}] message {count}/{len(messages)} ({time.time() - started:.0f}s)", flush=True)
 
     summary = summarize(rows)
 
@@ -513,6 +540,8 @@ def run(config: dict, encoder=None) -> list[dict]:
 
     with (out_dir / "config.yaml").open("w") as handle:
         yaml.safe_dump(provenance, handle, sort_keys=False)
+
+    shutil.rmtree(out_dir / "_checkpoints", ignore_errors=True)
 
     return summary
 
