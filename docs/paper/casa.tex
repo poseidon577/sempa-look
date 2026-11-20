@@ -107,7 +107,7 @@ The channel enters only through $(r,R)$; the encoder is no longer in the loop. M
 \section{Experimental setup}
 %=====================================================================
 
-\textbf{Data.} 100 MS-COCO captions with $K=12$ words (frozen evaluation set of our reproduction of~\cite{lee2026look}), and WikiHow sentences with $K=24$ (100 messages), $K=48$ and $K=60$ (\emph{[60/60 after the extension runs; currently 30/20]}). Subpacket sizes $M\in\{4,3,2\}$ give $N\in\{3,4,6\}$ at $K=12$; longer messages use $N=6$.
+\textbf{Data.} 100 MS-COCO captions with $K=12$ words (frozen evaluation set of our reproduction of~\cite{lee2026look}), and WikiHow sentences with $K=24$ (100 messages), $K=48$ and $K=60$ (60 messages each). Subpacket sizes $M\in\{4,3,2\}$ give $N\in\{3,4,6\}$ at $K=12$; longer messages use $N=6$.
 
 \textbf{Baselines.} Random PA; deterministic token interleaving ($i\mapsto i \bmod N$); SemPA-Look ($P=10$, $k=4$); swap local search on the paper's residual semantic score $\sum_n\phi(W\setminus G_n)$; the same search seeded by the interleaver; each with ``+ order''; CASA fitted as if the channel were i.i.d.\ (p-aware, memory-blind); the exhaustive i.i.d.-optimal partition; and the channel oracle, exhaustive over ordered partitions (665{,}280 calls at $N=6$, $K=12$).
 
@@ -245,12 +245,12 @@ Rayl.\ $\alpha=0.99$ & $+0.012$ & $+0.004$ & $+0.003$ & $+0.014$ & $+0.008$ & $-
 
 
 \subsection{Longer messages}
-Full Search is infeasible beyond $K=12$. On WikiHow $K=24$ at $p=0.5$, CASA beats SemPA-Look by $+0.056$ ATS ($+9.5\%$) on the Gilbert channel and swap search with ordering by $+0.016$. At $K=48$ and $60$ the gap to SemPA-Look grows to $+0.06$--$0.08$ at $p=0.5$, and CASA uses $2.4$--$3.3\times$ fewer encoder calls than swap search, whose cost grows with the number of token pairs. \emph{[Update with the extended samples.]}
+Full Search is infeasible beyond $K=12$. On WikiHow $K=24$ at $p=0.5$, CASA beats SemPA-Look by $+0.056$ ATS ($+9.5\%$) on the Gilbert channel and swap search with ordering by $+0.016$. At $K=48$ and $60$ (60 messages each, three channels) the gap to SemPA-Look grows to $+0.062$--$0.073$ and $+0.066$--$0.079$ at $p=0.5$, and CASA beats swap search with ordering by $+0.007$ to $+0.037$ at every point with $p\ge0.3$ (all CIs exclude zero). At $p=0.1$ the picture of $K=12$ repeats: CASA trails swap search by $0.004$ under i.i.d.\ losses, ties it on the Rayleigh channel and leads by $0.001$--$0.002$ on the Gilbert channel. CASA also becomes the cheaper search: swap search needs a pass over all token pairs per step, about $12{,}500$ and $24{,}000$ calls per message, against $5{,}000$ and $7{,}600$ for CASA ($2.5\times$ and $3.1\times$ fewer).
 
 %=====================================================================
 \section{Limitations}
 %=====================================================================
-At low loss ($p\approx0.1$) CASA only ties a well-searched blind partition with ordering, and under i.i.d.\ losses at $K\ge48$ it trails it by 0.004. The receiver simply drops lost tokens; a generative receiver that infills missing tokens would change $\phi$ and could be modelled as another law over survival patterns. Every metric we use is automatic; none is a human judgment, and the metrics disagree on the last 0.01--0.02: CASA's edge over the exhaustive i.i.d.-optimal partition holds under three sentence encoders but reverses under BERTScore, so only its gains over practical searches are metric-robust. If a deep interleaver is affordable, most of the burst penalty disappears for all methods, so CASA matters most under a fixed delay budget or fading too slow for the batch to average out.
+At low loss ($p\approx0.1$) CASA only ties a well-searched blind partition with ordering, and under i.i.d.\ losses at $K\ge48$ it trails it by 0.004. Messages longer than 12 tokens have no oracle and only three channels. The receiver simply drops lost tokens; a generative receiver that infills missing tokens would change $\phi$ and could be modelled as another law over survival patterns. Every metric we use is automatic; none is a human judgment, and the metrics disagree on the last 0.01--0.02: CASA's edge over the exhaustive i.i.d.-optimal partition holds under three sentence encoders but reverses under BERTScore, so only its gains over practical searches are metric-robust. If a deep interleaver is affordable, most of the burst penalty disappears for all methods, so CASA matters most under a fixed delay budget or fading too slow for the batch to average out.
 
 %=====================================================================
 \section{Conclusion}

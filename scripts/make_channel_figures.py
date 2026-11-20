@@ -468,7 +468,11 @@ def main(argv=None):
     long_algos = ["random_pa", "interleave", "sempa_look", "swap_ls", "interleave_swap_ls", "sempa_look+order",
                   "swap_ls+order", "interleave_swap_ls+order", "casa_iid", "casa"]
     for K in (24, 48, 60):
-        wikihow = load(f"wikihow_k{K}")
+        # K = 48 and 60 were extended to 60 messages with a disjoint seed
+        # (sempalab.extend_eval_set); the merged run drops the
+        # interleaver-seeded swap baseline, which stays on the original set.
+        original = load(f"wikihow_k{K}")
+        wikihow = load(f"wikihow_k{K}_n60") or original
         if not wikihow:
             continue
         p_values = sorted({r["p"] for r in wikihow})
@@ -482,10 +486,14 @@ def main(argv=None):
                 if select(wikihow, algorithm=reference):
                     tables.append(f"\nCASA gain over {STYLE[reference][0]}, K = {K}\n")
                     tables.append(gain_table(wikihow, M, p_values, channels, reference))
+            if original is not wikihow and select(original, algorithm="interleave_swap_ls+order"):
+                orig_messages = int(original[0]["messages"])
+                tables.append(f"\nCASA gain over {STYLE['interleave_swap_ls+order'][0]}, K = {K} (original {orig_messages} messages)\n")
+                tables.append(gain_table(original, M, p_values, channels, "interleave_swap_ls+order"))
             for encoder in ("minilm", "bge-small"):
                 other = load(f"wikihow_k{K}", f"summary_{encoder}.csv")
                 if other:
-                    tables.append(f"\n**{ENCODER_LABEL[encoder]}** re-score, K = {K}: CASA gain over SemPA-Look\n")
+                    tables.append(f"\n**{ENCODER_LABEL[encoder]}** re-score, K = {K} ({int(float(other[0]['messages']))} messages): CASA gain over SemPA-Look\n")
                     tables.append(gain_table(other, M, p_values, channels, "sempa_look"))
             shown = [c for c in [("iid", 0.0), ("gilbert", 0.6), ("rayleigh", 0.9)] if c in channels]
             gain_vs_p(wikihow, M, shown, [a for a in ["sempa_look", "swap_ls+order", "interleave_swap_ls+order", "casa_iid", "casa"]

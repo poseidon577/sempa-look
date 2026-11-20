@@ -36,3 +36,21 @@ def test_merge_keeps_common_algorithms_only():
     merged = merge_runs(original, extension)
     assert {r["algorithm"] for r in merged} == {"casa"}
     assert len(merged) == 2
+
+
+def test_committed_merged_runs_have_60_messages():
+    import csv
+    import gzip
+    from pathlib import Path
+
+    root = Path(__file__).parents[1] / "results" / "channel"
+    for K in (48, 60):
+        merged = root / f"wikihow_k{K}_n60"
+        summary = list(csv.DictReader(open(merged / "summary.csv")))
+        assert {int(float(r["messages"])) for r in summary} == {60}
+        with gzip.open(merged / "results.csv.gz", "rt") as handle:
+            rows = list(csv.DictReader(handle))
+        ids = {int(r["message_id"]) for r in rows}
+        assert len(ids) == 60
+        assert sum(i >= 1000 for i in ids) == {48: 30, 60: 40}[K]
+        assert "interleave_swap_ls+order" not in {r["algorithm"] for r in rows}
