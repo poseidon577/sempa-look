@@ -13,14 +13,54 @@ The project reproduces and analyzes the 2026 IEEE Transactions on Communications
 > Low-Complexity Semantic Packet Aggregation for Token Communication via Lookahead Search
 > S. Lee, J. Park, J. Choi, and H. Park, IEEE Transactions on Communications, 2026.
 
+## Summary
+
+Every reported number in this repository uses the paper's encoder (`sentence-transformers/all-mpnet-base-v2`), exact ATS over all 2^N erasure patterns, the paper's WTS, and its uncoded BPSK/AWGN channel with 300-bit packets. The 100-message MS-COCO and WikiHow evaluation sets are frozen in `results/stage4/eval_sets/`.
+
+**Reproduced.** Most results land within about 1–2 % of the paper. A selection (all about 70 compared numbers are in [docs/reproduction_table.md](docs/reproduction_table.md)):
+
+| Result | Paper | Ours |
+| --- | --- | --- |
+| Fig. 7a: SemPA-Look ATS vs M = 1, 2, 3, 4, 6, 12 (K=12, 7 dB) | 0.879, 0.886, 0.885, 0.883, 0.871, 0.793 | 0.880, 0.885, 0.885, 0.881, 0.871, 0.793 |
+| Fig. 6a: SemPA-Look vs Full Search (K=8, M=4, 6 dB) | −1.79 % | −2.03 % |
+| Fig. 6a: SemPA-Look vs no packetization (6 dB) | +24.0 % | +22.2 % |
+| Fig. 6a: SemPA-GBeam vs Full Search (6 dB) | −0.15 % (derived) | −0.15 % |
+| Fig. 10a: SemPA-Look ATS, k = 0 → 5 (K=24, M=4, 7 dB) | 0.8649 → 0.8777 | 0.8658 → 0.8766 |
+| Fig. 11a: ATS at P=130, SemPA-Look / GA | 0.8814 / 0.8863 | 0.8828 / 0.8871 |
+| Table V: SemPA-Look ATS at 6 / 7 / 8 dB (K=24, M=6) | 0.6206 / 0.8716 / 0.9696 | 0.6316 / 0.8778 / 0.9705 |
+| Table III: GA encoder calls | 3,200 | 3,200 |
+
+The Stage 2 gate also passes: at K=8, M=4, SemPA-Look (k=1) is within 0.24 / 0.65 / 0.98 % of Full Search at p = 0.1 / 0.3 / 0.5, against a 3 % target. Subword tokenization reproduces the same way. Details: [Stage 4](#stage-4--paper-reproduction), [docs/reproduction.md](docs/reproduction.md).
+
+**New in this repository.**
+
+* **CASA, channel-aware semantic aggregation** (PR #8). Under bursty (Gilbert–Elliott) and correlated Rayleigh fading erasures at the same average packet error rate, SemPA-Look keeps only 1–47 % of the oracle's gain over Random PA on COCO K=12. CASA keeps 85–92 % on every channel and beats SemPA-Look by up to +0.040 ATS (+8.1 %), every 95 % CI above zero. The gains hold, smaller, when re-scored under MiniLM and BGE-small. See [Research extension 1](#research-extension-1--channel-aware-aggregation) and [docs/channel_aware.md](docs/channel_aware.md).
+* **Stronger baselines and larger K** (PR #10). An interleaver-seeded swap search baseline (within 0.002 ATS of randomly started swap search), an interleaver depth sweep D = 1..16 with delay accounting, and WikiHow K = 48 and 60, where CASA beats SemPA-Look by +0.06 to +0.08 ATS at p = 0.5 with 2.4–3.3× fewer encoder calls than swap search.
+* SemPA-GBeam and MCTS-UCT baselines (PR #9), a subword-tokenization reproduction and a review of the paper's limitations ([docs/limitations.md](docs/limitations.md)), and a map of related work ([docs/related_work.md](docs/related_work.md)).
+
+**Not matched.** Three gaps remain unexplained after the checks in [docs/reproduction.md](docs/reproduction.md#gaps-we-could-not-close):
+
+1. **Random PA at 6 dB.** The paper's Random PA is much weaker at 6 dB only (Table II: 0.5417, ours 0.619). This alone drives its headline gains over Random PA (+14.3 % in Fig. 6a, +18.5 % in Table II), against our +5.8 % and +2.4 %. Our Random PA matches the paper at 4, 7 and 8 dB.
+2. **Fig. 3, TSS vs RSS.** The paper separates RSS-based greedy, TSS-based greedy and Random PA. Ours overlap within 0.005 ATS. The paper does not state K or M for this figure.
+3. **Fig. 13, N ordering.** With N fixed, the paper has N=2 above N=4 at large K. Ours has N=4 at or above N=2 from K=20 on, as does the paper's own subword Fig. 13b.
+
+Two smaller differences: SemPA-Look's gain over MCTS (Table II) matches only in sign (+0.27 %, CI includes 0, against +2.93 %), and SemPA-Look's Table III encoder count is 190 measured against the paper's 250 closed form.
+
+**Not attempted.** The DeepSC / UTF-8 / Huffman baselines of Table IV, the Fig. 4 sampling ablations, AIGC / LPIPS (Figs. 14, 15), BLEURT / BERTScore, LLM post-correction and channel coding (Fig. 18). See [docs/assumptions.md](docs/assumptions.md#not-reproduced).
+
+**Commands.** `make test` runs the test suite, `make repro` reruns every paper experiment, and `make figures` regenerates the figures and the comparison table. See [Makefile targets](#makefile-targets).
+
+## Background
+
 The central problem is simple to state:
 
-> How should the tokens of a message be grouped into packets so that the message retains as much semantic meaning as possible when packets are lost?**
+> How should the tokens of a message be grouped into packets so that the message retains as much semantic meaning as possible when packets are lost?
 
 Unlike conventional bit communication, tokens are not independent. The semantic meaning of a token depends on its surrounding context. Consequently, packetizing tokens becomes a **combinatorial optimization problem**.
 
 SEMPA-LAB aims to go beyond simply reproducing the paper:
 
+```text
                     SEMPA-LAB
                         │
           ┌─────────────┼─────────────┐
@@ -31,10 +71,11 @@ SEMPA-LAB aims to go beyond simply reproducing the paper:
           └─────────────┼─────────────┘
                         │
                  Research System
+```
 
 The research workflow is deliberately ordered:
 
-
+```text
 WHAT THE PAPER CLAIMS
           ↓
 WHAT THE CODE IMPLEMENTS
@@ -42,13 +83,9 @@ WHAT THE CODE IMPLEMENTS
 WHAT THE EXPERIMENTS SHOW
           ↓
 WHAT CAN BE IMPROVED
-
+```
 
 Extensions are only introduced after the baseline has been verified.
-
-> **Reproduction status:** the paper's MS-COCO and WikiHow results are reproduced with its encoder and channel, most within 1 % of the published numbers. See [Stage 4](#stage-4--paper-reproduction) and the [reproduction report](docs/reproduction.md).
->
-> **First extension:** [channel-aware aggregation](docs/channel_aware.md) under bursty (Gilbert–Elliott) and fading erasures. See [Research extension 1](#research-extension-1--channel-aware-aggregation).
 
 ---
 
@@ -368,13 +405,15 @@ Caching is particularly important because different partition evaluations repeat
 
 # Current Encoder
 
-The development implementation uses:
+Every reported figure and table uses the paper's encoder:
 
 ```text
-sentence-transformers/all-MiniLM-L6-v2
+sentence-transformers/all-mpnet-base-v2      (config key: encoder: mpnet)
 ```
 
-The reproduction configuration can use the encoder specified by the corresponding experiment.
+Every config in `configs/repro/` and `configs/channel/` sets `encoder: mpnet`, and so does every stored `config.yaml` under `results/`. A test (`tests/test_repo_docs.py`) checks this.
+
+`sentence-transformers/all-MiniLM-L6-v2` (`encoder: minilm`) is the default in `configs/base.yaml` and the encoder the unit tests load. It is used for development and smoke runs only. MiniLM and `BAAI/bge-small-en-v1.5` also appear as *re-scoring* encoders for the channel-aware results, to check that partitions chosen under MPNet stay good under another encoder.
 
 The system is designed so that the encoder can be replaced without rewriting the packetization algorithms.
 
@@ -416,62 +455,63 @@ SEMPA-LAB therefore measures encoder runtime rather than assuming that GPU/MPS i
 sempa-look/
 │
 ├── README.md
+├── Makefile                  make test / repro / figures
 ├── requirements.txt
 ├── pyproject.toml
-├── .gitignore
+├── .github/workflows/        CI: pytest on every push and pull request
 │
 ├── src/
 │   └── sempalab/
-│       │
-│       ├── __init__.py
-│       ├── types.py
-│       ├── partition.py
-│       ├── packetize.py
-│       ├── encoder.py
-│       ├── metrics.py
-│       ├── objectives.py
+│       ├── types.py, partition.py, packetize.py, tokenization.py
+│       ├── encoder.py, metrics.py, objectives.py, evaluation.py
+│       ├── aggregation.py, system.py              Stage 3 physical system
+│       ├── config.py, run.py                      YAML configs, Stage 3 runner
+│       ├── datasets.py, repro.py, compare.py      Stage 4 reproduction
+│       ├── channel_aware.py (CASA), channel_experiment.py, delay.py
+│       ├── viz.py
 │       │
 │       ├── channel/
-│       │   ├── __init__.py
-│       │   └── bernoulli.py
+│       │   ├── bernoulli.py                       i.i.d. erasures
+│       │   ├── awgn_bpsk.py                       BPSK/AWGN packet error model
+│       │   └── correlated.py                      Gilbert–Elliott, Rayleigh fading
 │       │
 │       └── algorithms/
-│           ├── __init__.py
-│           ├── full_search.py
-│           ├── random_pa.py
-│           ├── no_packetization.py
-│           ├── greedy_tss.py
-│           ├── greedy_rss.py
-│           ├── sempa_look.py
-│           ├── genetic.py
-│           ├── sempa_gbeam.py
-│           └── mcts_uct.py
+│           ├── full_search.py, random_pa.py, no_packetization.py
+│           ├── greedy_tss.py, greedy_rss.py
+│           ├── sempa_look.py, genetic.py
+│           ├── sempa_gbeam.py, mcts_uct.py
+│           └── interleave.py, swap_local_search.py
 │
+├── configs/
+│   ├── base.yaml, stage3_demo.yaml
+│   ├── repro/                Stage 4 paper experiments (one file per run)
+│   └── channel/              channel-aware experiments
+│
+├── results/
+│   ├── stage2/               Stage 2 acceptance
+│   ├── stage4/               paper reproduction, eval sets, figures
+│   └── channel/              channel-aware results and figures
+│
+├── docs/                     reproduction report, assumptions, limitations,
+│                             channel-aware write-up, related work
+├── scripts/                  experiments, figures, comparison table
 ├── tests/
-│
-├── scripts/
-│
-├── configs/      (planned, Stage 3)
-├── data/         (planned, git-ignored)
-├── results/      (planned, git-ignored)
-└── notebooks/    (planned)
+└── data/                     downloaded datasets (git-ignored, created on demand)
 ```
-
-Directories marked *planned* do not exist yet. They are created as the corresponding stages land; `data/` and `results/` are git-ignored.
 
 ### Directory Guide
 
 | Directory       | Purpose                       |
 | --------------- | ----------------------------- |
 | `src/sempalab/` | Core implementation           |
-| `algorithms/`   | Packetization algorithms      |
+| `algorithms/`   | Packetization algorithms and baselines |
 | `channel/`      | Channel models                |
 | `tests/`        | Unit and regression tests     |
-| `scripts/`      | Reproducible experiments      |
-| `configs/`      | Experiment configurations (planned) |
-| `data/`         | Datasets and evaluation sets (planned) |
-| `results/`      | CSV/JSON experimental results (planned) |
-| `notebooks/`    | Exploratory analysis (planned) |
+| `scripts/`      | Experiments, figures and the paper comparison table |
+| `configs/`      | Experiment configurations (YAML) |
+| `results/`      | Committed CSV/JSON results and figures |
+| `docs/`         | Reports and write-ups |
+| `data/`         | Datasets (git-ignored) |
 
 ---
 
@@ -547,7 +587,7 @@ pip install -e .
 Once the environment is installed:
 
 ```bash
-pytest
+make test        # or: pytest
 ```
 
 To run an individual algorithm test:
@@ -584,6 +624,20 @@ Genetic Algorithm test passed
 ```
 
 The exact values may vary with encoder/model/runtime configuration.
+
+---
+
+## Makefile targets
+
+| Target | What it does |
+| --- | --- |
+| `make test` | Runs the whole test suite (`pytest -q`). The unit tests download MiniLM on first use. |
+| `make check-docs` | Fast checks that the README, docs and configs agree with the repository (no model download). |
+| `make repro` | Reruns every Stage 4 paper experiment in `configs/repro/` with MPNet. Needs the COCO and WikiHow data (see [Rerun](#rerun)) and about 5 hours on 4 CPUs. `make repro CONFIGS=configs/repro/coco_k8.yaml` runs one. |
+| `make channel` | Reruns the channel-aware experiments in `configs/channel/` (many hours; see [docs/channel_aware.md](docs/channel_aware.md#7-rerun)). |
+| `make figures` | Regenerates every figure and the paper comparison table from the committed results, in about a minute. |
+
+`make -n <target>` prints the commands without running them.
 
 ---
 
@@ -757,8 +811,8 @@ The current algorithmic stage contains:
 [x] SemPA-Look
 [x] Genetic Algorithm
 
-[ ] SemPA-GBeam      optional
-[ ] MCTS-UCT         optional
+[x] SemPA-GBeam      optional (PR #9)
+[x] MCTS-UCT         optional (PR #9)
 [x] 100-message acceptance experiment
 ```
 
@@ -1053,31 +1107,32 @@ This allows the same experiment to be reproduced without modifying source code.
 
 # Results
 
-All experiment outputs should be stored under:
-
-```text
-results/
-```
-
-Example:
+Every committed result lives under `results/`:
 
 ```text
 results/
 ├── stage2/
-│   ├── acceptance.csv
-│   ├── acceptance.json
-│   └── summary.json
+│   ├── acceptance.csv            per-message scores, all methods
+│   ├── messages.json             the 100 COCO captions
+│   └── summary.json              gaps to Full Search, gate checks
 │
-├── reproduction/
-│   ├── fig3.csv
-│   ├── fig6.csv
-│   ├── fig8.csv
-│   └── fig9.csv
+├── stage4/
+│   ├── <experiment>/             one folder per configs/repro/*.yaml
+│   │   ├── config.yaml           resolved config
+│   │   ├── results.csv           per-message results
+│   │   └── summary.csv           averages read by the figure scripts
+│   ├── eval_sets/                frozen 100-message COCO and WikiHow sets
+│   ├── paper_reference.yaml      numbers read from the paper
+│   ├── paper_curves.yaml         curves read off the paper's figures
+│   ├── comparison.csv            paper vs ours
+│   └── figures/                  fig3_tss_vs_rss.png, fig6_ats_wts.png, ...
 │
-└── figures/
-    ├── fig3.png
-    ├── fig6.png
-    └── ...
+└── channel/
+    ├── <experiment>/             one folder per configs/channel/*.yaml
+    │   ├── config.yaml
+    │   ├── results.csv.gz
+    │   └── summary.csv           (+ summary_minilm.csv, summary_bge-small.csv)
+    └── figures/                  coco_k12_N6_gain_vs_p.png, ...
 ```
 
 The principle is:
@@ -1140,7 +1195,7 @@ Optimize not only expected semantic quality but also the risk of severe semantic
 
 ### Bursty Channels
 
-Replace independent packet erasures with a correlated channel model such as a Gilbert–Elliott process.
+Replace independent packet erasures with a correlated channel model such as a Gilbert–Elliott process. Done as [Research extension 1](#research-extension-1--channel-aware-aggregation).
 
 ### Saliency-Aware Sampling
 
@@ -1200,7 +1255,7 @@ This prevents the common research failure mode of modifying a baseline before es
 
 ### Current milestone
 
-**Core algorithmic implementation**
+**Reproduction done; hardening the channel-aware extension**
 
 Completed:
 
@@ -1226,18 +1281,18 @@ Completed:
 * [x] MCTS-UCT
 * [x] Algorithm-level tests
 
-Current next milestone:
+Stage milestones:
 
 * [x] 100-message Stage 2 acceptance experiment
-
-Then:
-
 * [x] Physical communication system
 * [x] MS-COCO / WikiHow reproduction (Stage 4)
 * [x] Paper reproduction report ([docs/reproduction.md](docs/reproduction.md))
 * [x] Limitation analysis ([docs/limitations.md](docs/limitations.md))
 * [x] Research extension 1: channel-aware aggregation ([docs/channel_aware.md](docs/channel_aware.md))
-* [ ] Final ablation and evaluation
+* [x] Related work map ([docs/related_work.md](docs/related_work.md))
+* [ ] Systematic literature search for CASA's novelty claim
+* [ ] CASA with a mismatched (estimated) channel law, non-cosine metrics, larger samples at K = 48 and 60
+* [ ] Paper-style write-up
 
 ---
 
