@@ -2,7 +2,7 @@
 
 This is the first research extension, direction 2 of [limitations.md](limitations.md), combined with the p-aware pairwise surrogate from direction 3. The paper assumes every packet is erased independently with the same probability p. We drop that assumption and model bursts and fading. Then we ask how the paper's method behaves and what an aggregator that knows the channel can recover.
 
-**Short answer.** Correlated losses break SemPA-Look's advantage. With six subpackets per message (N = 6) on a Gilbert–Elliott channel with lag-1 correlation ρ = 0.6, SemPA-Look keeps only 8% of the possible gain over Random PA. Under i.i.d. losses it keeps 36%. Under memory, *which packet each group rides in* matters, not only how tokens are grouped. Our channel-aware method, **CASA**, exploits that. It captures **85–92% of the oracle's gain over Random PA on every channel we tested**. It beats SemPA-Look by up to **+0.040 ATS (+8.1%)**, and it beats even the exhaustively searched i.i.d.-optimal partition by up to +0.018 ATS. All of these differences have 95% CIs that exclude zero. The gains hold, smaller, when the same partitions are re-scored under MiniLM and BGE-small. They also hold on 24-, 48- and 60-token WikiHow passages, where Full Search is infeasible. At K = 48 and 60, CASA beats SemPA-Look by +0.06 to +0.08 ATS at p = 0.5 and uses 2.4–3.3× fewer encoder calls than swap search. A stronger blind baseline, swap search started from the modular interleaver, behaves like randomly started swap search (within 0.002 ATS), so it does not close the gap. Two honest limits apply. A packet interleaver, if the delay budget allows one, removes much of the burst problem for every method: SemPA-Look matches CASA with a 1.5–2.3× deeper interleaver, but the best blind searches with slot ordering need only 1.1–1.45× (up to 1.85× at depth 8). At low loss (p ≈ 0.1), CASA only ties a strong swap-search baseline, and at K ≥ 48 under i.i.d. losses it is behind it (−0.004).
+**Short answer.** Correlated losses break SemPA-Look's advantage. With six subpackets per message (N = 6) on a Gilbert–Elliott channel with lag-1 correlation ρ = 0.6, SemPA-Look keeps only 8% of the possible gain over Random PA. Under i.i.d. losses it keeps 36%. Under memory, *which packet each group rides in* matters, not only how tokens are grouped. Our channel-aware method, **CASA**, exploits that. It captures **85–92% of the oracle's gain over Random PA on every channel we tested**. It beats SemPA-Look by up to **+0.040 ATS (+8.1%)**, and it beats even the exhaustively searched i.i.d.-optimal partition by up to +0.018 ATS (under the encoders; under BERTScore that partition is ahead, see section 4). All of these differences have 95% CIs that exclude zero. The gains over SemPA-Look and swap search hold when the same partitions are re-scored under MiniLM and BGE-small (smaller) and under BERTScore F1 (as large). They also hold on 24-, 48- and 60-token WikiHow passages, where Full Search is infeasible. At K = 48 and 60, CASA beats SemPA-Look by +0.06 to +0.08 ATS at p = 0.5 and uses 2.4–3.3× fewer encoder calls than swap search. A stronger blind baseline, swap search started from the modular interleaver, behaves like randomly started swap search (within 0.002 ATS), so it does not close the gap. Two honest limits apply. A packet interleaver, if the delay budget allows one, removes much of the burst problem for every method: SemPA-Look matches CASA with a 1.5–2.3× deeper interleaver, but the best blind searches with slot ordering need only 1.1–1.45× (up to 1.85× at depth 8). At low loss (p ≈ 0.1), CASA only ties a strong swap-search baseline, and at K ≥ 48 under i.i.d. losses it is behind it (−0.004).
 
 All numbers: MPNet (`all-mpnet-base-v2`) defines the objective and the headline numbers, 100 messages per point, exact ATS under each channel's joint loss law, paired per-message differences with bootstrap 95% CIs (5,000 resamples). Full tables: [channel_aware_tables.md](channel_aware_tables.md).
 
@@ -147,6 +147,15 @@ BGE-small packs cosines closer to 1, so all of its absolute differences are comp
 
 ![rescored](../results/channel/figures/coco_k12_N6_rescored.png)
 
+### BERTScore F1
+
+The same partitions are also re-scored with BERTScore F1 (RoBERTa-large, baseline-rescaled; `python -m sempalab.bertscore_rescore --config configs/channel/coco_k12.yaml --M 3 2`). φ(F, W) is the F1 between the surviving tokens in their original order and the full message. It aligns tokens and does not pool a sentence vector, so it is a genuinely different kind of metric from the three encoders.
+- CASA's gain over SemPA-Look has a CI above zero at all 49 points for N = 4 and N = 6, and its gain over swap LS + order at all 28 points with p ≥ 0.3. The gains are as large as under MPNet: for N = 6, Gilbert ρ = 0.6, p = 0.5, +0.040 [+0.034, +0.047] over SemPA-Look and +0.018 [+0.013, +0.023] over swap LS + order (MPNet: +0.039 and +0.009).
+- **One result does not transfer.** Under BERTScore the exhaustive i.i.d.-optimal partition (chosen with MPNet) scores at or above both CASA and the MPNet channel oracle on every channel, by up to 0.016 at N = 6, p = 0.5. Under MPNet, channel-aware ordering adds 0.01–0.02 on top of that partition; BERTScore does not reward that extra. So CASA's gains over the practical searches are metric-robust, but its edge over an exhaustively searched blind partition is not.
+- Shares of the oracle gain are not meaningful under BERTScore, because the MPNet oracle is not the BERTScore optimum. Only paired differences are reported.
+
+Paired differences per channel at p = 0.3 and 0.5: [channel_bertscore_tables.md](channel_bertscore_tables.md).
+
 ## 5. Longer messages: WikiHow, K = 24, 48 and 60, N = 6
 
 ### K = 24
@@ -211,6 +220,8 @@ We pushed the same comparison to 48-token (30 messages, M = 8) and 60-token (20 
 python -m sempalab.channel_experiment --config configs/channel/coco_k12.yaml          # about 30 min on 4 CPUs
 python -m sempalab.channel_experiment --config configs/channel/coco_k12.yaml --rescore minilm
 python -m sempalab.channel_experiment --config configs/channel/coco_k12.yaml --rescore bge-small
+python -m sempalab.bertscore_rescore --config configs/channel/coco_k12.yaml --M 3 2   # about 2 h on 4 CPUs
+python scripts/make_bertscore_table.py
 python -m sempalab.channel_experiment --config configs/channel/coco_k12_stride.yaml   # D = 1..16
 python -m sempalab.channel_experiment --config configs/channel/coco_k12_matched.yaml  # about 21 min
 python -m sempalab.channel_experiment --config configs/channel/wikihow_k24.yaml       # about 90 min

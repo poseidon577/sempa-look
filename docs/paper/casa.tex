@@ -29,7 +29,7 @@
 \maketitle
 
 \begin{abstract}
-Semantic packet aggregation decides which tokens of a message share a packet, so that the message keeps as much of its meaning as possible when packets are lost. Existing methods assume that every packet is erased independently with the same probability. We show that this assumption is costly. On Gilbert--Elliott and correlated Rayleigh-fading channels at the same average loss rate, the state-of-the-art lookahead aggregator keeps as little as 1\% of the attainable gain over random grouping, and even the exhaustively searched i.i.d.-optimal grouping keeps only 32--73\% at six packets per message. Under memory a second degree of freedom appears that i.i.d.\ models hide: the order in which a message's packets are sent. We propose CASA, a channel-aware aggregator that fits a pairwise surrogate of semantic similarity on subsets drawn from the channel's own survival law, reduces expected similarity under the channel's joint loss law to a closed-form quadratic assignment problem, and re-ranks a few local optima exactly. On MS-COCO captions CASA captures 85--92\% of the exhaustive oracle's gain on every channel tested, beats the lookahead aggregator by up to $+0.040$ average token similarity (ATS), and beats the best channel-blind grouping found by exhaustive search. The gains persist on 24- to 60-token WikiHow passages, when partitions are re-scored with two other sentence encoders and with BERTScore, and when the channel law is estimated: a two-state Markov model fitted to only 100 observed packets keeps CASA within 0.001 ATS of the design with the true law. \emph{[BERTScore sentence to be added.]}
+Semantic packet aggregation decides which tokens of a message share a packet, so that the message keeps as much of its meaning as possible when packets are lost. Existing methods assume that every packet is erased independently with the same probability. We show that this assumption is costly. On Gilbert--Elliott and correlated Rayleigh-fading channels at the same average loss rate, the state-of-the-art lookahead aggregator keeps as little as 1\% of the attainable gain over random grouping, and even the exhaustively searched i.i.d.-optimal grouping keeps only 32--73\% at six packets per message. Under memory a second degree of freedom appears that i.i.d.\ models hide: the order in which a message's packets are sent. We propose CASA, a channel-aware aggregator that fits a pairwise surrogate of semantic similarity on subsets drawn from the channel's own survival law, reduces expected similarity under the channel's joint loss law to a closed-form quadratic assignment problem, and re-ranks a few local optima exactly. On MS-COCO captions CASA captures 85--92\% of the exhaustive oracle's gain on every channel tested, beats the lookahead aggregator by up to $+0.040$ average token similarity (ATS), and beats the best channel-blind grouping found by exhaustive search. The gains over the lookahead aggregator and over swap search persist on 24- to 60-token WikiHow passages, when partitions are re-scored with two other sentence encoders and with BERTScore F1 (where they are as large as under the design encoder, up to $+0.050$), and when the channel law is estimated: a two-state Markov model fitted to only 100 observed packets keeps CASA within 0.001 ATS of the design with the true law. The edge over the exhaustive i.i.d.-optimal grouping is metric-dependent: it holds under all three sentence encoders but reverses under BERTScore.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -219,7 +219,30 @@ i.i.d.\ at the true $p$ & 63\% & 41\% & 28\% & 59\% & 52\%\\
 Three findings stand out. First, a short trace suffices: a Gilbert model fitted to 100 packets keeps CASA within 0.001 ATS of the true-law design on every Gilbert channel, and it still beats swap search with ordering \emph{given the true law} by $+0.003$ to $+0.013$ at $p=0.5$ (all CIs above zero). Second, a wrong family causes a small bias that more data does not remove: on slow fading ($\alpha=0.99$) the fitted two-state model stays at 84--87\% from $T=100$ to $10^4$, while the model-free empirical law reaches 89--92\% from about $10^3$ packets but is noisy at $T=100$ (68\%). Third, the loss rate hardly matters (at most 3 points for $\pm50\%$ error in $p$) but the memory does: overestimating it ($\rho=0.9$ for a truth of $0.3$) is the costliest mistake, though still far better than assuming independence.
 
 \subsection{Metric and encoder robustness}
-Partitions chosen with MPNet keep their advantage when re-scored with \texttt{all-MiniLM-L6-v2} and \texttt{bge-small-en-v1.5}: CASA's gain over SemPA-Look stays positive with CIs above zero at every bursty point, at about half (MiniLM) and a quarter to a third (BGE-small) of the MPNet size. \emph{[BERTScore F1 (RoBERTa-large, baseline-rescaled) re-score to be added.]}
+Partitions chosen with MPNet keep their advantage when re-scored with \texttt{all-MiniLM-L6-v2} and \texttt{bge-small-en-v1.5}: CASA's gain over SemPA-Look stays positive with CIs above zero at every bursty point, at about half (MiniLM) and a quarter to a third (BGE-small) of the MPNet size. 
+
+We also re-score the same partitions with BERTScore F1~\cite{zhang2020bertscore} (RoBERTa-large, baseline-rescaled), a token-alignment metric with no sentence pooling, using the surviving tokens in their original order as the candidate and the full message as the reference. CASA's gain over SemPA-Look has a 95\% CI above zero at all 49 channel points for both $N=4$ and $N=6$, and its gain over swap search with ordering at all 28 points with $p\ge0.3$. The gains are as large as under MPNet: at $N=6$, Gilbert $\rho=0.6$, $p=0.5$, $+0.040$ $[+0.034,+0.047]$ over SemPA-Look and $+0.018$ $[+0.013,+0.023]$ over swap search with ordering (MPNet: $+0.039$ and $+0.009$). One result does not transfer. Under BERTScore the exhaustive i.i.d.-optimal partition (chosen with MPNet) scores at or above both CASA and the MPNet channel oracle on every channel, by up to $0.016$ at $N=6$, $p=0.5$. The extra gain that channel-aware ordering finds beyond an exhaustively searched blind partition is about $0.01$--$0.02$ under MPNet, and BERTScore does not reward it. Shares of the oracle gain are not meaningful here, because the MPNet oracle is not the BERTScore optimum, so we report paired differences only (Table~\ref{tab:bertscore}).
+
+\begin{table}[t]
+\centering
+\caption{CASA minus each reference under the design encoder (MPNet) and under BERTScore F1, same partitions (COCO, $K=12$, $N=6$, $p=0.5$, 100 messages). $^\dagger$: 95\% paired-bootstrap CI covers zero; all other entries exclude it.}
+\label{tab:bertscore}
+\begin{tabular}{lccc@{\hskip 12pt}ccc}
+\toprule
+& \multicolumn{3}{c}{MPNet cosine} & \multicolumn{3}{c}{BERTScore F1}\\
+Channel & SemPA-Look & Swap+ord & FS i.i.d. & SemPA-Look & Swap+ord & FS i.i.d.\\
+\midrule
+i.i.d. & $+0.024$ & $+0.017$ & $-0.004$ & $+0.042$ & $+0.031$ & $-0.006$\\
+GE $\rho=0.3$ & $+0.035$ & $+0.013$ & $+0.008$ & $+0.046$ & $+0.028$ & $-0.012$\\
+GE $\rho=0.6$ & $+0.039$ & $+0.009$ & $+0.018$ & $+0.040$ & $+0.018$ & $-0.016$\\
+GE $\rho=0.9$ & $+0.019$ & $+0.003$ & $+0.012$ & $+0.014$ & $+0.003$ & $-0.009$\\
+Rayl.\ $\alpha=0.5$ & $+0.029$ & $+0.015$ & $+0.001^\dagger$ & $+0.045$ & $+0.031$ & $-0.008$\\
+Rayl.\ $\alpha=0.9$ & $+0.031$ & $+0.010$ & $+0.011$ & $+0.034$ & $+0.017$ & $-0.012$\\
+Rayl.\ $\alpha=0.99$ & $+0.012$ & $+0.004$ & $+0.003$ & $+0.014$ & $+0.008$ & $-0.004$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
 
 \subsection{Longer messages}
 Full Search is infeasible beyond $K=12$. On WikiHow $K=24$ at $p=0.5$, CASA beats SemPA-Look by $+0.056$ ATS ($+9.5\%$) on the Gilbert channel and swap search with ordering by $+0.016$. At $K=48$ and $60$ the gap to SemPA-Look grows to $+0.06$--$0.08$ at $p=0.5$, and CASA uses $2.4$--$3.3\times$ fewer encoder calls than swap search, whose cost grows with the number of token pairs. \emph{[Update with the extended samples.]}
@@ -227,7 +250,7 @@ Full Search is infeasible beyond $K=12$. On WikiHow $K=24$ at $p=0.5$, CASA beat
 %=====================================================================
 \section{Limitations}
 %=====================================================================
-At low loss ($p\approx0.1$) CASA only ties a well-searched blind partition with ordering, and under i.i.d.\ losses at $K\ge48$ it trails it by 0.004. The receiver simply drops lost tokens; a generative receiver that infills missing tokens would change $\phi$ and could be modelled as another law over survival patterns. Every metric we use is automatic; none is a human judgment. If a deep interleaver is affordable, most of the burst penalty disappears for all methods, so CASA matters most under a fixed delay budget or fading too slow for the batch to average out.
+At low loss ($p\approx0.1$) CASA only ties a well-searched blind partition with ordering, and under i.i.d.\ losses at $K\ge48$ it trails it by 0.004. The receiver simply drops lost tokens; a generative receiver that infills missing tokens would change $\phi$ and could be modelled as another law over survival patterns. Every metric we use is automatic; none is a human judgment, and the metrics disagree on the last 0.01--0.02: CASA's edge over the exhaustive i.i.d.-optimal partition holds under three sentence encoders but reverses under BERTScore, so only its gains over practical searches are metric-robust. If a deep interleaver is affordable, most of the burst penalty disappears for all methods, so CASA matters most under a fixed delay budget or fading too slow for the batch to average out.
 
 %=====================================================================
 \section{Conclusion}
