@@ -1,7 +1,7 @@
 """
 CASA under a mismatched or estimated channel law.
 
-    python -m sempalab.channel_mismatch --config configs/channel/coco_k12_mismatch.yaml
+    python -m sempalab.channel_mismatch --config configs/channel_mismatch/coco_k12.yaml
 
 In docs/channel_aware.md CASA is handed the true joint slot law Q. Here
 the aggregator is *designed* with a law Q_design that differs from the

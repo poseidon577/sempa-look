@@ -1,11 +1,11 @@
 """
 The literature check behind the CASA write-up must cite and contrast the
-closest prior work (docs/casa_related_work.md).
+closest prior work (docs/related_work.md).
 """
 
 from pathlib import Path
 
-DOC = Path(__file__).resolve().parents[1] / "docs" / "casa_related_work.md"
+DOC = Path(__file__).resolve().parents[1] / "docs" / "related_work.md"
 
 REQUIRED = [
     "2504.19591",  # SemPA-GBeam
@@ -20,10 +20,10 @@ REQUIRED = [
 def test_related_work_cites_closest_prior_art():
     text = DOC.read_text()
     missing = [arxiv_id for arxiv_id in REQUIRED if arxiv_id not in text]
-    assert not missing, f"docs/casa_related_work.md must cite {missing}"
+    assert not missing, f"docs/related_work.md must cite {missing}"
 
 
 def test_related_work_states_a_verdict_and_claim():
     text = DOC.read_text()
-    assert "## Verdict" in text
+    assert "## Verdict for CASA" in text
     assert "joint loss law" in text
