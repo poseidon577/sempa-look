@@ -112,6 +112,31 @@ For example, at N = 6, Gilbert ρ = 0.9, p = 0.3, CASA reaches 0.7705 at D = 2 a
 
 ![stride](../results/channel/figures/coco_k12_stride_p0.3.png)
 
+### Mismatched or estimated channel law
+
+Everything above hands CASA the true law Q. A real transmitter has to estimate it. We rebuilt CASA with a wrong or estimated law Q̂ and scored every partition by exact ATS under the true Q (`sempalab.channel_mismatch`, config `configs/channel_mismatch/coco_k12.yaml`, 100 messages, N = 4 and 6, true channels Gilbert ρ ∈ {0.3, 0.6, 0.9} and Rayleigh α ∈ {0.9, 0.99}, p ∈ {0.1, 0.3, 0.5}). The designs are: wrong memory (another ρ or α), wrong family (Gilbert for a fading truth and back), wrong p (×0.5, ×1.5), a Gilbert channel fitted by maximum likelihood to T observed packets of the true channel, and the empirical law of the slot patterns in T observed packets. Each message gets its own trace, so the spread over messages includes estimation noise. With the true law, this runner reproduces the main run's CASA results to within 1e-9.
+
+**CASA does not need the exact law.** Share of the oracle's gain at N = 6, mean over p = 0.1, 0.3 and 0.5:
+
+| CASA designed with | GE ρ=0.3 | GE ρ=0.6 | GE ρ=0.9 | Rayleigh α=0.9 | Rayleigh α=0.99 |
+|---|---:|---:|---:|---:|---:|
+| True law | 92% | 92% | 92% | 92% | 92% |
+| Gilbert fitted to 100 packets | 91% | 92% | 90% | 89% | 84% |
+| Gilbert fitted to 10,000 packets | 92% | 92% | 92% | 91% | 87% |
+| Empirical law, 1,000 packets | 90% | 92% | 92% | 90% | 89% |
+| True family, p × 0.5 | 89% | 91% | 92% | 89% | 91% |
+| Gilbert ρ = 0.9 (memory overestimated) | 72% | 87% | 92% | 78% | 79% |
+| i.i.d. at the true p | 63% | 41% | 28% | 59% | 52% |
+| *Swap LS + slot order, true law* | 77% | 79% | 76% | 76% | 69% |
+
+- **A short trace is enough.** A Gilbert fit to 100 observed packets keeps CASA within 0.001 ATS of the true-law design on every Gilbert channel (for example −0.0000 [−0.0006, +0.0006] at N = 6, ρ = 0.6, p = 0.5). It still beats swap LS + slot order *given the true law* by +0.003 to +0.013 at p = 0.5, every CI above zero.
+- **A wrong family costs a little, and more data does not fix it.** On slow Rayleigh fading (α = 0.99) a fitted two-state Gilbert model loses 0.001 ATS at p = 0.5 (84–87% instead of 92% of the oracle's gain over all p), and that gap stays flat from 100 to 10,000 packets: it is model bias, not estimation noise. The model-free empirical law closes it with about 1,000 packets (89–92%). With only 100 packets the empirical law is noisy (68–85%), so a parametric fit is the better choice for short traces.
+- **The loss rate barely matters; the memory does.** Halving or increasing p by 50% changes the share by at most 3 points. Overestimating memory is the costly mistake: designing for ρ = 0.9 when the truth is ρ = 0.3 drops the share to 72%, while underestimating (ρ = 0.3 for a truth of 0.9) gives 78%. Both still beat the memory-blind design (28–63%). Against swap LS + slot order with the true law, they win at p = 0.5 on every channel and N (CIs above zero), but at N = 6, p = 0.3 the over-estimate trails it on Gilbert ρ = 0.3 (−0.0014) and the under-estimate only ties it on ρ = 0.9 (+0.0004, CI includes zero).
+
+![mismatch](../results/channel/figures/coco_k12_mismatch_estimated.png)
+
+Full tables, including N = 4 and paired differences to the true-law design and to swap LS + slot order: [channel_mismatch_tables.md](channel_mismatch_tables.md).
+
 ## 4. Re-scored under other encoders
 
 The partitions chosen with MPNet are re-scored under `all-MiniLM-L6-v2` and `BAAI/bge-small-en-v1.5` (`--rescore`). The channel and partitions stay the same; only φ changes.
@@ -174,7 +199,7 @@ We pushed the same comparison to 48-token (30 messages, M = 8) and 60-token (20 
 ## 6. Limits and open points
 
 - **Interleaving first.** If a deployment can afford a deep packet interleaver, most of the burst penalty goes away for every method. CASA's value is at a fixed delay budget, or under fading too slow for the batch to average out.
-- **Known channel law.** CASA uses the true Q (r and R). Estimating it from feedback, and how robust CASA is to a wrong ρ or α, is untested.
+- **Estimated channel law.** CASA was tested with wrong and estimated laws (section 3, "Mismatched or estimated channel law"): a Gilbert fit to 100 observed packets is enough on Gilbert channels, and a model-free empirical law from about 1,000 packets is enough on slow fading. Channels whose statistics drift over time, and estimation from ACK/NACK feedback with delay, are untested.
 - **Low loss.** At p ≈ 0.1, CASA ties a well-searched blind partition with ordering, and under i.i.d. losses at K ≥ 48 it is 0.004 behind it. Swap search is better there; CASA's surrogate is fitted only on partial survival, which matters little when almost every slot survives.
 - **Large K is small-sample.** K = 48 and 60 use 30 and 20 messages and three channels, against 100 messages and seven channels at K = 12.
 - **Same receiver.** The receiver still just drops lost tokens (L1). Recovery-aware aggregation (direction 1) can slot into this framework as another law over survival patterns.
@@ -191,7 +216,9 @@ python -m sempalab.channel_experiment --config configs/channel/coco_k12_matched.
 python -m sempalab.channel_experiment --config configs/channel/wikihow_k24.yaml       # about 90 min
 python -m sempalab.channel_experiment --config configs/channel/wikihow_k48.yaml       # about 6 h
 python -m sempalab.channel_experiment --config configs/channel/wikihow_k60.yaml       # about 8 h
+python -m sempalab.channel_mismatch --config configs/channel_mismatch/coco_k12.yaml   # about 40 min
 python scripts/make_channel_figures.py   # results/channel/figures/, docs/channel_aware_tables.md
+python scripts/make_mismatch_figures.py  # docs/channel_mismatch_tables.md
 ```
 
 Evaluation sets are the frozen ones in `results/stage4/eval_sets/`, so no COCO or WikiHow download is needed. Add `--rescore minilm` and `--rescore bge-small` to any config to re-score its partitions.

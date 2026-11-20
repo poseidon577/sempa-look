@@ -29,7 +29,7 @@
 \maketitle
 
 \begin{abstract}
-Semantic packet aggregation decides which tokens of a message share a packet, so that the message keeps as much of its meaning as possible when packets are lost. Existing methods assume that every packet is erased independently with the same probability. We show that this assumption is costly. On Gilbert--Elliott and correlated Rayleigh-fading channels at the same average loss rate, the state-of-the-art lookahead aggregator keeps as little as 1\% of the attainable gain over random grouping, and even the exhaustively searched i.i.d.-optimal grouping keeps only 32--73\% at six packets per message. Under memory a second degree of freedom appears that i.i.d.\ models hide: the order in which a message's packets are sent. We propose CASA, a channel-aware aggregator that fits a pairwise surrogate of semantic similarity on subsets drawn from the channel's own survival law, reduces expected similarity under the channel's joint loss law to a closed-form quadratic assignment problem, and re-ranks a few local optima exactly. On MS-COCO captions CASA captures 85--92\% of the exhaustive oracle's gain on every channel tested, beats the lookahead aggregator by up to $+0.040$ average token similarity (ATS), and beats the best channel-blind grouping found by exhaustive search. The gains persist on 24- to 60-token WikiHow passages, when partitions are re-scored with two other sentence encoders and with BERTScore, and when the channel law is misspecified or estimated from a short loss trace. \emph{[Mismatch and BERTScore sentences to be finalised with the new runs.]}
+Semantic packet aggregation decides which tokens of a message share a packet, so that the message keeps as much of its meaning as possible when packets are lost. Existing methods assume that every packet is erased independently with the same probability. We show that this assumption is costly. On Gilbert--Elliott and correlated Rayleigh-fading channels at the same average loss rate, the state-of-the-art lookahead aggregator keeps as little as 1\% of the attainable gain over random grouping, and even the exhaustively searched i.i.d.-optimal grouping keeps only 32--73\% at six packets per message. Under memory a second degree of freedom appears that i.i.d.\ models hide: the order in which a message's packets are sent. We propose CASA, a channel-aware aggregator that fits a pairwise surrogate of semantic similarity on subsets drawn from the channel's own survival law, reduces expected similarity under the channel's joint loss law to a closed-form quadratic assignment problem, and re-ranks a few local optima exactly. On MS-COCO captions CASA captures 85--92\% of the exhaustive oracle's gain on every channel tested, beats the lookahead aggregator by up to $+0.040$ average token similarity (ATS), and beats the best channel-blind grouping found by exhaustive search. The gains persist on 24- to 60-token WikiHow passages, when partitions are re-scored with two other sentence encoders and with BERTScore, and when the channel law is estimated: a two-state Markov model fitted to only 100 observed packets keeps CASA within 0.001 ATS of the design with the true law. \emph{[BERTScore sentence to be added.]}
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -186,7 +186,37 @@ A packet interleaver of depth $D$ removes much of the burst penalty for every me
 
 \subsection{Mismatched and estimated channel law}
 \label{sec:mismatch}
-\emph{[To be filled from \texttt{results/channel/coco\_k12\_mismatch}: CASA designed with a wrong memory parameter, a wrong family, a wrong $p$ ($\times0.5$, $\times1.5$), a Gilbert model fitted by maximum likelihood to $T\in\{100,300,10^3,10^4\}$ observed packets, and the empirical slot-pattern law from $T$ packets; scored under the true law.]}
+CASA needs $(r,R)$, which a transmitter must estimate. We rebuilt CASA with a wrong or estimated law $\hat\Q$ and scored every partition under the true $\Q$: a wrong memory parameter, a wrong family, a wrong $p$ ($\times0.5$, $\times1.5$), a Gilbert channel fitted by maximum likelihood to $T$ observed packets of the true channel, and the empirical slot-pattern law of $T$ packets (add-$\tfrac12$ smoothing). Every message gets its own trace, so the results include estimation noise. Table~\ref{tab:mismatch} and Fig.~\ref{fig:mismatch} summarise $N=6$.
+
+\begin{table}[t]
+\centering
+\caption{Share of the oracle's gain when CASA is designed with a wrong or estimated law and scored under the true law (COCO $K=12$, $N=6$, mean over $p\in\{0.1,0.3,0.5\}$).}
+\label{tab:mismatch}
+\begin{tabular}{lccccc}
+\toprule
+CASA designed with & GE $\rho{=}0.3$ & GE $\rho{=}0.6$ & GE $\rho{=}0.9$ & Rayl.\ $\alpha{=}0.9$ & Rayl.\ $\alpha{=}0.99$\\
+\midrule
+True law & 92\% & 92\% & 92\% & 92\% & 92\%\\
+Gilbert fitted to $T=100$ packets & 91\% & 92\% & 90\% & 89\% & 84\%\\
+Gilbert fitted to $T=10^4$ packets & 92\% & 92\% & 92\% & 91\% & 87\%\\
+Empirical law, $T=10^3$ packets & 90\% & 92\% & 92\% & 90\% & 89\%\\
+True family, $p\times0.5$ & 89\% & 91\% & 92\% & 89\% & 91\%\\
+Gilbert $\rho=0.9$ (memory overestimated) & 72\% & 87\% & 92\% & 78\% & 79\%\\
+i.i.d.\ at the true $p$ & 63\% & 41\% & 28\% & 59\% & 52\%\\
+\midrule
+\emph{Swap LS + slot order, true law} & 77\% & 79\% & 76\% & 76\% & 69\%\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{coco_k12_mismatch_estimated.png}
+\caption{CASA with a channel law estimated from $T$ observed packets ($N=6$, mean over $p=0.3,0.5$). Dashed: CASA with the true law; dotted: swap search with slot ordering given the true law.}
+\label{fig:mismatch}
+\end{figure}
+
+Three findings stand out. First, a short trace suffices: a Gilbert model fitted to 100 packets keeps CASA within 0.001 ATS of the true-law design on every Gilbert channel, and it still beats swap search with ordering \emph{given the true law} by $+0.003$ to $+0.013$ at $p=0.5$ (all CIs above zero). Second, a wrong family causes a small bias that more data does not remove: on slow fading ($\alpha=0.99$) the fitted two-state model stays at 84--87\% from $T=100$ to $10^4$, while the model-free empirical law reaches 89--92\% from about $10^3$ packets but is noisy at $T=100$ (68\%). Third, the loss rate hardly matters (at most 3 points for $\pm50\%$ error in $p$) but the memory does: overestimating it ($\rho=0.9$ for a truth of $0.3$) is the costliest mistake, though still far better than assuming independence.
 
 \subsection{Metric and encoder robustness}
 Partitions chosen with MPNet keep their advantage when re-scored with \texttt{all-MiniLM-L6-v2} and \texttt{bge-small-en-v1.5}: CASA's gain over SemPA-Look stays positive with CIs above zero at every bursty point, at about half (MiniLM) and a quarter to a third (BGE-small) of the MPNet size. \emph{[BERTScore F1 (RoBERTa-large, baseline-rescaled) re-score to be added.]}
@@ -202,7 +232,7 @@ At low loss ($p\approx0.1$) CASA only ties a well-searched blind partition with 
 %=====================================================================
 \section{Conclusion}
 %=====================================================================
-Assuming independent packet losses hides the degree of freedom that matters most on real links: which group goes in which slot. CASA exposes it with a pairwise surrogate fitted on the channel's survival law and a closed-form quadratic assignment, and recovers most of the exhaustive oracle's gain at a few hundred encoder calls. \emph{[Final sentence on robustness to a mismatched law.]}
+Assuming independent packet losses hides the degree of freedom that matters most on real links: which group goes in which slot. CASA exposes it with a pairwise surrogate fitted on the channel's survival law and a closed-form quadratic assignment, and recovers most of the exhaustive oracle's gain at a few hundred encoder calls. It does not need the true law: a model fitted to a hundred observed packets, or a model-free estimate from a thousand, recovers nearly all of the gain.
 
 \bibliographystyle{IEEEtran}
 \bibliography{refs}
