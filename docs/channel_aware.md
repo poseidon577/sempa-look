@@ -2,7 +2,7 @@
 
 This is the first research extension, direction 2 of [limitations.md](limitations.md), combined with the p-aware pairwise surrogate from direction 3. The paper assumes every packet is erased independently with the same probability p. We drop that assumption and model bursts and fading. Then we ask how the paper's method behaves and what an aggregator that knows the channel can recover.
 
-**Short answer.** Correlated losses break SemPA-Look's advantage. With six subpackets per message (N = 6) on a Gilbert–Elliott channel with lag-1 correlation ρ = 0.6, SemPA-Look keeps only 8% of the possible gain over Random PA. Under i.i.d. losses it keeps 36%. Under memory, *which packet each group rides in* matters, not only how tokens are grouped. Our channel-aware method, **CASA**, exploits that. It captures **85–92% of the oracle's gain over Random PA on every channel we tested**. It beats SemPA-Look by up to **+0.040 ATS (+8.1%)**, and it beats even the exhaustively searched i.i.d.-optimal partition by up to +0.018 ATS. All of these differences have 95% CIs that exclude zero. The gains hold, smaller, when the same partitions are re-scored under MiniLM and BGE-small. They also hold on 24-, 48- and 60-token WikiHow passages, where Full Search is infeasible. At K = 48 and 60, CASA beats SemPA-Look by +0.06 to +0.08 ATS at p = 0.5 and uses 2.4–3.3× fewer encoder calls than swap search. A stronger blind baseline, swap search started from the modular interleaver, behaves like randomly started swap search (within 0.002 ATS), so it does not close the gap. Two honest limits apply. A packet interleaver, if the delay budget allows one, removes much of the burst problem for every method: SemPA-Look matches CASA with a 1.5–2.3× deeper interleaver, but the best blind searches with slot ordering need only 1.1–1.45× (up to 1.85× at depth 8). At low loss (p ≈ 0.1), CASA only ties a strong swap-search baseline, and at K ≥ 48 under i.i.d. losses it is behind it (−0.004).
+**Short answer.** Correlated losses break SemPA-Look's advantage. With six subpackets per message (N = 6) on a Gilbert–Elliott channel with lag-1 correlation ρ = 0.6, SemPA-Look keeps only 8% of the possible gain over Random PA. Under i.i.d. losses it keeps 36%. Under memory, *which packet each group rides in* matters, not only how tokens are grouped. Our channel-aware method, **CASA**, exploits that. It captures **85–92% of the oracle's gain over Random PA on every channel we tested**. It beats SemPA-Look by up to **+0.040 ATS (+8.1%)**, and it beats even the exhaustively searched i.i.d.-optimal partition by up to +0.018 ATS (under the encoders; under BERTScore that partition is ahead, see section 4). All of these differences have 95% CIs that exclude zero. The gains over SemPA-Look and swap search hold when the same partitions are re-scored under MiniLM and BGE-small (smaller) and under BERTScore F1 (as large). They also hold on 24-, 48- and 60-token WikiHow passages (60 messages each at K = 48 and 60), where Full Search is infeasible. At K = 48 and 60, CASA beats SemPA-Look by +0.06 to +0.08 ATS at p = 0.5 and uses 2.5–3.1× fewer encoder calls than swap search. A stronger blind baseline, swap search started from the modular interleaver, behaves like randomly started swap search (within 0.002 ATS), so it does not close the gap. Two honest limits apply. A packet interleaver, if the delay budget allows one, removes much of the burst problem for every method: SemPA-Look matches CASA with a 1.5–2.3× deeper interleaver, but the best blind searches with slot ordering need only 1.1–1.45× (up to 1.85× at depth 8). At low loss (p ≈ 0.1), CASA only ties a strong swap-search baseline, and at K ≥ 48 under i.i.d. losses it is behind it (−0.004).
 
 All numbers: MPNet (`all-mpnet-base-v2`) defines the objective and the headline numbers, 100 messages per point, exact ATS under each channel's joint loss law, paired per-message differences with bootstrap 95% CIs (5,000 resamples). Full tables: [channel_aware_tables.md](channel_aware_tables.md).
 
@@ -112,6 +112,31 @@ For example, at N = 6, Gilbert ρ = 0.9, p = 0.3, CASA reaches 0.7705 at D = 2 a
 
 ![stride](../results/channel/figures/coco_k12_stride_p0.3.png)
 
+### Mismatched or estimated channel law
+
+Everything above hands CASA the true law Q. A real transmitter has to estimate it. We rebuilt CASA with a wrong or estimated law Q̂ and scored every partition by exact ATS under the true Q (`sempalab.channel_mismatch`, config `configs/channel_mismatch/coco_k12.yaml`, 100 messages, N = 4 and 6, true channels Gilbert ρ ∈ {0.3, 0.6, 0.9} and Rayleigh α ∈ {0.9, 0.99}, p ∈ {0.1, 0.3, 0.5}). The designs are: wrong memory (another ρ or α), wrong family (Gilbert for a fading truth and back), wrong p (×0.5, ×1.5), a Gilbert channel fitted by maximum likelihood to T observed packets of the true channel, and the empirical law of the slot patterns in T observed packets. Each message gets its own trace, so the spread over messages includes estimation noise. With the true law, this runner reproduces the main run's CASA results to within 1e-9.
+
+**CASA does not need the exact law.** Share of the oracle's gain at N = 6, mean over p = 0.1, 0.3 and 0.5:
+
+| CASA designed with | GE ρ=0.3 | GE ρ=0.6 | GE ρ=0.9 | Rayleigh α=0.9 | Rayleigh α=0.99 |
+|---|---:|---:|---:|---:|---:|
+| True law | 92% | 92% | 92% | 92% | 92% |
+| Gilbert fitted to 100 packets | 91% | 92% | 90% | 89% | 84% |
+| Gilbert fitted to 10,000 packets | 92% | 92% | 92% | 91% | 87% |
+| Empirical law, 1,000 packets | 90% | 92% | 92% | 90% | 89% |
+| True family, p × 0.5 | 89% | 91% | 92% | 89% | 91% |
+| Gilbert ρ = 0.9 (memory overestimated) | 72% | 87% | 92% | 78% | 79% |
+| i.i.d. at the true p | 63% | 41% | 28% | 59% | 52% |
+| *Swap LS + slot order, true law* | 77% | 79% | 76% | 76% | 69% |
+
+- **A short trace is enough.** A Gilbert fit to 100 observed packets keeps CASA within 0.001 ATS of the true-law design on every Gilbert channel (for example −0.0000 [−0.0006, +0.0006] at N = 6, ρ = 0.6, p = 0.5). It still beats swap LS + slot order *given the true law* by +0.003 to +0.013 at p = 0.5, every CI above zero.
+- **A wrong family costs a little, and more data does not fix it.** On slow Rayleigh fading (α = 0.99) a fitted two-state Gilbert model loses 0.001 ATS at p = 0.5 (84–87% instead of 92% of the oracle's gain over all p), and that gap stays flat from 100 to 10,000 packets: it is model bias, not estimation noise. The model-free empirical law closes it with about 1,000 packets (89–92%). With only 100 packets the empirical law is noisy (68–85%), so a parametric fit is the better choice for short traces.
+- **The loss rate barely matters; the memory does.** Halving or increasing p by 50% changes the share by at most 3 points. Overestimating memory is the costly mistake: designing for ρ = 0.9 when the truth is ρ = 0.3 drops the share to 72%, while underestimating (ρ = 0.3 for a truth of 0.9) gives 78%. Both still beat the memory-blind design (28–63%). Against swap LS + slot order with the true law, they win at p = 0.5 on every channel and N (CIs above zero), but at N = 6, p = 0.3 the over-estimate trails it on Gilbert ρ = 0.3 (−0.0014) and the under-estimate only ties it on ρ = 0.9 (+0.0004, CI includes zero).
+
+![mismatch](../results/channel/figures/coco_k12_mismatch_estimated.png)
+
+Full tables, including N = 4 and paired differences to the true-law design and to swap LS + slot order: [channel_mismatch_tables.md](channel_mismatch_tables.md).
+
 ## 4. Re-scored under other encoders
 
 The partitions chosen with MPNet are re-scored under `all-MiniLM-L6-v2` and `BAAI/bge-small-en-v1.5` (`--rescore`). The channel and partitions stay the same; only φ changes.
@@ -121,6 +146,15 @@ The partitions chosen with MPNet are re-scored under `all-MiniLM-L6-v2` and `BAA
 BGE-small packs cosines closer to 1, so all of its absolute differences are compressed. The ordering of methods does not change. The gains are therefore not an artefact of optimising and scoring with the same encoder. The size of the gain is partly encoder-dependent, which is the circularity concern from limitations.md L5–L6.
 
 ![rescored](../results/channel/figures/coco_k12_N6_rescored.png)
+
+### BERTScore F1
+
+The same partitions are also re-scored with BERTScore F1 (RoBERTa-large, baseline-rescaled; `python -m sempalab.bertscore_rescore --config configs/channel/coco_k12.yaml --M 3 2`). φ(F, W) is the F1 between the surviving tokens in their original order and the full message. It aligns tokens and does not pool a sentence vector, so it is a genuinely different kind of metric from the three encoders.
+- CASA's gain over SemPA-Look has a CI above zero at all 49 points for N = 4 and N = 6, and its gain over swap LS + order at all 28 points with p ≥ 0.3. The gains are as large as under MPNet: for N = 6, Gilbert ρ = 0.6, p = 0.5, +0.040 [+0.034, +0.047] over SemPA-Look and +0.018 [+0.013, +0.023] over swap LS + order (MPNet: +0.039 and +0.009).
+- **One result does not transfer.** Under BERTScore the exhaustive i.i.d.-optimal partition (chosen with MPNet) scores at or above both CASA and the MPNet channel oracle on every channel, by up to 0.016 at N = 6, p = 0.5. Under MPNet, channel-aware ordering adds 0.01–0.02 on top of that partition; BERTScore does not reward that extra. So CASA's gains over the practical searches are metric-robust, but its edge over an exhaustively searched blind partition is not.
+- Shares of the oracle gain are not meaningful under BERTScore, because the MPNet oracle is not the BERTScore optimum. Only paired differences are reported.
+
+Paired differences per channel at p = 0.3 and 0.5: [channel_bertscore_tables.md](channel_bertscore_tables.md).
 
 ## 5. Longer messages: WikiHow, K = 24, 48 and 60, N = 6
 
@@ -146,26 +180,26 @@ Rerun with the interleaver-seeded baseline added, every earlier number reproduce
 
 ### K = 48 and K = 60
 
-We pushed the same comparison to 48-token (30 messages, M = 8) and 60-token (20 messages, M = 10) WikiHow passages, still at N = 6, at p ∈ {0.1, 0.3, 0.5} on the i.i.d., Gilbert ρ = 0.6 and Rayleigh α = 0.9 channels. CASA fits one shared pool per message as at K = 24.
+We pushed the same comparison to 48-token (M = 8) and 60-token (M = 10) WikiHow passages, 60 messages each, still at N = 6, at p ∈ {0.1, 0.3, 0.5} on the i.i.d., Gilbert ρ = 0.6 and Rayleigh α = 0.9 channels. CASA fits one shared pool per message as at K = 24. The first runs had 30 (K = 48) and 20 (K = 60) messages; we added 30 and 40 more from a disjoint draw of the same WikiHow pool (seed 1042, `python -m sempalab.extend_eval_set`) and merged them (`results/channel/wikihow_k48_n60`, `wikihow_k60_n60`). The extension runs skip the interleaver-seeded swap baseline, so that baseline and the MiniLM/BGE re-scores are reported on the original 30/20 messages.
 
 | Channel, p | SemPA-Look K=48 | Swap LS + order K=48 | **CASA K=48** | SemPA-Look K=60 | Swap LS + order K=60 | **CASA K=60** |
 |---|---:|---:|---:|---:|---:|---:|
-| i.i.d., 0.1 | 0.9562 | **0.9714** | 0.9671 | 0.9558 | **0.9721** | 0.9679 |
-| i.i.d., 0.3 | 0.8420 | 0.8755 | **0.8833** | 0.8400 | 0.8772 | **0.8852** |
-| i.i.d., 0.5 | 0.6932 | 0.7306 | **0.7628** | 0.6897 | 0.7335 | **0.7678** |
-| Gilbert ρ = 0.6, 0.1 | 0.9393 | 0.9566 | **0.9574** | 0.9392 | 0.9568 | **0.9577** |
-| Gilbert ρ = 0.6, 0.3 | 0.7976 | 0.8390 | **0.8468** | 0.7975 | 0.8394 | **0.8480** |
-| Gilbert ρ = 0.6, 0.5 | 0.6247 | 0.6756 | **0.6928** | 0.6249 | 0.6766 | **0.6935** |
-| Rayleigh α = 0.9, 0.1 | 0.9489 | 0.9645 | 0.9643 | 0.9484 | 0.9649 | 0.9647 |
-| Rayleigh α = 0.9, 0.3 | 0.8056 | 0.8409 | **0.8516** | 0.8048 | 0.8419 | **0.8534** |
-| Rayleigh α = 0.9, 0.5 | 0.6232 | 0.6639 | **0.6852** | 0.6228 | 0.6656 | **0.6853** |
-| calls / message | 190 | 12,269 | 5,016 | 190 | 24,878 | 7,634 |
+| i.i.d., 0.1 | 0.9554 | **0.9716** | 0.9671 | 0.9600 | **0.9754** | 0.9715 |
+| i.i.d., 0.3 | 0.8401 | 0.8760 | **0.8832** | 0.8502 | 0.8860 | **0.8944** |
+| i.i.d., 0.5 | 0.6893 | 0.7300 | **0.7624** | 0.7005 | 0.7423 | **0.7798** |
+| Gilbert ρ = 0.6, 0.1 | 0.9394 | 0.9569 | **0.9578** | 0.9417 | 0.9590 | **0.9608** |
+| Gilbert ρ = 0.6, 0.3 | 0.7976 | 0.8394 | **0.8467** | 0.8030 | 0.8445 | **0.8549** |
+| Gilbert ρ = 0.6, 0.5 | 0.6243 | 0.6757 | **0.6927** | 0.6308 | 0.6818 | **0.7032** |
+| Rayleigh α = 0.9, 0.1 | 0.9485 | **0.9647** | 0.9641 | 0.9519 | 0.9679 | 0.9679 |
+| Rayleigh α = 0.9, 0.3 | 0.8047 | 0.8409 | **0.8513** | 0.8107 | 0.8467 | **0.8600** |
+| Rayleigh α = 0.9, 0.5 | 0.6216 | 0.6635 | **0.6839** | 0.6283 | 0.6697 | **0.6938** |
+| calls / message | 190 | 12,515 | 5,016 | 190 | 23,954 | 7,634 |
 
-- **The gap to SemPA-Look keeps growing with K.** At p = 0.5 CASA leads by +0.062 to +0.070 at K = 48 and +0.063 to +0.078 at K = 60, with every CI above zero. SemPA-Look's fixed budget of 190 calls does not grow with K, and its partitions get relatively worse.
-- **Against swap search, the picture from K = 12 and 24 holds.** CASA leads Swap LS + order by +0.008 to +0.034 at p ≥ 0.3 (every CI above zero). At p = 0.1 it is 0.004 behind under i.i.d. losses at both lengths (CI below zero), and within ±0.001 on the bursty channels. Interleaver-seeded swap LS is again within 0.002 of randomly started swap LS.
-- **CASA is now the cheaper search.** Swap LS needs a full pass over all token pairs per step, so its call count grows quickly with K: about 12,000 per message at K = 48 and 25,000 at K = 60. CASA's fitting budget grows with the number of surrogate parameters, about 5,000 and 7,600 calls. That is 2.4× and 3.3× fewer.
-- **Re-scored** under MiniLM and BGE-small, CASA's gain over SemPA-Look stays positive with CIs above zero at every point at both lengths, at about half (MiniLM) and a quarter (BGE-small) of the MPNet size, as at K = 12.
-- **Runtime.** On 4 CPUs a K = 48 message takes about 11 minutes and a K = 60 message about 25 minutes for all algorithms and nine channel points. Most of it is swap search.
+- **The gap to SemPA-Look keeps growing with K.** At p = 0.5 CASA leads by +0.062 to +0.073 at K = 48 and +0.066 to +0.079 at K = 60, with every CI above zero. SemPA-Look's fixed budget of 190 calls does not grow with K, and its partitions get relatively worse.
+- **Against swap search, the picture from K = 12 and 24 holds.** CASA leads Swap LS + order by +0.007 to +0.037 at p ≥ 0.3 (every CI above zero). At p = 0.1 it is 0.004–0.0045 behind under i.i.d. losses at both lengths (CI below zero), 0.0006 behind to tied on Rayleigh α = 0.9, and +0.001 to +0.002 ahead on Gilbert ρ = 0.6. Doubling the samples moved no mean by more than 0.01 and halved most CIs; no sign changed except that the tiny K = 48 Rayleigh p = 0.1 deficit (−0.0006) now has a CI just below zero. On the original messages, interleaver-seeded swap LS is again within 0.002 of randomly started swap LS.
+- **CASA is now the cheaper search.** Swap LS needs a full pass over all token pairs per step, so its call count grows quickly with K: about 12,500 per message at K = 48 and 24,000 at K = 60. CASA's fitting budget grows with the number of surrogate parameters, about 5,000 and 7,600 calls. That is 2.5× and 3.1× fewer.
+- **Re-scored** under MiniLM and BGE-small (original 30/20 messages), CASA's gain over SemPA-Look stays positive with CIs above zero at every point at both lengths, at about half (MiniLM) and a quarter (BGE-small) of the MPNet size, as at K = 12.
+- **Runtime.** On 4 CPUs a K = 48 message takes about 11 minutes and a K = 60 message about 25 minutes for all algorithms and nine channel points; without interleaver-seeded swap LS about 6 and 11 minutes. Most of it is swap search.
 
 ![k48](../results/channel/figures/wikihow_k48_N6_gain_vs_p.png)
 
@@ -174,9 +208,9 @@ We pushed the same comparison to 48-token (30 messages, M = 8) and 60-token (20 
 ## 6. Limits and open points
 
 - **Interleaving first.** If a deployment can afford a deep packet interleaver, most of the burst penalty goes away for every method. CASA's value is at a fixed delay budget, or under fading too slow for the batch to average out.
-- **Known channel law.** CASA uses the true Q (r and R). Estimating it from feedback, and how robust CASA is to a wrong ρ or α, is untested.
+- **Estimated channel law.** CASA was tested with wrong and estimated laws (section 3, "Mismatched or estimated channel law"): a Gilbert fit to 100 observed packets is enough on Gilbert channels, and a model-free empirical law from about 1,000 packets is enough on slow fading. Channels whose statistics drift over time, and estimation from ACK/NACK feedback with delay, are untested.
 - **Low loss.** At p ≈ 0.1, CASA ties a well-searched blind partition with ordering, and under i.i.d. losses at K ≥ 48 it is 0.004 behind it. Swap search is better there; CASA's surrogate is fitted only on partial survival, which matters little when almost every slot survives.
-- **Large K is small-sample.** K = 48 and 60 use 30 and 20 messages and three channels, against 100 messages and seven channels at K = 12.
+- **Large K covers fewer points.** K = 48 and 60 use 60 messages each and three channels, against 100 messages and seven channels at K = 12; their encoder re-scores and the interleaver-seeded baseline use only the first 30 and 20 messages.
 - **Same receiver.** The receiver still just drops lost tokens (L1). Recovery-aware aggregation (direction 1) can slot into this framework as another law over survival patterns.
 - **Metric.** Everything is embedding cosine. Re-scoring with three encoders reduces the circularity concern but is not a human judgment.
 
@@ -186,12 +220,20 @@ We pushed the same comparison to 48-token (30 messages, M = 8) and 60-token (20 
 python -m sempalab.channel_experiment --config configs/channel/coco_k12.yaml          # about 30 min on 4 CPUs
 python -m sempalab.channel_experiment --config configs/channel/coco_k12.yaml --rescore minilm
 python -m sempalab.channel_experiment --config configs/channel/coco_k12.yaml --rescore bge-small
+python -m sempalab.bertscore_rescore --config configs/channel/coco_k12.yaml --M 3 2   # about 2 h on 4 CPUs
+python scripts/make_bertscore_table.py
 python -m sempalab.channel_experiment --config configs/channel/coco_k12_stride.yaml   # D = 1..16
 python -m sempalab.channel_experiment --config configs/channel/coco_k12_matched.yaml  # about 21 min
 python -m sempalab.channel_experiment --config configs/channel/wikihow_k24.yaml       # about 90 min
 python -m sempalab.channel_experiment --config configs/channel/wikihow_k48.yaml       # about 6 h
 python -m sempalab.channel_experiment --config configs/channel/wikihow_k60.yaml       # about 8 h
+python -m sempalab.channel_experiment --config configs/channel/wikihow_k48_ext.yaml   # 30 more messages, about 3 h
+python -m sempalab.channel_experiment --config configs/channel/wikihow_k60_ext.yaml   # 40 more messages, about 8 h
+python -m sempalab.extend_eval_set merge --original results/channel/wikihow_k48 --extension results/channel/wikihow_k48_ext --out results/channel/wikihow_k48_n60
+python -m sempalab.extend_eval_set merge --original results/channel/wikihow_k60 --extension results/channel/wikihow_k60_ext --out results/channel/wikihow_k60_n60
+python -m sempalab.channel_mismatch --config configs/channel_mismatch/coco_k12.yaml   # about 40 min
 python scripts/make_channel_figures.py   # results/channel/figures/, docs/channel_aware_tables.md
+python scripts/make_mismatch_figures.py  # docs/channel_mismatch_tables.md
 ```
 
 Evaluation sets are the frozen ones in `results/stage4/eval_sets/`, so no COCO or WikiHow download is needed. Add `--rescore minilm` and `--rescore bge-small` to any config to re-score its partitions.

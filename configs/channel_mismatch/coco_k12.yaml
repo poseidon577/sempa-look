@@ -1,0 +1,32 @@
+# CASA designed with a wrong or estimated channel law, scored under the
+# true law (docs/channel_aware.md, "Mismatched and estimated channel law").
+experiment: coco_k12_mismatch
+description: K=12 COCO, N=4/6, CASA with mismatched / estimated slot laws
+encoder: mpnet
+K: 12
+M: [3, 2]
+p: [0.1, 0.3, 0.5]
+channels:
+  - {name: gilbert, parameter: 0.3}
+  - {name: gilbert, parameter: 0.6}
+  - {name: gilbert, parameter: 0.9}
+  - {name: rayleigh, parameter: 0.9}
+  - {name: rayleigh, parameter: 0.99}
+designs:
+  - {kind: matched}
+  - {kind: iid}
+  - {kind: gilbert, parameter: 0.3}
+  - {kind: gilbert, parameter: 0.6}
+  - {kind: gilbert, parameter: 0.9}
+  - {kind: rayleigh, parameter: 0.9}
+  - {kind: p_scale, factor: 0.5}
+  - {kind: p_scale, factor: 1.5}
+  - {kind: estimate_gilbert, packets: 100}
+  - {kind: estimate_gilbert, packets: 300}
+  - {kind: estimate_gilbert, packets: 1000}
+  - {kind: estimate_gilbert, packets: 10000}
+  - {kind: estimate_empirical, packets: 100}
+  - {kind: estimate_empirical, packets: 1000}
+  - {kind: estimate_empirical, packets: 10000}
+P: 10
+k: 4

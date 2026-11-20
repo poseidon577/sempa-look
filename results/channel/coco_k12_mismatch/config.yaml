@@ -1,0 +1,86 @@
+experiment: coco_k12_mismatch
+description: K=12 COCO, N=4/6, CASA with mismatched / estimated slot laws
+encoder: mpnet
+device: cpu
+cache_size: 2000000
+data:
+  source: coco
+  path: data/coco/annotations/captions_train2017.json
+  max_articles: null
+  num_messages: 100
+  seed: 42
+  eval_set_dir: results/stage4/eval_sets
+K: 12
+M:
+- 3
+- 2
+p:
+- 0.1
+- 0.3
+- 0.5
+channels:
+- name: gilbert
+  parameter: 0.3
+- name: gilbert
+  parameter: 0.6
+- name: gilbert
+  parameter: 0.9
+- name: rayleigh
+  parameter: 0.9
+- name: rayleigh
+  parameter: 0.99
+designs:
+- kind: matched
+- kind: iid
+- kind: gilbert
+  parameter: 0.3
+- kind: gilbert
+  parameter: 0.6
+- kind: gilbert
+  parameter: 0.9
+- kind: rayleigh
+  parameter: 0.9
+- kind: p_scale
+  factor: 0.5
+- kind: p_scale
+  factor: 1.5
+- kind: estimate_gilbert
+  packets: 100
+- kind: estimate_gilbert
+  packets: 300
+- kind: estimate_gilbert
+  packets: 1000
+- kind: estimate_gilbert
+  packets: 10000
+- kind: estimate_empirical
+  packets: 100
+- kind: estimate_empirical
+  packets: 1000
+- kind: estimate_empirical
+  packets: 10000
+stride:
+- 1
+algorithms:
+- random_pa
+- sempa_look
+- swap_ls
+full_search: true
+P: 10
+k: 4
+swap_ls:
+  restarts: 1
+casa:
+  budget: null
+  restarts: 20
+  top: 5
+  ridge: 0.001
+smoothing: 0.5
+rayleigh_samples: 400000
+packet_bits: 300
+prefetch_max_sets: 5000
+limit: null
+seed: 42
+results_dir: results/channel
+run_at: '2026-11-20T01:30:26'
+wall_seconds: 2386.3
+model_name: sentence-transformers/all-mpnet-base-v2
